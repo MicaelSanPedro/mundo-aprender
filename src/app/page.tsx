@@ -58,8 +58,8 @@ const categories = [
 const products = [
   {
     id: 1,
-    name: "Caderno de Matemática - 3º Ano",
-    description: "Exercícios divertidos com jogos e desafios numéricos",
+    name: "Caderno de Matemática - 3º Ano (PDF)",
+    description: "Exercícios divertidos com jogos e desafios numéricos — pronto para imprimir",
     price: 34.90,
     originalPrice: 49.90,
     rating: 5,
@@ -73,8 +73,8 @@ const products = [
   },
   {
     id: 2,
-    name: "Kit de Alfabetização Completo",
-    description: "Cartilhas, flashcards e jogos para aprender a ler e escrever",
+    name: "Kit de Alfabetização Completo (PDF)",
+    description: "Cartilhas, flashcards e atividades para imprimir e aprender a ler e escrever",
     price: 89.90,
     originalPrice: 129.90,
     rating: 5,
@@ -88,8 +88,8 @@ const products = [
   },
   {
     id: 3,
-    name: "Laboratório de Ciências - Kit Iniciante",
-    description: "Experimentos seguros e educativos para pequenos cientistas (PDF)",
+    name: "Laboratório de Ciências - PDF",
+    description: "Experimentos seguros e educativos para pequenos cientistas — imprima e faça em casa!",
     price: 149.90,
     originalPrice: null,
     rating: 4,
@@ -103,8 +103,8 @@ const products = [
   },
   {
     id: 4,
-    name: "Atlas Ilustrado do Brasil",
-    description: "Mapas coloridos, capitais e curiosidades sobre cada estado",
+    name: "Atlas Ilustrado do Brasil (PDF)",
+    description: "Mapas coloridos, capitais e curiosidades sobre cada estado — pronto para imprimir",
     price: 44.90,
     originalPrice: 59.90,
     rating: 5,
@@ -118,8 +118,8 @@ const products = [
   },
   {
     id: 5,
-    name: "Jogo de Tabuleiro - Linha do Tempo",
-    description: "Aprenda história brincando! Viagem pela história do Brasil",
+    name: "Jogo da Linha do Tempo - PDF",
+    description: "Aprenda história brincando! Imprima e jogue com a história do Brasil",
     price: 79.90,
     originalPrice: null,
     rating: 4,
@@ -133,8 +133,8 @@ const products = [
   },
   {
     id: 6,
-    name: "Kit de Pintura Artística - 24 Cores",
-    description: "Atividades de pintura para explorar a criatividade (PDF)",
+    name: "Kit de Pintura Artística - PDF",
+    description: "24 atividades de pintura para explorar a criatividade — imprima e pinte!",
     price: 59.90,
     originalPrice: 74.90,
     rating: 5,
@@ -148,8 +148,8 @@ const products = [
   },
   {
     id: 7,
-    name: "Quebra-Cabeça - Sistema Solar",
-    description: "200 peças com informações sobre cada planeta",
+    name: "Quebra-Cabeça do Sistema Solar - PDF",
+    description: "200 peças para recortar e montar com informações sobre cada planeta",
     price: 39.90,
     originalPrice: null,
     rating: 4,
@@ -163,8 +163,8 @@ const products = [
   },
   {
     id: 8,
-    name: "Caderno de Caligrafia Divertida",
-    description: "Letras e números com ilustrações para treinar a escrita",
+    name: "Caderno de Caligrafia Divertida (PDF)",
+    description: "Letras e números com ilustrações para treinar a escrita — pronto para imprimir",
     price: 24.90,
     originalPrice: 34.90,
     rating: 5,
@@ -185,7 +185,7 @@ const testimonials = [
     role: "Professora do 2º Ano - Escola Municipal",
     emoji: "👩‍🏫",
     rating: 5,
-    text: "Os materiais da Mundo Aprender transformaram minha sala de aula! As crianças ficaram muito mais engajadas e os resultados nas provas melhoraram demais!",
+    text: "Os materiais em PDF da Mundo Aprender transformaram minha sala de aula! Eu imprimo as atividades e as crianças ficaram muito mais engajadas — os resultados nas provas melhoraram demais!",
     bgColor: "bg-kid-blue/10",
     borderColor: "border-kid-blue/30",
   },
@@ -195,7 +195,7 @@ const testimonials = [
     role: "Mãe da Sofia, 7 anos",
     emoji: "👩",
     rating: 5,
-    text: "Comprei o kit de alfabetização e minha filha aprendeu a ler em 2 meses! Os jogos são super divertidos e ela não quer parar de estudar.",
+    text: "Comprei o kit de alfabetização em PDF e minha filha aprendeu a ler em 2 meses! As atividades para imprimir são super divertidas e ela não quer parar de estudar.",
     bgColor: "bg-kid-pink/10",
     borderColor: "border-kid-pink/30",
   },
@@ -205,7 +205,7 @@ const testimonials = [
     role: "Pai do Lucas, 9 anos",
     emoji: "👨",
     rating: 5,
-    text: "O laboratório de ciências é incrível! Meu filho agora quer ser cientista. A qualidade dos materiais é excelente e as instruções são muito claras.",
+    text: "O PDF de laboratório de ciências é incrível! Meu filho agora quer ser cientista. Imprimimos os experimentos em casa e as instruções são super claras e divertidas!",
     bgColor: "bg-kid-green/10",
     borderColor: "border-kid-green/30",
   },
@@ -577,7 +577,7 @@ export default function Home() {
                       </div>
                     ) : orders.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <span className="text-6xl mb-4">📦</span>
+                        <span className="text-6xl mb-4">📥</span>
                         <p className="text-lg font-semibold text-foreground/60">Nenhum pedido ainda</p>
                         <p className="text-sm text-foreground/40 mt-1">Faça sua primeira compra!</p>
                         <Button
@@ -1034,8 +1034,8 @@ export default function Home() {
                 para o Ensino Fundamental!
               </h1>
               <p className="mt-3 sm:mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Torne o aprendizado uma aventura incrível! Cadernos, jogos, kits e muito mais para
-                crianças do 1º ao 9º ano. PDFs prontos para imprimir! 📥
+                Atividades, jogos e cadernos em PDF para imprimir! Material didático digital para
+                crianças do 1º ao 9º ano. Download imediato! 📥
               </p>
               <div className="mt-5 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <a href="#produtos">
@@ -1484,12 +1484,12 @@ export default function Home() {
               <p className="text-lg text-foreground/70 leading-relaxed mb-6">
                 A <strong className="text-foreground">Mundo Aprender</strong> nasceu da paixão por
                 tornar o aprendizado mais divertido e acessível para crianças brasileiras. Acreditamos
-                que cada criança merece materiais didáticos que despertem curiosidade e criatividade.
+                que cada criança merece materiais didáticos digitais que despertem curiosidade e criatividade.
               </p>
               <p className="text-lg text-foreground/70 leading-relaxed mb-8">
-                Trabalhamos com educadores especializados para desenvolver produtos que combinam
+                Trabalhamos com educadores especializados para desenvolver materiais em PDF que combinam
                 qualidade pedagógica com design atrativo, garantindo que aprender seja sempre uma
-                aventura empolgante! 🚀
+                aventura empolgante! Imprima, use e reuse quantas vezes quiser! 🚀
               </p>
 
               {/* Features */}
@@ -1541,7 +1541,7 @@ export default function Home() {
               className="grid grid-cols-2 gap-4 md:gap-6"
             >
               {[
-                { emoji: "📦", value: "500+", label: "Produtos", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
+                { emoji: "📄", value: "500+", label: "Materiais em PDF", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
                 { emoji: "👨‍👩‍👧‍👦", value: "10.000+", label: "Clientes Felizes", color: "bg-kid-pink/10", border: "border-kid-pink/20" },
                 { emoji: "⭐", value: "4.9/5", label: "Avaliação Média", color: "bg-kid-yellow/10", border: "border-kid-yellow/20" },
                 { emoji: "🏫", value: "2.500+", label: "Escolas Parceiras", color: "bg-kid-green/10", border: "border-kid-green/20" },
@@ -1646,8 +1646,8 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-sm text-white/50 leading-relaxed mb-4">
-                A loja favorita dos pequenos aprendizes! Materiais didáticos divertidos que tornam
-                o aprendizado uma aventura incrível.
+                A loja favorita dos pequenos aprendizes! Materiais didáticos em PDF que tornam
+                o aprendizado uma aventura incrível. Baixe, imprima e divirta-se!
               </p>
               <div className="flex gap-2">
                 {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
