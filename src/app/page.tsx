@@ -498,7 +498,11 @@ export default function Home() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          productsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          e.preventDefault();
+                          const header = document.querySelector("header");
+                          const headerHeight = header?.offsetHeight ?? 80;
+                          const top = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                          window.scrollTo({ top, behavior: "smooth" });
                         }
                       }}
                       autoFocus
