@@ -436,8 +436,7 @@ export default function Home() {
                         Finalizar Compra 🎉
                       </Button>
                       <Button
-                        variant="ghost"
-                        className="w-full mt-2 rounded-2xl text-foreground/50 hover:text-foreground"
+                        className="w-full mt-2 rounded-2xl bg-transparent text-[#1a1a2e]/50 hover:text-[#1a1a2e] hover:bg-[#FFD43B]/10"
                         onClick={() => setCartOpen(false)}
                       >
                         Continuar Comprando
@@ -563,8 +562,7 @@ export default function Home() {
                 </a>
                 <a href="#categorias">
                   <Button
-                    variant="outline"
-                    className="w-full sm:w-auto rounded-2xl border-2 border-white/50 text-white font-semibold text-lg px-8 py-6 hover:bg-white/20 backdrop-blur-sm"
+                    className="w-full sm:w-auto rounded-2xl border-2 border-white/50 bg-transparent text-white font-semibold text-lg px-8 py-6 hover:bg-white/20 backdrop-blur-sm"
                   >
                     Explorar Categorias
                   </Button>
@@ -871,8 +869,7 @@ export default function Home() {
                   Aproveitar Agora! 🎉
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 text-white font-semibold px-8 py-6 hover:bg-white/15 backdrop-blur-sm"
+                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 bg-transparent text-white font-semibold px-8 py-6 hover:bg-white/15 backdrop-blur-sm"
                 >
                   Ver Detalhes
                 </Button>
