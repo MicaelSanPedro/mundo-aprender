@@ -302,6 +302,9 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [justAdded, setJustAdded] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [justFavorited, setJustFavorited] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const productsRef = useRef<HTMLElement>(null);
@@ -325,7 +328,9 @@ export default function Home() {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const filteredProducts = activeCategory
+  const filteredProducts = showFavorites
+    ? products.filter((p) => favorites.has(p.id))
+    : activeCategory
     ? products.filter((p) => p.category === activeCategory)
     : products.filter(
         (p) =>
@@ -357,6 +362,20 @@ export default function Home() {
 
   const removeFromCart = useCallback((id: number) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
+  const toggleFavorite = useCallback((id: number) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setJustFavorited(id);
+    setTimeout(() => setJustFavorited(null), 1200);
   }, []);
 
   const handleSubscribe = () => {
@@ -534,6 +553,27 @@ export default function Home() {
                 onClick={() => setSearchOpen(!searchOpen)}
               >
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+              </Button>
+
+              {/* Favorites filter toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`rounded-2xl h-9 w-9 sm:h-10 sm:w-10 transition-all ${showFavorites ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "hover:bg-kid-pink/10"}`}
+                onClick={() => {
+                  setShowFavorites(!showFavorites);
+                  if (!showFavorites) {
+                    setActiveCategory(null);
+                    setSearchQuery("");
+                  }
+                }}
+              >
+                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${showFavorites ? "fill-kid-pink text-kid-pink" : "text-foreground/60"}`} />
+                {favorites.size > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-kid-pink text-white text-[9px] sm:text-[10px] font-bold rounded-full w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center">
+                    {favorites.size}
+                  </span>
+                )}
               </Button>
 
               {/* Orders history - hidden on mobile, accessible via mobile menu */}
@@ -924,6 +964,46 @@ export default function Home() {
                       <ClipboardList className="h-4 w-4" />
                       Meus Pedidos
                     </button>
+
+                    {/* Favorites link in mobile menu */}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setShowFavorites(!showFavorites);
+                        if (!showFavorites) {
+                          setActiveCategory(null);
+                          setSearchQuery("");
+                        }
+                        setTimeout(() => {
+                          const header = document.querySelector("header");
+                          const headerHeight = header?.offsetHeight ?? 80;
+                          const targetY = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                          const startY = window.scrollY;
+                          const distance = targetY - startY;
+                          const duration = 600;
+                          let start: number | null = null;
+                          function step(timestamp: number) {
+                            if (!start) start = timestamp;
+                            const progress = Math.min((timestamp - start) / duration, 1);
+                            const ease = progress < 0.5
+                              ? 4 * progress * progress * progress
+                              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                            window.scrollTo(0, startY + distance * ease);
+                            if (progress < 1) requestAnimationFrame(step);
+                          }
+                          requestAnimationFrame(step);
+                        }, 250);
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-pink hover:bg-kid-pink/5 rounded-2xl font-semibold transition-all w-full text-left"
+                    >
+                      <Heart className={`h-4 w-4 ${showFavorites ? "fill-kid-pink text-kid-pink" : ""}`} />
+                      Meus Favoritos
+                      {favorites.size > 0 && (
+                        <span className="ml-auto bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                          {favorites.size}
+                        </span>
+                      )}
+                    </button>
                   </nav>
 
                   {/* Mobile menu footer */}
@@ -1140,7 +1220,7 @@ export default function Home() {
                 transition={{ delay: i * 0.08 }}
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                onClick={() => { setActiveCategory(activeCategory === cat.id ? null : cat.id); setShowFavorites(false); }}
                 className={`relative group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                   activeCategory === cat.id
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
@@ -1185,7 +1265,32 @@ export default function Home() {
       {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
       <section id="produtos" ref={productsRef} className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {searchQuery.trim() !== "" ? (
+          {showFavorites ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-pink/10 text-kid-pink font-semibold text-sm border-kid-pink/20">
+                ❤️ Meus Favoritos
+              </Badge>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
+                Produtos que <span className="text-kid-pink">Você Amou</span> ❤️
+              </h2>
+              <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+                {filteredProducts.length > 0
+                  ? `${filteredProducts.length} favorito${filteredProducts.length === 1 ? "" : "s"} salvo${filteredProducts.length === 1 ? "" : "s"}`
+                  : "Você ainda não favoritou nenhum produto"}
+              </p>
+              <Button
+                variant="ghost"
+                className="mt-3 text-kid-pink hover:bg-kid-pink/10 rounded-2xl text-sm font-semibold"
+                onClick={() => setShowFavorites(false)}
+              >
+                ✕ Limpar filtro
+              </Button>
+            </motion.div>
+          ) : searchQuery.trim() !== "" ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1264,9 +1369,26 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-xl bg-white/80 backdrop-blur-sm hover:bg-kid-pink/20 hover:scale-110 transition-all"
+                    className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${
+                      favorites.has(product.id)
+                        ? "bg-kid-pink/15 hover:bg-kid-pink/25"
+                        : "bg-white/80 hover:bg-kid-pink/20"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(product.id);
+                    }}
                   >
-                    <Heart className="h-4 w-4 text-foreground/30 hover:text-kid-pink transition-colors" />
+                    <motion.div
+                      animate={justFavorited === product.id ? { scale: [1, 1.4, 1] } : {}}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Heart className={`h-4 w-4 transition-colors ${
+                        favorites.has(product.id)
+                          ? "fill-kid-pink text-kid-pink"
+                          : "text-foreground/30 hover:text-kid-pink"
+                      }`} />
+                    </motion.div>
                   </Button>
 
                   {/* Product image placeholder */}
