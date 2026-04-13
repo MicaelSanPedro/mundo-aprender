@@ -702,22 +702,59 @@ export default function Home() {
       {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
       <section id="produtos" className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-orange/10 text-kid-orange font-semibold text-sm border-kid-orange/20">
-              ⭐ Nossos Melhores Produtos
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground">
-              Produtos em <span className="text-kid-orange">Destaque</span> ⭐
-            </h2>
-            <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
-              Material didático de alta qualidade selecionado por educadores
-            </p>
-          </motion.div>
+          {searchQuery.trim() !== "" ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-blue/10 text-kid-blue font-semibold text-sm border-kid-blue/20">
+                🔍 Resultados da Busca
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+                Buscando por: <span className="text-kid-blue">"{searchQuery}"</span>
+              </h2>
+              <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+                {filteredProducts.length > 0
+                  ? `${filteredProducts.length} produto${filteredProducts.length === 1 ? " encontrado" : "s encontrados"}`
+                  : "Nenhum produto encontrado para essa busca"}
+              </p>
+            </motion.div>
+          ) : activeCategory ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-purple/10 text-kid-purple font-semibold text-sm border-kid-purple/20">
+                📂 Categoria Selecionada
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+                {categories.find((c) => c.id === activeCategory)?.emoji}{" "}
+                {categories.find((c) => c.id === activeCategory)?.name}
+              </h2>
+              <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+                {filteredProducts.length} produto{filteredProducts.length === 1 ? "" : "s"} nesta categoria
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-orange/10 text-kid-orange font-semibold text-sm border-kid-orange/20">
+                ⭐ Nossos Melhores Produtos
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+                Produtos em <span className="text-kid-orange">Destaque</span> ⭐
+              </h2>
+              <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+                Material didático de alta qualidade selecionado por educadores
+              </p>
+            </motion.div>
+          )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
             <AnimatePresence mode="popLayout">
