@@ -495,11 +495,11 @@ export default function Home() {
                       placeholder="Buscar produtos, matérias..."
                       className="pl-11 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5"
                       value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setTimeout(() => {
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
                           productsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }, 100);
+                        }
                       }}
                       autoFocus
                     />
