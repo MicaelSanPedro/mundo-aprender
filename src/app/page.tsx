@@ -40,6 +40,8 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  Download,
+  FileText,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -87,7 +89,7 @@ const products = [
   {
     id: 3,
     name: "Laboratório de Ciências - Kit Iniciante",
-    description: "Experimentos seguros e educativos para pequenos cientistas",
+    description: "Experimentos seguros e educativos para pequenos cientistas (PDF)",
     price: 149.90,
     originalPrice: null,
     rating: 4,
@@ -132,7 +134,7 @@ const products = [
   {
     id: 6,
     name: "Kit de Pintura Artística - 24 Cores",
-    description: "Tintas, pincéis e telas para explorar a criatividade",
+    description: "Atividades de pintura para explorar a criatividade (PDF)",
     price: 59.90,
     originalPrice: 74.90,
     rating: 5,
@@ -239,10 +241,6 @@ interface Customer {
   name: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
 }
 
 interface Order {
@@ -287,9 +285,9 @@ const brazilianStates = [
 ];
 
 const statusConfig: Record<string, { color: string; bgColor: string; icon: React.ElementType; label: string }> = {
-  "em processamento": { color: "text-amber-700", bgColor: "bg-amber-100 border-amber-200", icon: Clock, label: "Em Processamento" },
-  "enviado": { color: "text-blue-700", bgColor: "bg-blue-100 border-blue-200", icon: Truck, label: "Enviado" },
-  "entregue": { color: "text-green-700", bgColor: "bg-green-100 border-green-200", icon: CheckCircle2, label: "Entregue" },
+  "em processamento": { color: "text-amber-700", bgColor: "bg-amber-100 border-amber-200", icon: Clock, label: "Aguardando Pagamento" },
+  "enviado": { color: "text-blue-700", bgColor: "bg-blue-100 border-blue-200", icon: Download, label: "Download Liberado" },
+  "entregue": { color: "text-green-700", bgColor: "bg-green-100 border-green-200", icon: CheckCircle2, label: "Concluído" },
   "cancelado": { color: "text-red-700", bgColor: "bg-red-100 border-red-200", icon: X, label: "Cancelado" },
 };
 
@@ -313,7 +311,7 @@ export default function Home() {
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
-    name: "", email: "", phone: "", address: "", city: "", state: "", zipCode: "",
+    name: "", email: "", phone: "",
   });
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
@@ -387,7 +385,7 @@ export default function Home() {
   // Open checkout from cart
   const openCheckout = () => {
     setCheckoutStep(1);
-    setCustomer({ name: "", email: "", phone: "", address: "", city: "", state: "", zipCode: "" });
+    setCustomer({ name: "", email: "", phone: "" });
     setCompletedOrder(null);
     setCartOpen(false);
     setTimeout(() => setCheckoutOpen(true), 200);
@@ -634,14 +632,18 @@ export default function Home() {
                                     className="overflow-hidden"
                                   >
                                     <div className="px-4 pb-4 border-t border-kid-green/10 pt-3">
-                                      <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido:</p>
+                                      <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido (Digital PDF):</p>
                                       <div className="space-y-2">
                                         {order.items.map((item) => (
                                           <div key={item.id} className="flex items-center gap-2 bg-kid-green/5 rounded-xl p-2">
                                             <span className="text-xl">{item.emoji}</span>
                                             <div className="flex-1 min-w-0">
                                               <p className="text-xs font-semibold truncate">{item.name}</p>
-                                              <p className="text-[10px] text-foreground/40">Qtd: {item.quantity}</p>
+                                              <div className="flex items-center gap-1 mt-0.5">
+                                                <FileText className="h-2.5 w-2.5 text-kid-blue" />
+                                                <p className="text-[10px] text-kid-blue font-medium">PDF Digital</p>
+                                                <p className="text-[10px] text-foreground/30">• Qtd: {item.quantity}</p>
+                                              </div>
                                             </div>
                                             <span className="text-xs font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
                                           </div>
@@ -650,7 +652,7 @@ export default function Home() {
 
                                       <div className="mt-3 pt-3 border-t border-kid-green/10">
                                         <p className="text-xs text-foreground/50 mb-1">
-                                          📍 {order.customer.name} — {order.customer.city}/{order.customer.state}
+                                          👤 {order.customer.name} — {order.customer.email}
                                         </p>
                                       </div>
 
@@ -663,7 +665,7 @@ export default function Home() {
                                             className="text-[10px] rounded-xl border-kid-blue/30 text-kid-blue hover:bg-kid-blue/10"
                                             onClick={() => updateOrderStatus(order.id, "enviado")}
                                           >
-                                            <Truck className="h-3 w-3 mr-1" /> Marcar Enviado
+                                            <Download className="h-3 w-3 mr-1" /> Liberar Download
                                           </Button>
                                         )}
                                         {order.status === "enviado" && (
@@ -673,7 +675,7 @@ export default function Home() {
                                             className="text-[10px] rounded-xl border-kid-green/30 text-kid-green hover:bg-kid-green/10"
                                             onClick={() => updateOrderStatus(order.id, "entregue")}
                                           >
-                                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar Entregue
+                                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar Concluído
                                           </Button>
                                         )}
                                         {isCancelable && (
@@ -965,7 +967,7 @@ export default function Home() {
               </h1>
               <p className="mt-4 md:mt-6 text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 Torne o aprendizado uma aventura incrível! Cadernos, jogos, kits e muito mais para
-                crianças do 1º ao 9º ano. 🚀
+                crianças do 1º ao 9º ano. PDFs prontos para imprimir! 📥
               </p>
               <div className="mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <a href="#produtos">
@@ -985,13 +987,13 @@ export default function Home() {
               {/* Trust badges */}
               <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
                 <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
-                  <Truck className="h-4 w-4" /> Frete Grátis
+                  <Download className="h-4 w-4" /> Download Imediato
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
                   <Shield className="h-4 w-4" /> Compra Segura
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
-                  <RefreshCw className="h-4 w-4" /> Troca Fácil
+                  <FileText className="h-4 w-4" /> Material Digital PDF
                 </div>
               </div>
             </motion.div>
@@ -1308,11 +1310,11 @@ export default function Home() {
                 Promoção da <span className="text-kid-yellow">Semana!</span>
               </h2>
               <p className="mt-3 text-xl md:text-2xl font-semibold text-white/90">
-                Kit Completo com <span className="text-kid-yellow font-black text-3xl md:text-4xl">30% OFF</span>
+                Kit Completo de PDFs com <span className="text-kid-yellow font-black text-3xl md:text-4xl">30% OFF</span>
               </p>
               <p className="mt-2 text-white/70 max-w-lg mx-auto">
-                Caderno + Kit de Canetas + Régua geométrica + Estojo. Tudo que seu filho precisa
-                para arrasar na escola!
+                Atividades de Matemática + Português + Ciências + Artes. Tudo que seu filho precisa
+                para estudar, em PDF pronto para imprimir!
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
@@ -1426,11 +1428,11 @@ export default function Home() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
                   <div className="w-10 h-10 bg-kid-blue/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Truck className="h-5 w-5 text-kid-blue" />
+                    <Download className="h-5 w-5 text-kid-blue" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-foreground">Frete Grátis</p>
-                    <p className="text-xs text-foreground/50">Para compras acima de R$ 99</p>
+                    <p className="font-bold text-sm text-foreground">Download Imediato</p>
+                    <p className="text-xs text-foreground/50">Receba seus PDFs no instante</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
@@ -1438,8 +1440,8 @@ export default function Home() {
                     <Shield className="h-5 w-5 text-kid-green" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-foreground">Garantia de 30 dias</p>
-                    <p className="text-xs text-foreground/50">Troca ou devolução fácil</p>
+                    <p className="font-bold text-sm text-foreground">Acesso por 24h</p>
+                    <p className="text-xs text-foreground/50">Link de download com validade</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
@@ -1456,8 +1458,8 @@ export default function Home() {
                     <Award className="h-5 w-5 text-kid-purple" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-foreground">Qualidade Premium</p>
-                    <p className="text-xs text-foreground/50">Material durável e seguro</p>
+                    <p className="font-bold text-sm text-foreground">3 Downloads</p>
+                    <p className="text-xs text-foreground/50">Baixe até 3 vezes cada PDF</p>
                   </div>
                 </div>
               </div>
@@ -1750,9 +1752,14 @@ export default function Home() {
                 className="space-y-4"
               >
                 <div className="text-center mb-6">
-                  <span className="text-4xl">📋</span>
-                  <h3 className="text-lg font-bold mt-2">Dados de Entrega</h3>
-                  <p className="text-sm text-foreground/50">Preencha suas informações</p>
+                  <span className="text-4xl">📄</span>
+                  <h3 className="text-lg font-bold mt-2">Dados para Recebimento</h3>
+                  <p className="text-sm text-foreground/50">Os PDFs serão enviados para seu e-mail</p>
+                </div>
+
+                <div className="bg-kid-blue/10 rounded-2xl p-4 border border-kid-blue/20 flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-kid-blue shrink-0" />
+                  <p className="text-sm text-foreground/70">Produto digital em PDF — download imediato após a confirmação do pagamento!</p>
                 </div>
 
                 <div className="space-y-3">
@@ -1774,6 +1781,7 @@ export default function Home() {
                       value={customer.email}
                       onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                     />
+                    <p className="text-xs text-foreground/40 mt-1">O link de download será enviado para este e-mail</p>
                   </div>
                   <div>
                     <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
@@ -1784,59 +1792,12 @@ export default function Home() {
                       onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
                     />
                   </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Endereço *</Label>
-                    <Input
-                      placeholder="Rua, número, complemento"
-                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
-                      value={customer.address}
-                      onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Cidade *</Label>
-                      <Input
-                        placeholder="Sua cidade"
-                        className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
-                        value={customer.city}
-                        onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Estado *</Label>
-                      <Select
-                        value={customer.state}
-                        onValueChange={(value) => setCustomer({ ...customer, state: value })}
-                      >
-                        <SelectTrigger className="w-full rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange">
-                          <SelectValue placeholder="UF" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {brazilianStates.map((s) => (
-                            <SelectItem key={s.value} value={s.value}>
-                              {s.value} - {s.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">CEP</Label>
-                    <Input
-                      placeholder="00000-000"
-                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
-                      value={customer.zipCode}
-                      onChange={(e) => setCustomer({ ...customer, zipCode: formatZipCode(e.target.value) })}
-                    />
-                  </div>
                 </div>
 
                 <Button
                   className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink text-white font-bold text-lg py-6 shadow-kid-orange mt-6"
                   onClick={() => setCheckoutStep(2)}
-                  disabled={!customer.name || !customer.email || !customer.address || !customer.city || !customer.state}
+                  disabled={!customer.name || !customer.email}
                 >
                   Revisar Pedido ➡️
                 </Button>
@@ -1857,12 +1818,10 @@ export default function Home() {
 
                 {/* Customer info summary */}
                 <div className="bg-kid-yellow/10 rounded-2xl p-4 border border-kid-yellow/20">
-                  <p className="text-xs font-semibold text-foreground/50 mb-1">Dados de entrega:</p>
+                  <p className="text-xs font-semibold text-foreground/50 mb-1">Dados do comprador:</p>
                   <p className="text-sm font-semibold">{customer.name}</p>
                   <p className="text-xs text-foreground/60">{customer.email}</p>
                   {customer.phone && <p className="text-xs text-foreground/60">{customer.phone}</p>}
-                  <p className="text-xs text-foreground/60">{customer.address}</p>
-                  <p className="text-xs text-foreground/60">{customer.city}/{customer.state} {customer.zipCode}</p>
                 </div>
 
                 {/* Items */}
@@ -1886,7 +1845,7 @@ export default function Home() {
                     <span className="font-semibold">Total do Pedido:</span>
                     <span className="text-2xl font-black">R$ {totalPrice.toFixed(2)}</span>
                   </div>
-                  <p className="text-white/70 text-xs mt-1">Frete grátis 🚚</p>
+                  <p className="text-white/70 text-xs mt-1">Download imediato após pagamento 📥</p>
                 </div>
 
                 <Button
@@ -1932,11 +1891,11 @@ export default function Home() {
 
                 <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Truck className="h-4 w-4 text-kid-blue" />
-                    <p className="text-sm font-semibold">Previsão de Entrega</p>
+                    <Download className="h-4 w-4 text-kid-blue" />
+                    <p className="text-sm font-semibold">Download Imediato</p>
                   </div>
                   <p className="text-xs text-foreground/60">
-                    Entrega estimada em 5 a 10 dias úteis para {completedOrder.customer.city}/{completedOrder.customer.state}
+                    Seus PDFs estarão disponíveis para download imediato. Acesse a seção "Meus Pedidos" para baixar cada material. Link válido por 24h com até 3 downloads por produto.
                   </p>
                 </div>
 
