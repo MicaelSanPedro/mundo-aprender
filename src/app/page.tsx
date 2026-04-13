@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
   ShoppingCart,
   Menu,
@@ -32,6 +34,12 @@ import {
   Trash2,
   ArrowRight,
   Sparkles,
+  ClipboardList,
+  ChevronDown,
+  ChevronLeft,
+  CheckCircle2,
+  Clock,
+  Loader2,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -219,6 +227,72 @@ interface CartItem {
   quantity: number;
 }
 
+interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  emoji: string;
+  quantity: number;
+}
+
+interface Customer {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  items: OrderItem[];
+  customer: Customer;
+  total: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const brazilianStates = [
+  { value: "AC", label: "Acre" },
+  { value: "AL", label: "Alagoas" },
+  { value: "AP", label: "Amapá" },
+  { value: "AM", label: "Amazonas" },
+  { value: "BA", label: "Bahia" },
+  { value: "CE", label: "Ceará" },
+  { value: "DF", label: "Distrito Federal" },
+  { value: "ES", label: "Espírito Santo" },
+  { value: "GO", label: "Goiás" },
+  { value: "MA", label: "Maranhão" },
+  { value: "MT", label: "Mato Grosso" },
+  { value: "MS", label: "Mato Grosso do Sul" },
+  { value: "MG", label: "Minas Gerais" },
+  { value: "PA", label: "Pará" },
+  { value: "PB", label: "Paraíba" },
+  { value: "PR", label: "Paraná" },
+  { value: "PE", label: "Pernambuco" },
+  { value: "PI", label: "Piauí" },
+  { value: "RJ", label: "Rio de Janeiro" },
+  { value: "RN", label: "Rio Grande do Norte" },
+  { value: "RS", label: "Rio Grande do Sul" },
+  { value: "RO", label: "Rondônia" },
+  { value: "RR", label: "Roraima" },
+  { value: "SC", label: "Santa Catarina" },
+  { value: "SP", label: "São Paulo" },
+  { value: "SE", label: "Sergipe" },
+  { value: "TO", label: "Tocantins" },
+];
+
+const statusConfig: Record<string, { color: string; bgColor: string; icon: React.ElementType; label: string }> = {
+  "em processamento": { color: "text-amber-700", bgColor: "bg-amber-100 border-amber-200", icon: Clock, label: "Em Processamento" },
+  "enviado": { color: "text-blue-700", bgColor: "bg-blue-100 border-blue-200", icon: Truck, label: "Enviado" },
+  "entregue": { color: "text-green-700", bgColor: "bg-green-100 border-green-200", icon: CheckCircle2, label: "Entregue" },
+  "cancelado": { color: "text-red-700", bgColor: "bg-red-100 border-red-200", icon: X, label: "Cancelado" },
+};
+
 /* ─── Component ─────────────────────────────────────────── */
 
 export default function Home() {
@@ -233,6 +307,22 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const productsRef = useRef<HTMLElement>(null);
+
+  // Order / Checkout state
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [customer, setCustomer] = useState<Customer>({
+    name: "", email: "", phone: "", address: "", city: "", state: "", zipCode: "",
+  });
+  const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+
+  // Order history state
+  const [ordersOpen, setOrdersOpen] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -277,6 +367,121 @@ export default function Home() {
       setEmail("");
       setTimeout(() => setSubscribed(false), 4000);
     }
+  };
+
+  // Phone mask helper
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
+  // Zip code mask helper
+  const formatZipCode = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  // Open checkout from cart
+  const openCheckout = () => {
+    setCheckoutStep(1);
+    setCustomer({ name: "", email: "", phone: "", address: "", city: "", state: "", zipCode: "" });
+    setCompletedOrder(null);
+    setCartOpen(false);
+    setTimeout(() => setCheckoutOpen(true), 200);
+  };
+
+  // Submit order
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cartItems,
+          customer,
+          total: totalPrice,
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao criar pedido");
+      const order: Order = await res.json();
+      setCompletedOrder(order);
+      setCheckoutStep(3);
+      setCartItems([]);
+    } catch {
+      alert("Erro ao processar pedido. Tente novamente.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  // Fetch orders
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await fetch("/api/orders");
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // Open order history sheet
+  const openOrders = async () => {
+    setOrdersOpen(true);
+    setExpandedOrderId(null);
+    setCancelConfirmId(null);
+    await fetchOrders();
+  };
+
+  // Cancel order
+  const cancelOrder = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
+      if (res.ok) {
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        setCancelConfirmId(null);
+        setExpandedOrderId(null);
+      }
+    } catch {
+      alert("Erro ao cancelar pedido.");
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
+      }
+    } catch {
+      alert("Erro ao atualizar pedido.");
+    }
+  };
+
+  // Format date to PT-BR
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   useEffect(() => {
@@ -332,6 +537,191 @@ export default function Home() {
               >
                 <Search className="h-5 w-5 text-foreground/60" />
               </Button>
+
+              {/* Orders history */}
+              <Sheet open={ordersOpen} onOpenChange={setOrdersOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-2xl hover:bg-kid-green/20"
+                    onClick={openOrders}
+                  >
+                    <ClipboardList className="h-5 w-5 text-foreground/60" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
+                  <SheetTitle className="sr-only">Meus Pedidos</SheetTitle>
+                  <div className="bg-gradient-to-r from-kid-green to-kid-teal p-6 text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <ClipboardList className="h-6 w-6" />
+                        <h2 className="text-xl font-bold">Meus Pedidos</h2>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-xl hover:bg-white/20 text-white"
+                        onClick={fetchOrders}
+                        disabled={ordersLoading}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${ordersLoading ? "animate-spin" : ""}`} />
+                      </Button>
+                    </div>
+                    <p className="text-white/80 text-sm mt-1">Acompanhe seus pedidos</p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+                    {ordersLoading ? (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 text-kid-green animate-spin mb-3" />
+                        <p className="text-sm text-foreground/50">Carregando pedidos...</p>
+                      </div>
+                    ) : orders.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <span className="text-6xl mb-4">📦</span>
+                        <p className="text-lg font-semibold text-foreground/60">Nenhum pedido ainda</p>
+                        <p className="text-sm text-foreground/40 mt-1">Faça sua primeira compra!</p>
+                        <Button
+                          className="mt-4 rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-semibold"
+                          onClick={() => setOrdersOpen(false)}
+                        >
+                          Ver Produtos
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {orders.map((order) => {
+                          const sc = statusConfig[order.status] || statusConfig["em processamento"];
+                          const StatusIcon = sc.icon;
+                          const isExpanded = expandedOrderId === order.id;
+                          const isCancelable = order.status === "em processamento";
+                          return (
+                            <motion.div
+                              key={order.id}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="bg-white rounded-2xl border-2 border-kid-green/20 overflow-hidden shadow-sm"
+                            >
+                              {/* Order header */}
+                              <button
+                                className="w-full text-left p-4"
+                                onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-bold text-sm text-kid-green">{order.orderNumber}</span>
+                                  <ChevronDown className={`h-4 w-4 text-foreground/40 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-foreground/50">{formatDate(order.createdAt)}</span>
+                                  <Badge className={`${sc.bgColor} ${sc.color} border text-[10px] font-bold rounded-full px-2 py-0.5`}>
+                                    <StatusIcon className="h-2.5 w-2.5 mr-1" />
+                                    {sc.label}
+                                  </Badge>
+                                </div>
+                                <p className="text-lg font-black text-kid-orange mt-1">R$ {order.total.toFixed(2)}</p>
+                              </button>
+
+                              {/* Expanded details */}
+                              <AnimatePresence>
+                                {isExpanded && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="px-4 pb-4 border-t border-kid-green/10 pt-3">
+                                      <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido:</p>
+                                      <div className="space-y-2">
+                                        {order.items.map((item) => (
+                                          <div key={item.id} className="flex items-center gap-2 bg-kid-green/5 rounded-xl p-2">
+                                            <span className="text-xl">{item.emoji}</span>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-semibold truncate">{item.name}</p>
+                                              <p className="text-[10px] text-foreground/40">Qtd: {item.quantity}</p>
+                                            </div>
+                                            <span className="text-xs font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      <div className="mt-3 pt-3 border-t border-kid-green/10">
+                                        <p className="text-xs text-foreground/50 mb-1">
+                                          📍 {order.customer.name} — {order.customer.city}/{order.customer.state}
+                                        </p>
+                                      </div>
+
+                                      {/* Status update buttons */}
+                                      <div className="mt-3 flex flex-wrap gap-2">
+                                        {order.status !== "entregue" && order.status !== "cancelado" && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="text-[10px] rounded-xl border-kid-blue/30 text-kid-blue hover:bg-kid-blue/10"
+                                            onClick={() => updateOrderStatus(order.id, "enviado")}
+                                          >
+                                            <Truck className="h-3 w-3 mr-1" /> Marcar Enviado
+                                          </Button>
+                                        )}
+                                        {order.status === "enviado" && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="text-[10px] rounded-xl border-kid-green/30 text-kid-green hover:bg-kid-green/10"
+                                            onClick={() => updateOrderStatus(order.id, "entregue")}
+                                          >
+                                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar Entregue
+                                          </Button>
+                                        )}
+                                        {isCancelable && (
+                                          <>
+                                            {cancelConfirmId === order.id ? (
+                                              <div className="flex gap-1">
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  className="text-[10px] rounded-xl border-kid-red/30 text-kid-red hover:bg-kid-red/10"
+                                                  onClick={() => cancelOrder(order.id)}
+                                                >
+                                                  Confirmar
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  className="text-[10px] rounded-xl"
+                                                  onClick={() => setCancelConfirmId(null)}
+                                                >
+                                                  Voltar
+                                                </Button>
+                                              </div>
+                                            ) : (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="text-[10px] rounded-xl border-kid-red/30 text-kid-red hover:bg-kid-red/10"
+                                                onClick={() => setCancelConfirmId(order.id)}
+                                              >
+                                                <Trash2 className="h-3 w-3 mr-1" /> Cancelar Pedido
+                                              </Button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
 
               {/* Cart */}
               <Sheet open={cartOpen} onOpenChange={setCartOpen}>
@@ -433,7 +823,7 @@ export default function Home() {
                           R$ {totalPrice.toFixed(2)}
                         </span>
                       </div>
-                      <Button className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink hover:from-kid-orange/90 hover:to-kid-pink/90 text-white font-bold text-lg py-6 shadow-kid-orange">
+                      <Button className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink hover:from-kid-orange/90 hover:to-kid-pink/90 text-white font-bold text-lg py-6 shadow-kid-orange" onClick={openCheckout}>
                         Finalizar Compra 🎉
                       </Button>
                       <Button
@@ -1305,6 +1695,274 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* ═══════════════ CHECKOUT SHEET ═══════════════ */}
+      <Sheet open={checkoutOpen} onOpenChange={(open) => {
+        if (!open) setCheckoutOpen(false);
+      }}>
+        <SheetContent className="w-full sm:max-w-lg bg-white p-0 flex flex-col overflow-y-auto">
+          <SheetTitle className="sr-only">Finalizar Compra</SheetTitle>
+          {/* Checkout Header */}
+          <div className="bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple p-6 text-white sticky top-0 z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShoppingCart className="h-6 w-6" />
+                <h2 className="text-xl font-bold">Finalizar Compra</h2>
+              </div>
+              {checkoutStep > 1 && checkoutStep < 3 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl text-white/80 hover:text-white hover:bg-white/20"
+                  onClick={() => setCheckoutStep(checkoutStep === 2 ? 1 : 2)}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              )}
+            </div>
+            {/* Steps indicator */}
+            <div className="flex items-center gap-2 mt-4">
+              {[1, 2, 3].map((step) => (
+                <div key={step} className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                    checkoutStep >= step
+                      ? "bg-white text-kid-orange"
+                      : "bg-white/20 text-white/50"
+                  }`}>
+                    {checkoutStep > step ? <CheckCircle2 className="h-4 w-4" /> : step}
+                  </div>
+                  {step < 3 && (
+                    <div className={`h-0.5 w-8 rounded transition-all ${
+                      checkoutStep > step ? "bg-white" : "bg-white/20"
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            {/* Step 1: Customer info */}
+            {checkoutStep === 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-4"
+              >
+                <div className="text-center mb-6">
+                  <span className="text-4xl">📋</span>
+                  <h3 className="text-lg font-bold mt-2">Dados de Entrega</h3>
+                  <p className="text-sm text-foreground/50">Preencha suas informações</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Nome Completo *</Label>
+                    <Input
+                      placeholder="Seu nome completo"
+                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                      value={customer.name}
+                      onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">E-mail *</Label>
+                    <Input
+                      type="email"
+                      placeholder="seu@email.com"
+                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                      value={customer.email}
+                      onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
+                    <Input
+                      placeholder="(11) 99999-9999"
+                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                      value={customer.phone}
+                      onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Endereço *</Label>
+                    <Input
+                      placeholder="Rua, número, complemento"
+                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                      value={customer.address}
+                      onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Cidade *</Label>
+                      <Input
+                        placeholder="Sua cidade"
+                        className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                        value={customer.city}
+                        onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Estado *</Label>
+                      <Select
+                        value={customer.state}
+                        onValueChange={(value) => setCustomer({ ...customer, state: value })}
+                      >
+                        <SelectTrigger className="w-full rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange">
+                          <SelectValue placeholder="UF" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brazilianStates.map((s) => (
+                            <SelectItem key={s.value} value={s.value}>
+                              {s.value} - {s.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">CEP</Label>
+                    <Input
+                      placeholder="00000-000"
+                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                      value={customer.zipCode}
+                      onChange={(e) => setCustomer({ ...customer, zipCode: formatZipCode(e.target.value) })}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink text-white font-bold text-lg py-6 shadow-kid-orange mt-6"
+                  onClick={() => setCheckoutStep(2)}
+                  disabled={!customer.name || !customer.email || !customer.address || !customer.city || !customer.state}
+                >
+                  Revisar Pedido ➡️
+                </Button>
+              </motion.div>
+            )}
+
+            {/* Step 2: Order summary */}
+            {checkoutStep === 2 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-4"
+              >
+                <div className="text-center mb-4">
+                  <span className="text-4xl">🛍️</span>
+                  <h3 className="text-lg font-bold mt-2">Resumo do Pedido</h3>
+                </div>
+
+                {/* Customer info summary */}
+                <div className="bg-kid-yellow/10 rounded-2xl p-4 border border-kid-yellow/20">
+                  <p className="text-xs font-semibold text-foreground/50 mb-1">Dados de entrega:</p>
+                  <p className="text-sm font-semibold">{customer.name}</p>
+                  <p className="text-xs text-foreground/60">{customer.email}</p>
+                  {customer.phone && <p className="text-xs text-foreground/60">{customer.phone}</p>}
+                  <p className="text-xs text-foreground/60">{customer.address}</p>
+                  <p className="text-xs text-foreground/60">{customer.city}/{customer.state} {customer.zipCode}</p>
+                </div>
+
+                {/* Items */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-foreground/50">Itens:</p>
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-kid-orange/5 rounded-xl p-3 border border-kid-orange/10">
+                      <span className="text-2xl">{item.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{item.name}</p>
+                        <p className="text-xs text-foreground/50">Qtd: {item.quantity} × R$ {item.price.toFixed(2)}</p>
+                      </div>
+                      <span className="text-sm font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total */}
+                <div className="bg-gradient-to-r from-kid-orange to-kid-pink rounded-2xl p-4 text-white">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Total do Pedido:</span>
+                    <span className="text-2xl font-black">R$ {totalPrice.toFixed(2)}</span>
+                  </div>
+                  <p className="text-white/70 text-xs mt-1">Frete grátis 🚚</p>
+                </div>
+
+                <Button
+                  className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold text-lg py-6 shadow-kid-green"
+                  onClick={handleCheckout}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Processando...
+                    </span>
+                  ) : (
+                    "Confirmar Compra 🎉"
+                  )}
+                </Button>
+              </motion.div>
+            )}
+
+            {/* Step 3: Success */}
+            {checkoutStep === 3 && completedOrder && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                >
+                  <span className="text-7xl block mb-4">🎉</span>
+                </motion.div>
+                <h3 className="text-2xl font-black text-foreground">Pedido Confirmado!</h3>
+                <p className="text-foreground/60 mt-2">
+                  Seu pedido foi realizado com sucesso!
+                </p>
+
+                <div className="mt-6 bg-kid-green/10 rounded-2xl p-6 border-2 border-kid-green/20 inline-block">
+                  <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
+                  <p className="text-3xl font-black text-kid-green">{completedOrder.orderNumber}</p>
+                </div>
+
+                <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Truck className="h-4 w-4 text-kid-blue" />
+                    <p className="text-sm font-semibold">Previsão de Entrega</p>
+                  </div>
+                  <p className="text-xs text-foreground/60">
+                    Entrega estimada em 5 a 10 dias úteis para {completedOrder.customer.city}/{completedOrder.customer.state}
+                  </p>
+                </div>
+
+                <div className="mt-6 space-y-3">
+                  <Button
+                    className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-6"
+                    onClick={() => {
+                      setCheckoutOpen(false);
+                      setTimeout(() => openOrders(), 300);
+                    }}
+                  >
+                    <ClipboardList className="h-5 w-5 mr-2" />
+                    Ver Meus Pedidos
+                  </Button>
+                  <Button
+                    className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
+                    onClick={() => setCheckoutOpen(false)}
+                  >
+                    Continuar Comprando
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* ═══════════════ SCROLL TO TOP ═══════════════ */}
       <AnimatePresence>

@@ -121,3 +121,31 @@ Complete single-page application with 9 sections:
 - Lint passes cleanly
 - Dev server compiles and renders successfully (200 responses)
 - Complete, polished single-page e-commerce experience
+
+---
+Task ID: 1, 2, 3, 4
+Agent: full-stack-developer
+Task: Implementar CRUD completo de compras (pedidos)
+
+Work Log:
+- Created `data/` directory and `data/orders.json` for JSON file-based persistence
+- Created API route `src/app/api/orders/route.ts` (GET all orders sorted by date, POST new order with auto-generated #MUN-XXXXX order number)
+- Created API route `src/app/api/orders/[id]/route.ts` (GET single order, PUT update status, DELETE cancel order)
+- Added TypeScript interfaces: `OrderItem`, `Customer`, `Order`
+- Added Brazilian states dropdown data (27 states) with `Select` component
+- Added `statusConfig` mapping for 4 statuses: em processamento (amber), enviado (blue), entregue (green), cancelado (red)
+- Implemented multi-step checkout Sheet modal (3 steps: customer form → order review → success confirmation)
+- Added phone mask `(XX) XXXXX-XXXX` and CEP mask `XXXXX-XXX` for Brazilian format
+- Updated "Finalizar Compra 🎉" button to open checkout flow instead of doing nothing
+- Added order history Sheet sidebar in header (clipboard icon) with expandable order cards
+- Implemented status update buttons (Marcar Enviado, Marcar Entregue) and cancel order with confirmation
+- Added loading states with spinner animations
+- Added framer-motion animations for checkout steps and order card expansion
+- All UI text in Portuguese (Brazil), currency in BRL
+
+Stage Summary:
+- CRUD completo de pedidos implementado
+- Checkout flow de 3 etapas com formulário de entrega
+- Histórico de pedidos com expansão de detalhes
+- Atualização de status e cancelamento de pedidos
+- Lint passa limpo, dev server compila sem erros
