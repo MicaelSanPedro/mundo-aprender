@@ -501,8 +501,21 @@ export default function Home() {
                           e.preventDefault();
                           const header = document.querySelector("header");
                           const headerHeight = header?.offsetHeight ?? 80;
-                          const top = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
-                          window.scrollTo({ top, behavior: "smooth" });
+                          const targetY = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                          const startY = window.scrollY;
+                          const distance = targetY - startY;
+                          const duration = 600;
+                          let start: number | null = null;
+                          function step(timestamp: number) {
+                            if (!start) start = timestamp;
+                            const progress = Math.min((timestamp - start) / duration, 1);
+                            const ease = progress < 0.5
+                              ? 4 * progress * progress * progress
+                              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                            window.scrollTo(0, startY + distance * ease);
+                            if (progress < 1) requestAnimationFrame(step);
+                          }
+                          requestAnimationFrame(step);
                         }
                       }}
                       autoFocus

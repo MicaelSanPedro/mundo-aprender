@@ -96,7 +96,7 @@
     @apply bg-background text-foreground;
   }
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 }
 
