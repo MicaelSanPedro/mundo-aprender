@@ -1,0 +1,1270 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import {
+  ShoppingCart,
+  Menu,
+  Star,
+  Mail,
+  Phone,
+  MapPin,
+  ChevronUp,
+  Search,
+  Heart,
+  Truck,
+  Shield,
+  RefreshCw,
+  Award,
+  Users,
+  Package,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  X,
+  Minus,
+  Plus,
+  Trash2,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
+
+/* ─── Data ─────────────────────────────────────────────── */
+
+const categories = [
+  { id: "matematica", emoji: "🔢", name: "Matemática", color: "bg-kid-blue", shadow: "shadow-kid-blue", hoverBorder: "hover:border-kid-blue", itemCount: 85 },
+  { id: "portugues", emoji: "📝", name: "Português", color: "bg-kid-pink", shadow: "shadow-kid-pink", hoverBorder: "hover:border-kid-pink", itemCount: 72 },
+  { id: "ciencias", emoji: "🔬", name: "Ciências", color: "bg-kid-green", shadow: "shadow-kid-green", hoverBorder: "hover:border-kid-green", itemCount: 64 },
+  { id: "historia", emoji: "📜", name: "História", color: "bg-kid-orange", shadow: "shadow-kid-orange", hoverBorder: "hover:border-kid-orange", itemCount: 53 },
+  { id: "geografia", emoji: "🌍", name: "Geografia", color: "bg-kid-purple", shadow: "shadow-kid-purple", hoverBorder: "hover:border-kid-purple", itemCount: 48 },
+  { id: "artes", emoji: "🎨", name: "Artes", color: "bg-kid-yellow", shadow: "shadow-kid-yellow", hoverBorder: "hover:border-kid-yellow", itemCount: 61 },
+];
+
+const products = [
+  {
+    id: 1,
+    name: "Caderno de Matemática - 3º Ano",
+    description: "Exercícios divertidos com jogos e desafios numéricos",
+    price: 34.90,
+    originalPrice: 49.90,
+    rating: 5,
+    reviews: 128,
+    emoji: "📓",
+    bgColor: "bg-blue-50",
+    borderHover: "hover:border-kid-blue",
+    category: "matematica",
+    tag: "Mais Vendido",
+    tagColor: "bg-kid-orange",
+  },
+  {
+    id: 2,
+    name: "Kit de Alfabetização Completo",
+    description: "Cartilhas, flashcards e jogos para aprender a ler e escrever",
+    price: 89.90,
+    originalPrice: 129.90,
+    rating: 5,
+    reviews: 256,
+    emoji: "📚",
+    bgColor: "bg-pink-50",
+    borderHover: "hover:border-kid-pink",
+    category: "portugues",
+    tag: "Promoção",
+    tagColor: "bg-kid-red",
+  },
+  {
+    id: 3,
+    name: "Laboratório de Ciências - Kit Iniciante",
+    description: "Experimentos seguros e educativos para pequenos cientistas",
+    price: 149.90,
+    originalPrice: null,
+    rating: 4,
+    reviews: 89,
+    emoji: "🧪",
+    bgColor: "bg-green-50",
+    borderHover: "hover:border-kid-green",
+    category: "ciencias",
+    tag: "Novo",
+    tagColor: "bg-kid-green",
+  },
+  {
+    id: 4,
+    name: "Atlas Ilustrado do Brasil",
+    description: "Mapas coloridos, capitais e curiosidades sobre cada estado",
+    price: 44.90,
+    originalPrice: 59.90,
+    rating: 5,
+    reviews: 167,
+    emoji: "🗺️",
+    bgColor: "bg-purple-50",
+    borderHover: "hover:border-kid-purple",
+    category: "geografia",
+    tag: "-25%",
+    tagColor: "bg-kid-orange",
+  },
+  {
+    id: 5,
+    name: "Jogo de Tabuleiro - Linha do Tempo",
+    description: "Aprenda história brincando! Viagem pela história do Brasil",
+    price: 79.90,
+    originalPrice: null,
+    rating: 4,
+    reviews: 95,
+    emoji: "🎲",
+    bgColor: "bg-orange-50",
+    borderHover: "hover:border-kid-orange",
+    category: "historia",
+    tag: "Favorito",
+    tagColor: "bg-kid-pink",
+  },
+  {
+    id: 6,
+    name: "Kit de Pintura Artística - 24 Cores",
+    description: "Tintas, pincéis e telas para explorar a criatividade",
+    price: 59.90,
+    originalPrice: 74.90,
+    rating: 5,
+    reviews: 203,
+    emoji: "🖌️",
+    bgColor: "bg-yellow-50",
+    borderHover: "hover:border-kid-yellow",
+    category: "artes",
+    tag: "-20%",
+    tagColor: "bg-kid-orange",
+  },
+  {
+    id: 7,
+    name: "Quebra-Cabeça - Sistema Solar",
+    description: "200 peças com informações sobre cada planeta",
+    price: 39.90,
+    originalPrice: null,
+    rating: 4,
+    reviews: 78,
+    emoji: "🪐",
+    bgColor: "bg-blue-50",
+    borderHover: "hover:border-kid-blue",
+    category: "ciencias",
+    tag: "Novo",
+    tagColor: "bg-kid-green",
+  },
+  {
+    id: 8,
+    name: "Caderno de Caligrafia Divertida",
+    description: "Letras e números com ilustrações para treinar a escrita",
+    price: 24.90,
+    originalPrice: 34.90,
+    rating: 5,
+    reviews: 312,
+    emoji: "✏️",
+    bgColor: "bg-pink-50",
+    borderHover: "hover:border-kid-pink",
+    category: "portugues",
+    tag: "Mais Vendido",
+    tagColor: "bg-kid-orange",
+  },
+];
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Professora Maria Silva",
+    role: "Professora do 2º Ano - Escola Municipal",
+    emoji: "👩‍🏫",
+    rating: 5,
+    text: "Os materiais da Mundo Aprender transformaram minha sala de aula! As crianças ficaram muito mais engajadas e os resultados nas provas melhoraram demais!",
+    bgColor: "bg-kid-blue/10",
+    borderColor: "border-kid-blue/30",
+  },
+  {
+    id: 2,
+    name: "Ana Paula Oliveira",
+    role: "Mãe da Sofia, 7 anos",
+    emoji: "👩",
+    rating: 5,
+    text: "Comprei o kit de alfabetização e minha filha aprendeu a ler em 2 meses! Os jogos são super divertidos e ela não quer parar de estudar.",
+    bgColor: "bg-kid-pink/10",
+    borderColor: "border-kid-pink/30",
+  },
+  {
+    id: 3,
+    name: "Pedro Santos",
+    role: "Pai do Lucas, 9 anos",
+    emoji: "👨",
+    rating: 5,
+    text: "O laboratório de ciências é incrível! Meu filho agora quer ser cientista. A qualidade dos materiais é excelente e as instruções são muito claras.",
+    bgColor: "bg-kid-green/10",
+    borderColor: "border-kid-green/30",
+  },
+];
+
+const navLinks = [
+  { label: "Início", href: "#inicio" },
+  { label: "Categorias", href: "#categorias" },
+  { label: "Produtos", href: "#produtos" },
+  { label: "Sobre", href: "#sobre" },
+  { label: "Contato", href: "#contato" },
+];
+
+/* ─── Types ─────────────────────────────────────────────── */
+
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  emoji: string;
+  quantity: number;
+}
+
+/* ─── Component ─────────────────────────────────────────── */
+
+export default function Home() {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [justAdded, setJustAdded] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const filteredProducts = activeCategory
+    ? products.filter((p) => p.category === activeCategory)
+    : products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+  const addToCart = useCallback((product: (typeof products)[0]) => {
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { id: product.id, name: product.name, price: product.price, emoji: product.emoji, quantity: 1 }];
+    });
+    setJustAdded(product.id);
+    setTimeout(() => setJustAdded(null), 1500);
+  }, []);
+
+  const updateQuantity = useCallback((id: number, delta: number) => {
+    setCartItems((prev) =>
+      prev
+        .map((item) => (item.id === id ? { ...item, quantity: item.quantity + delta } : item))
+        .filter((item) => item.quantity > 0)
+    );
+  }, []);
+
+  const removeFromCart = useCallback((id: number) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
+  const handleSubscribe = () => {
+    if (email.includes("@")) {
+      setSubscribed(true);
+      setEmail("");
+      setTimeout(() => setSubscribed(false), 4000);
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  /* ─── Render ──────────────────────────────────────────── */
+
+  return (
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
+      {/* ═══════════════ HEADER ═══════════════ */}
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-2 border-kid-yellow/30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <a href="#inicio" className="flex items-center gap-2 group">
+              <span className="text-3xl group-hover:animate-wiggle">🎒</span>
+              <div className="flex flex-col leading-tight">
+                <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple bg-clip-text text-transparent">
+                  Mundo Aprender
+                </span>
+                <span className="text-[10px] md:text-xs text-kid-blue font-semibold -mt-0.5">
+                  Brincar &bull; Criar &bull; Aprender ✨
+                </span>
+              </div>
+            </a>
+
+            {/* Desktop Nav */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-2 text-sm font-semibold text-foreground/70 hover:text-kid-orange rounded-2xl hover:bg-kid-orange/10 transition-all duration-200"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              {/* Search toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-2xl hover:bg-kid-yellow/20"
+                onClick={() => setSearchOpen(!searchOpen)}
+              >
+                <Search className="h-5 w-5 text-foreground/60" />
+              </Button>
+
+              {/* Cart */}
+              <Sheet open={cartOpen} onOpenChange={setCartOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-pink/20 relative">
+                    <ShoppingCart className="h-5 w-5 text-foreground/60" />
+                    {totalItems > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md"
+                      >
+                        {totalItems}
+                      </motion.span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
+                  <SheetTitle className="sr-only">Carrinho de Compras</SheetTitle>
+                  <div className="bg-gradient-to-r from-kid-pink to-kid-orange p-6 text-white">
+                    <div className="flex items-center gap-3">
+                      <ShoppingCart className="h-6 w-6" />
+                      <h2 className="text-xl font-bold">Meu Carrinho</h2>
+                    </div>
+                    <p className="text-white/80 text-sm mt-1">{totalItems} {totalItems === 1 ? 'item' : 'itens'} no carrinho</p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+                    {cartItems.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                        <span className="text-6xl mb-4">🛒</span>
+                        <p className="text-lg font-semibold text-foreground/60">Seu carrinho está vazio</p>
+                        <p className="text-sm text-foreground/40 mt-1">Adicione produtos incríveis!</p>
+                        <Button
+                          className="mt-4 rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-semibold"
+                          onClick={() => setCartOpen(false)}
+                        >
+                          Ver Produtos
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {cartItems.map((item) => (
+                          <motion.div
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex items-center gap-3 bg-kid-yellow/5 rounded-2xl p-3 border border-kid-yellow/20"
+                          >
+                            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                              {item.emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate">{item.name}</p>
+                              <p className="text-kid-orange font-bold text-sm">
+                                R$ {item.price.toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="w-7 h-7 rounded-xl"
+                                onClick={() => updateQuantity(item.id, -1)}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-6 text-center font-bold text-sm">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="w-7 h-7 rounded-xl"
+                                onClick={() => updateQuantity(item.id, 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-7 h-7 rounded-xl hover:bg-kid-red/10"
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-kid-red" />
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {cartItems.length > 0 && (
+                    <div className="border-t-2 border-kid-yellow/20 p-4 bg-white">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="font-semibold text-foreground/60">Total:</span>
+                        <span className="text-2xl font-black text-kid-orange">
+                          R$ {totalPrice.toFixed(2)}
+                        </span>
+                      </div>
+                      <Button className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink hover:from-kid-orange/90 hover:to-kid-pink/90 text-white font-bold text-lg py-6 shadow-kid-orange">
+                        Finalizar Compra 🎉
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full mt-2 rounded-2xl text-foreground/50 hover:text-foreground"
+                        onClick={() => setCartOpen(false)}
+                      >
+                        Continuar Comprando
+                      </Button>
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
+
+              {/* Mobile Menu */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild className="lg:hidden">
+                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-blue/20">
+                    <Menu className="h-5 w-5 text-foreground/60" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-sm bg-white p-0">
+                  <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+                  <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-6 text-white">
+                    <span className="text-4xl">🎒</span>
+                    <h2 className="text-xl font-bold mt-2">Mundo Aprender</h2>
+                  </div>
+                  <nav className="p-4 space-y-1">
+                    {navLinks.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-orange hover:bg-kid-orange/5 rounded-2xl font-semibold transition-all"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                        {link.label}
+                      </a>
+                    ))}
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+
+          {/* Search bar */}
+          <AnimatePresence>
+            {searchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="pb-4">
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+                    <Input
+                      placeholder="Buscar produtos, matérias..."
+                      className="pl-11 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl"
+                      onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </header>
+
+      {/* ═══════════════ HERO SECTION ═══════════════ */}
+      <section id="inicio" className="relative gradient-hero overflow-hidden">
+        {/* Decorative floating elements */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <span className="absolute top-10 left-[5%] text-5xl md:text-7xl animate-float opacity-30">⭐</span>
+          <span className="absolute top-20 right-[10%] text-4xl md:text-6xl animate-float-delay-1 opacity-30">✏️</span>
+          <span className="absolute bottom-20 left-[15%] text-4xl md:text-5xl animate-float-delay-2 opacity-25">📖</span>
+          <span className="absolute bottom-32 right-[20%] text-5xl md:text-7xl animate-float-slow opacity-30">🎨</span>
+          <span className="absolute top-1/2 left-[3%] text-3xl md:text-4xl animate-float-delay-3 opacity-20">📐</span>
+          <span className="absolute top-1/3 right-[5%] text-3xl md:text-4xl animate-float opacity-20">🔬</span>
+          <span className="absolute bottom-10 left-[40%] text-4xl md:text-5xl animate-float-delay-1 opacity-25">🌈</span>
+          <span className="absolute top-5 left-[50%] text-3xl animate-float-delay-2 opacity-20">🎈</span>
+        </div>
+
+        {/* Decorative shapes */}
+        <div className="absolute top-10 right-10 w-20 h-20 md:w-32 md:h-32 bg-white/10 rounded-full blur-sm" />
+        <div className="absolute bottom-10 left-10 w-24 h-24 md:w-40 md:h-40 bg-white/10 rounded-full blur-sm" />
+        <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-2xl rotate-45 blur-sm" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Text content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-center lg:text-left"
+            >
+              <Badge className="mb-4 px-4 py-1.5 rounded-full bg-white/30 text-white font-semibold text-sm backdrop-blur-sm border-0">
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                Loja Nº 1 em Materiais Didáticos
+              </Badge>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight drop-shadow-md">
+                Materiais Didáticos{" "}
+                <span className="text-kid-yellow drop-shadow-lg">Divertidos</span>{" "}
+                para o Ensino Fundamental!
+              </h1>
+              <p className="mt-4 md:mt-6 text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Torne o aprendizado uma aventura incrível! Cadernos, jogos, kits e muito mais para
+                crianças do 1º ao 9º ano. 🚀
+              </p>
+              <div className="mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <a href="#produtos">
+                  <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:bg-white/95 hover:scale-105 transition-all duration-200 animate-pulse-glow">
+                    Ver Produtos 🛍️
+                  </Button>
+                </a>
+                <a href="#categorias">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto rounded-2xl border-2 border-white/50 text-white font-semibold text-lg px-8 py-6 hover:bg-white/20 backdrop-blur-sm"
+                  >
+                    Explorar Categorias
+                  </Button>
+                </a>
+              </div>
+
+              {/* Trust badges */}
+              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
+                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
+                  <Truck className="h-4 w-4" /> Frete Grátis
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
+                  <Shield className="h-4 w-4" /> Compra Segura
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
+                  <RefreshCw className="h-4 w-4" /> Troca Fácil
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Illustration area */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative flex items-center justify-center"
+            >
+              <div className="relative w-64 h-64 md:w-96 md:h-96">
+                {/* Main circle */}
+                <div className="absolute inset-0 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center shadow-2xl">
+                  <div className="text-center">
+                    <span className="text-7xl md:text-9xl block animate-bounce-gentle">🎓</span>
+                    <p className="text-white font-bold text-lg md:text-xl mt-4 drop-shadow-md">
+                      Aprender é Divertido!
+                    </p>
+                  </div>
+                </div>
+
+                {/* Orbiting emojis */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-3xl md:text-5xl animate-float">📚</div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-3xl md:text-5xl animate-float-delay-2">🔬</div>
+                <div className="absolute top-1/2 -left-4 -translate-y-1/2 text-3xl md:text-5xl animate-float-delay-1">🎨</div>
+                <div className="absolute top-1/2 -right-4 -translate-y-1/2 text-3xl md:text-5xl animate-float-slow">🔢</div>
+
+                {/* Small decorative dots */}
+                <div className="absolute top-8 right-8 w-4 h-4 bg-kid-yellow rounded-full animate-sparkle" />
+                <div className="absolute bottom-12 left-12 w-3 h-3 bg-kid-pink rounded-full animate-sparkle" style={{ animationDelay: "0.5s" }} />
+                <div className="absolute top-1/3 right-4 w-3 h-3 bg-kid-green rounded-full animate-sparkle" style={{ animationDelay: "1s" }} />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path
+              d="M0 50C240 100 480 0 720 50C960 100 1200 0 1440 50V100H0V50Z"
+              fill="#FFFBEB"
+            />
+          </svg>
+        </div>
+      </section>
+
+      {/* ═══════════════ CATEGORIES SECTION ═══════════════ */}
+      <section id="categorias" className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-blue/10 text-kid-blue font-semibold text-sm border-kid-blue/20">
+              📚 Explore Nossas Categorias
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              Navegue por <span className="text-kid-blue">Matéria</span>
+            </h2>
+            <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+              Encontre o material perfeito para cada disciplina. Clique para filtrar os produtos!
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+            {categories.map((cat, i) => (
+              <motion.button
+                key={cat.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ scale: 1.08, y: -6 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                className={`relative group flex flex-col items-center gap-3 p-5 md:p-6 rounded-3xl border-2 transition-all duration-300 ${
+                  activeCategory === cat.id
+                    ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
+                    : `bg-white ${cat.hoverBorder} hover:shadow-lg`
+                }`}
+              >
+                <span className="text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
+                  {cat.emoji}
+                </span>
+                <span className="font-bold text-sm md:text-base text-center leading-tight">{cat.name}</span>
+                <span className="text-xs text-foreground/40 font-medium">{cat.itemCount} itens</span>
+                {activeCategory === cat.id && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md"
+                  >
+                    <X className="h-3 w-3 text-foreground/50" />
+                  </motion.div>
+                )}
+              </motion.button>
+            ))}
+          </div>
+
+          {activeCategory && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-6 text-center"
+            >
+              <p className="text-foreground/60">
+                Mostrando produtos de{" "}
+                <span className="font-bold text-kid-orange capitalize">
+                  {categories.find((c) => c.id === activeCategory)?.name}
+                </span>
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
+      <section id="produtos" className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-orange/10 text-kid-orange font-semibold text-sm border-kid-orange/20">
+              ⭐ Nossos Melhores Produtos
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              Produtos em <span className="text-kid-orange">Destaque</span> ⭐
+            </h2>
+            <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+              Material didático de alta qualidade selecionado por educadores
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`card-hover group relative bg-white rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
+                >
+                  {/* Discount badge */}
+                  {product.tag && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <Badge className={`${product.tagColor} text-white font-bold text-xs rounded-xl px-2.5 py-1 shadow-md`}>
+                        {product.tag}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Favorite button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-xl bg-white/80 backdrop-blur-sm hover:bg-kid-pink/20 hover:scale-110 transition-all"
+                  >
+                    <Heart className="h-4 w-4 text-foreground/30 hover:text-kid-pink transition-colors" />
+                  </Button>
+
+                  {/* Product image placeholder */}
+                  <div className={`relative ${product.bgColor} p-6 md:p-8 flex items-center justify-center aspect-square`}>
+                    <span className="text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
+                      {product.emoji}
+                    </span>
+                    {/* Decorative background pattern */}
+                    <div className="absolute inset-0 opacity-5">
+                      <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-current" />
+                      <div className="absolute bottom-4 left-3 w-6 h-6 rounded-lg bg-current rotate-12" />
+                      <div className="absolute top-1/2 left-1/2 w-20 h-20 rounded-full bg-current" />
+                    </div>
+                  </div>
+
+                  {/* Product info */}
+                  <div className="p-4 md:p-5">
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star
+                          key={j}
+                          className={`h-3.5 w-3.5 ${
+                            j < product.rating ? "fill-kid-yellow text-kid-yellow" : "fill-gray-200 text-gray-200"
+                          }`}
+                        />
+                      ))}
+                      <span className="text-xs text-foreground/40 ml-1">({product.reviews})</span>
+                    </div>
+
+                    <h3 className="font-bold text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-foreground/50 line-clamp-2 mb-3">{product.description}</p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
+                        {product.originalPrice && (
+                          <span className="text-xs text-foreground/30 line-through">
+                            R$ {product.originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <motion.div whileTap={{ scale: 0.95 }} className="mt-3">
+                      <Button
+                        className={`w-full rounded-2xl font-bold text-sm py-5 transition-all duration-300 ${
+                          justAdded === product.id
+                            ? "bg-kid-green text-white"
+                            : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"
+                        }`}
+                        onClick={() => addToCart(product)}
+                      >
+                        {justAdded === product.id ? (
+                          <span className="flex items-center justify-center gap-1">
+                            Adicionado! ✅
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center gap-1">
+                            <ShoppingCart className="h-4 w-4" />
+                            Adicionar ao Carrinho
+                          </span>
+                        )}
+                      </Button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-16">
+              <span className="text-6xl mb-4 block">🔍</span>
+              <p className="text-lg font-semibold text-foreground/60">Nenhum produto encontrado</p>
+              <p className="text-sm text-foreground/40 mt-1">Tente buscar por outro termo</p>
+              <Button
+                className="mt-4 rounded-2xl bg-kid-blue text-white font-semibold"
+                onClick={() => { setSearchQuery(""); setActiveCategory(null); }}
+              >
+                Ver Todos os Produtos
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════════ PROMO BANNER ═══════════════ */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative gradient-promo rounded-3xl md:rounded-[2rem] overflow-hidden p-8 md:p-12 lg:p-16 text-center text-white"
+          >
+            {/* Decorative elements */}
+            <div className="absolute top-4 left-6 text-4xl animate-float opacity-40">🔥</div>
+            <div className="absolute bottom-4 right-8 text-4xl animate-float-delay-2 opacity-40">🎁</div>
+            <div className="absolute top-8 right-1/4 text-2xl animate-float-delay-1 opacity-30">⭐</div>
+            <div className="absolute bottom-8 left-1/4 text-2xl animate-float-slow opacity-30">✨</div>
+
+            <div className="relative">
+              <Badge className="mb-4 px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-sm backdrop-blur-sm border-0">
+                ⏰ Oferta por tempo limitado!
+              </Badge>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
+                Promoção da <span className="text-kid-yellow">Semana!</span>
+              </h2>
+              <p className="mt-3 text-xl md:text-2xl font-semibold text-white/90">
+                Kit Completo com <span className="text-kid-yellow font-black text-3xl md:text-4xl">30% OFF</span>
+              </p>
+              <p className="mt-2 text-white/70 max-w-lg mx-auto">
+                Caderno + Kit de Canetas + Régua geométrica + Estojo. Tudo que seu filho precisa
+                para arrasar na escola!
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+                  Aproveitar Agora! 🎉
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 text-white font-semibold px-8 py-6 hover:bg-white/15 backdrop-blur-sm"
+                >
+                  Ver Detalhes
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════════════ TESTIMONIALS ═══════════════ */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-pink/10 text-kid-pink font-semibold text-sm border-kid-pink/20">
+              💖 Feedback dos Nossos Clientes
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              O que dizem os professores e pais <span className="text-kid-pink">😊</span>
+            </h2>
+            <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
+              Mais de 10.000 famílias satisfeitas em todo o Brasil
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <motion.div
+                key={t.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className={`relative ${t.bgColor} border-2 ${t.borderColor} rounded-3xl p-6 md:p-8`}
+              >
+                {/* Quote mark */}
+                <span className="absolute -top-3 left-6 text-4xl">💬</span>
+
+                <div className="flex items-center gap-1 mb-4 mt-2">
+                  {Array.from({ length: t.rating }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-kid-yellow text-kid-yellow" />
+                  ))}
+                </div>
+
+                <p className="text-foreground/70 leading-relaxed text-sm md:text-base italic mb-6">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm">
+                    {t.emoji}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">{t.name}</p>
+                    <p className="text-xs text-foreground/50">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ ABOUT / STATS ═══════════════ */}
+      <section id="sobre" className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-green/10 text-kid-green font-semibold text-sm border-kid-green/20">
+              🌱 Sobre a Mundo Aprender
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              Transformando a <span className="text-kid-green">Educação</span> Brasileira
+            </h2>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* About text */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <p className="text-lg text-foreground/70 leading-relaxed mb-6">
+                A <strong className="text-foreground">Mundo Aprender</strong> nasceu da paixão por
+                tornar o aprendizado mais divertido e acessível para crianças brasileiras. Acreditamos
+                que cada criança merece materiais didáticos que despertem curiosidade e criatividade.
+              </p>
+              <p className="text-lg text-foreground/70 leading-relaxed mb-8">
+                Trabalhamos com educadores especializados para desenvolver produtos que combinam
+                qualidade pedagógica com design atrativo, garantindo que aprender seja sempre uma
+                aventura empolgante! 🚀
+              </p>
+
+              {/* Features */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="w-10 h-10 bg-kid-blue/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Truck className="h-5 w-5 text-kid-blue" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">Frete Grátis</p>
+                    <p className="text-xs text-foreground/50">Para compras acima de R$ 99</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="w-10 h-10 bg-kid-green/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Shield className="h-5 w-5 text-kid-green" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">Garantia de 30 dias</p>
+                    <p className="text-xs text-foreground/50">Troca ou devolução fácil</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="w-10 h-10 bg-kid-pink/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Heart className="h-5 w-5 text-kid-pink" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">Feito com Carinho</p>
+                    <p className="text-xs text-foreground/50">Aprovado por educadores</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="w-10 h-10 bg-kid-purple/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Award className="h-5 w-5 text-kid-purple" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">Qualidade Premium</p>
+                    <p className="text-xs text-foreground/50">Material durável e seguro</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="grid grid-cols-2 gap-4 md:gap-6"
+            >
+              {[
+                { emoji: "📦", value: "500+", label: "Produtos", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
+                { emoji: "👨‍👩‍👧‍👦", value: "10.000+", label: "Clientes Felizes", color: "bg-kid-pink/10", border: "border-kid-pink/20" },
+                { emoji: "⭐", value: "4.9/5", label: "Avaliação Média", color: "bg-kid-yellow/10", border: "border-kid-yellow/20" },
+                { emoji: "🏫", value: "2.500+", label: "Escolas Parceiras", color: "bg-kid-green/10", border: "border-kid-green/20" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center`}
+                >
+                  <span className="text-3xl md:text-4xl block mb-2">{stat.emoji}</span>
+                  <p className="text-2xl md:text-3xl font-black text-foreground">{stat.value}</p>
+                  <p className="text-xs md:text-sm text-foreground/50 font-medium mt-1">{stat.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ NEWSLETTER ═══════════════ */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative gradient-newsletter rounded-3xl md:rounded-[2rem] overflow-hidden p-8 md:p-12 lg:p-16 text-center"
+          >
+            {/* Decorative elements */}
+            <div className="absolute top-6 left-8 text-4xl animate-float opacity-30">📧</div>
+            <div className="absolute bottom-6 right-8 text-4xl animate-float-delay-2 opacity-30">🎁</div>
+            <div className="absolute top-1/2 left-4 text-3xl animate-float-delay-1 opacity-20">📬</div>
+
+            <div className="relative max-w-lg mx-auto">
+              <span className="text-5xl md:text-6xl block mb-4">📬</span>
+              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+                Receba nossas novidades!
+              </h2>
+              <p className="mt-3 text-foreground/70 text-lg">
+                Promoções exclusivas, dicas de ensino e novos produtos diretamente no seu e-mail. 🎉
+              </p>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Input
+                  type="email"
+                  placeholder="Seu melhor e-mail..."
+                  className="flex-1 rounded-2xl border-2 border-white/60 bg-white/80 backdrop-blur-sm text-foreground placeholder:text-foreground/40 h-12 text-base"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
+                />
+                <Button
+                  className="rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold px-8 h-12 shadow-kid-orange hover:shadow-lg transition-all"
+                  onClick={handleSubscribe}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Inscrever-se
+                </Button>
+              </div>
+
+              <AnimatePresence>
+                {subscribed && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-4 inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-md"
+                  >
+                    <span className="text-lg">🎉</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      Inscrito com sucesso! Obrigado!
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <p className="mt-4 text-xs text-foreground/40">
+                🔒 Não enviamos spam. Você pode cancelar a qualquer momento.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════════════ FOOTER ═══════════════ */}
+      <footer id="contato" className="relative bg-foreground text-white/80">
+        {/* Colorful top border */}
+        <div className="h-2 bg-gradient-to-r from-kid-yellow via-kid-pink via-kid-purple to-kid-blue" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-3xl">🎒</span>
+                <span className="text-xl font-black bg-gradient-to-r from-kid-yellow to-kid-orange bg-clip-text text-transparent">
+                  Mundo Aprender
+                </span>
+              </div>
+              <p className="text-sm text-white/50 leading-relaxed mb-4">
+                A loja favorita dos pequenos aprendizes! Materiais didáticos divertidos que tornam
+                o aprendizado uma aventura incrível.
+              </p>
+              <div className="flex gap-2">
+                {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
+                  <button
+                    key={i}
+                    className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center hover:bg-kid-orange/50 transition-colors duration-200"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
+                Links Rápidos
+              </h4>
+              <ul className="space-y-2">
+                {[
+                  { label: "Início", href: "#inicio" },
+                  { label: "Categorias", href: "#categorias" },
+                  { label: "Produtos em Destaque", href: "#produtos" },
+                  { label: "Sobre Nós", href: "#sobre" },
+                  { label: "Política de Privacidade", href: "#" },
+                  { label: "Termos de Uso", href: "#" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-white/50 hover:text-kid-yellow transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Categories */}
+            <div>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
+                Categorias
+              </h4>
+              <ul className="space-y-2">
+                {categories.map((cat) => (
+                  <li key={cat.id}>
+                    <button
+                      onClick={() => {
+                        setActiveCategory(cat.id);
+                        document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="text-sm text-white/50 hover:text-kid-yellow transition-colors flex items-center gap-1.5"
+                    >
+                      <span>{cat.emoji}</span> {cat.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
+                Contato
+              </h4>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-kid-orange mt-0.5 shrink-0" />
+                  <span className="text-sm text-white/50">
+                    Rua da Aprendizagem, 123
+                    <br />
+                    São Paulo - SP, 01234-567
+                  </span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-kid-green shrink-0" />
+                  <span className="text-sm text-white/50">(11) 98765-4321</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-kid-blue shrink-0" />
+                  <span className="text-sm text-white/50">contato@mundoaprender.com.br</span>
+                </li>
+              </ul>
+
+              {/* Mini trust badges */}
+              <div className="mt-6 flex gap-3">
+                <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1">
+                  <Shield className="h-3.5 w-3.5 text-kid-green" />
+                  <span className="text-[10px] text-white/40">SSL</span>
+                </div>
+                <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1">
+                  <Shield className="h-3.5 w-3.5 text-kid-blue" />
+                  <span className="text-[10px] text-white/40">Seguro</span>
+                </div>
+                <div className="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1">
+                  <Award className="h-3.5 w-3.5 text-kid-yellow" />
+                  <span className="text-[10px] text-white/40">Premium</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-white/30">
+              © 2026 Mundo Aprender - Todos os direitos reservados. Feito com 💛 no Brasil
+            </p>
+            <div className="flex items-center gap-4 text-xs text-white/30">
+              <span>💳 Visa</span>
+              <span>💳 Mastercard</span>
+              <span>💳 Pix</span>
+              <span>💳 Boleto</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* ═══════════════ SCROLL TO TOP ═══════════════ */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed bottom-6 right-6 z-40 w-12 h-12 bg-kid-orange text-white rounded-2xl shadow-kid-orange flex items-center justify-center hover:bg-kid-orange/90 transition-colors"
+          >
+            <ChevronUp className="h-5 w-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

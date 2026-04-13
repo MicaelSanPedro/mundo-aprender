@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { Nunito } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+export const metadata: Metadata = {
+  title: "Mundo Aprender - Materiais Didáticos Divertidos",
+  description:
+    "Loja de materiais didáticos divertidos para o ensino fundamental. Cadernos, jogos, livros e muito mais para tornar o aprendizado incrível!",
+  keywords: [
+    "materiais didáticos",
+    "ensino fundamental",
+    "educação infantil",
+    "cadernos escolares",
+    "jogos educativos",
+    "brasil",
+  ],
+  authors: [{ name: "Mundo Aprender" }],
+  icons: {
+    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={`${nunito.variable} antialiased font-[family-name:var(--font-nunito)]`}>
+        {children}
+        <Toaster />
+      </body>
+    </html>
+  );
+}
