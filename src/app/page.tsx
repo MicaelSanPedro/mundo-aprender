@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,6 +232,7 @@ export default function Home() {
   const [justAdded, setJustAdded] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const productsRef = useRef<HTMLElement>(null);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -494,7 +495,12 @@ export default function Home() {
                       placeholder="Buscar produtos, matérias..."
                       className="pl-11 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setTimeout(() => {
+                          productsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 100);
+                      }}
                       autoFocus
                     />
                     <Button
@@ -700,7 +706,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
-      <section id="produtos" className="py-16 md:py-24 bg-white">
+      <section id="produtos" ref={productsRef} className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {searchQuery.trim() !== "" ? (
             <motion.div
