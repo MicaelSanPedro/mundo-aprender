@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": "mnxqmwzly4un1ts",
+    "orderNumber": "#MUN-23170",
+    "items": [
+      {
+        "id": 2,
+        "name": "Kit de Alfabetização Completo",
+        "price": 89.9,
+        "emoji": "📚",
+        "quantity": 1
+      }
+    ],
+    "customer": {
+      "name": "Micael San Pedro",
+      "email": "sanpedromicael@gmail.com",
+      "phone": "(66) 98122-0410"
+    },
+    "total": 89.9,
+    "status": "entregue",
+    "createdAt": "2026-04-13T22:02:06.849Z",
+    "updatedAt": "2026-04-13T22:02:20.104Z"
+  }
+]

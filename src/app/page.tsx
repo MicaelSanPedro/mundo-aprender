@@ -496,16 +496,16 @@ export default function Home() {
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* ═══════════════ HEADER ═══════════════ */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-2 border-kid-yellow/30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
-            <a href="#inicio" className="flex items-center gap-2 group">
-              <span className="text-3xl group-hover:animate-wiggle">🎒</span>
+            <a href="#inicio" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
+              <span className="text-2xl sm:text-3xl group-hover:animate-wiggle">🎒</span>
               <div className="flex flex-col leading-tight">
-                <span className="text-xl md:text-2xl font-black bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple bg-clip-text text-transparent">
+                <span className="text-base sm:text-xl md:text-2xl font-black bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple bg-clip-text text-transparent">
                   Mundo Aprender
                 </span>
-                <span className="text-[10px] md:text-xs text-kid-blue font-semibold -mt-0.5">
+                <span className="hidden sm:block text-[10px] md:text-xs text-kid-blue font-semibold -mt-0.5">
                   Brincar &bull; Criar &bull; Aprender ✨
                 </span>
               </div>
@@ -525,27 +525,27 @@ export default function Home() {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* Search toggle */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-2xl hover:bg-kid-yellow/20"
+                className="rounded-2xl hover:bg-kid-yellow/20 h-9 w-9 sm:h-10 sm:w-10"
                 onClick={() => setSearchOpen(!searchOpen)}
               >
-                <Search className="h-5 w-5 text-foreground/60" />
+                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
 
-              {/* Orders history */}
+              {/* Orders history - hidden on mobile, accessible via mobile menu */}
               <Sheet open={ordersOpen} onOpenChange={setOrdersOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-2xl hover:bg-kid-green/20"
+                    className="hidden sm:inline-flex rounded-2xl hover:bg-kid-green/20 h-9 w-9 sm:h-10 sm:w-10"
                     onClick={openOrders}
                   >
-                    <ClipboardList className="h-5 w-5 text-foreground/60" />
+                    <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
@@ -728,13 +728,13 @@ export default function Home() {
               {/* Cart */}
               <Sheet open={cartOpen} onOpenChange={setCartOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-pink/20 relative">
-                    <ShoppingCart className="h-5 w-5 text-foreground/60" />
+                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-pink/20 relative h-9 w-9 sm:h-10 sm:w-10">
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
                     {totalItems > 0 && (
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md"
+                        className="absolute -top-1 -right-1 bg-kid-pink text-white text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-md"
                       >
                         {totalItems}
                       </motion.span>
@@ -842,16 +842,64 @@ export default function Home() {
               {/* Mobile Menu */}
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild className="lg:hidden">
-                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-blue/20">
-                    <Menu className="h-5 w-5 text-foreground/60" />
+                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-blue/20 h-9 w-9 sm:h-10 sm:w-10">
+                    <Menu className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-sm bg-white p-0">
+                <SheetContent className="w-[85vw] sm:max-w-sm bg-white p-0">
                   <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
-                  <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-6 text-white">
-                    <span className="text-4xl">🎒</span>
-                    <h2 className="text-xl font-bold mt-2">Mundo Aprender</h2>
+                  <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-5 sm:p-6 text-white">
+                    <span className="text-3xl sm:text-4xl">🎒</span>
+                    <h2 className="text-lg sm:text-xl font-bold mt-2">Mundo Aprender</h2>
+                    <p className="text-white/70 text-xs sm:text-sm">Brincar &bull; Criar &bull; Aprender ✨</p>
                   </div>
+
+                  {/* Mobile search */}
+                  <div className="px-4 pt-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+                      <Input
+                        placeholder="Buscar produtos..."
+                        className="pl-9 pr-9 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5 text-sm"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            setMobileMenuOpen(false);
+                            setTimeout(() => {
+                              const header = document.querySelector("header");
+                              const headerHeight = header?.offsetHeight ?? 80;
+                              const targetY = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                              const startY = window.scrollY;
+                              const distance = targetY - startY;
+                              const duration = 600;
+                              let start: number | null = null;
+                              function step(timestamp: number) {
+                                if (!start) start = timestamp;
+                                const progress = Math.min((timestamp - start) / duration, 1);
+                                const ease = progress < 0.5
+                                  ? 4 * progress * progress * progress
+                                  : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                                window.scrollTo(0, startY + distance * ease);
+                                if (progress < 1) requestAnimationFrame(step);
+                              }
+                              requestAnimationFrame(step);
+                            }, 250);
+                          }
+                        }}
+                      />
+                      {searchQuery && (
+                        <button
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 hover:bg-kid-orange/10"
+                          onClick={() => setSearchQuery("")}
+                        >
+                          <X className="h-3.5 w-3.5 text-foreground/40" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <nav className="p-4 space-y-1">
                     {navLinks.map((link) => (
                       <a
@@ -864,7 +912,27 @@ export default function Home() {
                         {link.label}
                       </a>
                     ))}
+
+                    {/* Orders link in mobile menu */}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setTimeout(() => openOrders(), 250);
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-green hover:bg-kid-green/5 rounded-2xl font-semibold transition-all w-full text-left"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                      Meus Pedidos
+                    </button>
                   </nav>
+
+                  {/* Mobile menu footer */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-kid-yellow/10 border-t border-kid-yellow/20">
+                    <div className="flex items-center gap-2 text-xs text-foreground/40">
+                      <Download className="h-3.5 w-3.5" />
+                      <span>Downloads imediatos em PDF</span>
+                    </div>
+                  </div>
                 </SheetContent>
               </Sheet>
             </div>
@@ -947,7 +1015,7 @@ export default function Home() {
         <div className="absolute bottom-10 left-10 w-24 h-24 md:w-40 md:h-40 bg-white/10 rounded-full blur-sm" />
         <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-2xl rotate-45 blur-sm" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Text content */}
             <motion.div
@@ -956,28 +1024,28 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="text-center lg:text-left"
             >
-              <Badge className="mb-4 px-4 py-1.5 rounded-full bg-white/30 text-white font-semibold text-sm backdrop-blur-sm border-0">
-                <Sparkles className="h-3.5 w-3.5 mr-1" />
+              <Badge className="mb-3 sm:mb-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/30 text-white font-semibold text-xs sm:text-sm backdrop-blur-sm border-0">
+                <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
                 Loja Nº 1 em Materiais Didáticos
               </Badge>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight drop-shadow-md">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight drop-shadow-md">
                 Materiais Didáticos{" "}
                 <span className="text-kid-yellow drop-shadow-lg">Divertidos</span>{" "}
                 para o Ensino Fundamental!
               </h1>
-              <p className="mt-4 md:mt-6 text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="mt-3 sm:mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 Torne o aprendizado uma aventura incrível! Cadernos, jogos, kits e muito mais para
                 crianças do 1º ao 9º ano. PDFs prontos para imprimir! 📥
               </p>
-              <div className="mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+              <div className="mt-5 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <a href="#produtos">
-                  <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:bg-white/95 hover:scale-105 transition-all duration-200 animate-pulse-glow">
+                  <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 shadow-lg hover:shadow-xl hover:bg-white/95 hover:scale-105 transition-all duration-200 animate-pulse-glow">
                     Ver Produtos 🛍️
                   </Button>
                 </a>
                 <a href="#categorias">
                   <Button
-                    className="w-full sm:w-auto rounded-2xl border-2 border-white/50 bg-transparent text-white font-semibold text-lg px-8 py-6 hover:bg-white/20 backdrop-blur-sm"
+                    className="w-full sm:w-auto rounded-2xl border-2 border-white/50 bg-transparent text-white font-semibold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 hover:bg-white/20 backdrop-blur-sm"
                   >
                     Explorar Categorias
                   </Button>
@@ -985,15 +1053,15 @@ export default function Home() {
               </div>
 
               {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
-                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
-                  <Download className="h-4 w-4" /> Download Imediato
+              <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
+                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Download Imediato
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
-                  <Shield className="h-4 w-4" /> Compra Segura
+                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                  <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Compra Segura
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-white text-sm backdrop-blur-sm">
-                  <FileText className="h-4 w-4" /> Material Digital PDF
+                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Material Digital PDF
                 </div>
               </div>
             </motion.div>
@@ -1005,12 +1073,12 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative flex items-center justify-center"
             >
-              <div className="relative w-64 h-64 md:w-96 md:h-96">
+              <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 mx-auto lg:mx-0">
                 {/* Main circle */}
                 <div className="absolute inset-0 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center shadow-2xl">
                   <div className="text-center">
-                    <span className="text-7xl md:text-9xl block animate-bounce-gentle">🎓</span>
-                    <p className="text-white font-bold text-lg md:text-xl mt-4 drop-shadow-md">
+                    <span className="text-5xl sm:text-7xl md:text-9xl block animate-bounce-gentle">🎓</span>
+                    <p className="text-white font-bold text-sm sm:text-lg md:text-xl mt-2 sm:mt-4 drop-shadow-md">
                       Aprender é Divertido!
                     </p>
                   </div>
@@ -1054,7 +1122,7 @@ export default function Home() {
             <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-blue/10 text-kid-blue font-semibold text-sm border-kid-blue/20">
               📚 Explore Nossas Categorias
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
               Navegue por <span className="text-kid-blue">Matéria</span>
             </h2>
             <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
@@ -1062,7 +1130,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {categories.map((cat, i) => (
               <motion.button
                 key={cat.id}
@@ -1073,17 +1141,17 @@ export default function Home() {
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                className={`relative group flex flex-col items-center gap-3 p-5 md:p-6 rounded-3xl border-2 transition-all duration-300 ${
+                className={`relative group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                   activeCategory === cat.id
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
                     : `bg-white ${cat.hoverBorder} hover:shadow-lg`
                 }`}
               >
-                <span className="text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
+                <span className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
                   {cat.emoji}
                 </span>
-                <span className="font-bold text-sm md:text-base text-center leading-tight">{cat.name}</span>
-                <span className="text-xs text-foreground/40 font-medium">{cat.itemCount} itens</span>
+                <span className="font-bold text-xs sm:text-sm md:text-base text-center leading-tight">{cat.name}</span>
+                <span className="text-[10px] sm:text-xs text-foreground/40 font-medium">{cat.itemCount} itens</span>
                 {activeCategory === cat.id && (
                   <motion.div
                     initial={{ scale: 0 }}
@@ -1126,7 +1194,7 @@ export default function Home() {
               <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-blue/10 text-kid-blue font-semibold text-sm border-kid-blue/20">
                 🔍 Resultados da Busca
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
                 Buscando por: <span className="text-kid-blue">"{searchQuery}"</span>
               </h2>
               <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
@@ -1144,7 +1212,7 @@ export default function Home() {
               <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-purple/10 text-kid-purple font-semibold text-sm border-kid-purple/20">
                 📂 Categoria Selecionada
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
                 {categories.find((c) => c.id === activeCategory)?.emoji}{" "}
                 {categories.find((c) => c.id === activeCategory)?.name}
               </h2>
@@ -1162,7 +1230,7 @@ export default function Home() {
               <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-orange/10 text-kid-orange font-semibold text-sm border-kid-orange/20">
                 ⭐ Nossos Melhores Produtos
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
                 Produtos em <span className="text-kid-orange">Destaque</span> ⭐
               </h2>
               <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
@@ -1171,7 +1239,7 @@ export default function Home() {
             </motion.div>
           )}
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product, i) => (
                 <motion.div
@@ -1294,7 +1362,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="relative gradient-promo rounded-3xl md:rounded-[2rem] overflow-hidden p-8 md:p-12 lg:p-16 text-center text-white"
+            className="relative gradient-promo rounded-2xl sm:rounded-3xl md:rounded-[2rem] overflow-hidden p-6 sm:p-8 md:p-12 lg:p-16 text-center text-white"
           >
             {/* Decorative elements */}
             <div className="absolute top-4 left-6 text-4xl animate-float opacity-40">🔥</div>
@@ -1306,22 +1374,22 @@ export default function Home() {
               <Badge className="mb-4 px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-sm backdrop-blur-sm border-0">
                 ⏰ Oferta por tempo limitado!
               </Badge>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
                 Promoção da <span className="text-kid-yellow">Semana!</span>
               </h2>
-              <p className="mt-3 text-xl md:text-2xl font-semibold text-white/90">
-                Kit Completo de PDFs com <span className="text-kid-yellow font-black text-3xl md:text-4xl">30% OFF</span>
+              <p className="mt-3 text-lg sm:text-xl md:text-2xl font-semibold text-white/90">
+                Kit Completo de PDFs com <span className="text-kid-yellow font-black text-2xl sm:text-3xl md:text-4xl">30% OFF</span>
               </p>
               <p className="mt-2 text-white/70 max-w-lg mx-auto">
                 Atividades de Matemática + Português + Ciências + Artes. Tudo que seu filho precisa
                 para estudar, em PDF pronto para imprimir!
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+                <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
                   Aproveitar Agora! 🎉
                 </Button>
                 <Button
-                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 bg-transparent text-white font-semibold px-8 py-6 hover:bg-white/15 backdrop-blur-sm"
+                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 bg-transparent text-white font-semibold px-6 sm:px-8 py-5 sm:py-6 hover:bg-white/15 backdrop-blur-sm"
                 >
                   Ver Detalhes
                 </Button>
@@ -1343,7 +1411,7 @@ export default function Home() {
             <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-pink/10 text-kid-pink font-semibold text-sm border-kid-pink/20">
               💖 Feedback dos Nossos Clientes
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
               O que dizem os professores e pais <span className="text-kid-pink">😊</span>
             </h2>
             <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
@@ -1401,7 +1469,7 @@ export default function Home() {
             <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-green/10 text-kid-green font-semibold text-sm border-kid-green/20">
               🌱 Sobre a Mundo Aprender
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
               Transformando a <span className="text-kid-green">Educação</span> Brasileira
             </h2>
           </motion.div>
@@ -1504,7 +1572,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative gradient-newsletter rounded-3xl md:rounded-[2rem] overflow-hidden p-8 md:p-12 lg:p-16 text-center"
+            className="relative gradient-newsletter rounded-2xl sm:rounded-3xl md:rounded-[2rem] overflow-hidden p-6 sm:p-8 md:p-12 lg:p-16 text-center"
           >
             {/* Decorative elements */}
             <div className="absolute top-6 left-8 text-4xl animate-float opacity-30">📧</div>
@@ -1512,11 +1580,11 @@ export default function Home() {
             <div className="absolute top-1/2 left-4 text-3xl animate-float-delay-1 opacity-20">📬</div>
 
             <div className="relative max-w-lg mx-auto">
-              <span className="text-5xl md:text-6xl block mb-4">📬</span>
-              <h2 className="text-3xl md:text-4xl font-black text-foreground">
+              <span className="text-4xl sm:text-5xl md:text-6xl block mb-3 sm:mb-4">📬</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
                 Receba nossas novidades!
               </h2>
-              <p className="mt-3 text-foreground/70 text-lg">
+              <p className="mt-3 text-foreground/70 text-base sm:text-lg">
                 Promoções exclusivas, dicas de ensino e novos produtos diretamente no seu e-mail. 🎉
               </p>
 
@@ -1568,7 +1636,7 @@ export default function Home() {
         <div className="h-2 bg-gradient-to-r from-kid-yellow via-kid-pink via-kid-purple to-kid-blue" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
             {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
