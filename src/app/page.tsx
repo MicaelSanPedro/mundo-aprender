@@ -543,17 +543,17 @@ export default function Home() {
 
             {/* Actions */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              {/* Search toggle */}
+              {/* Search toggle - desktop only (mobile: inside ☰ menu) */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-2xl hover:bg-kid-yellow/20 h-9 w-9 sm:h-10 sm:w-10"
+                className="hidden sm:inline-flex rounded-2xl hover:bg-kid-yellow/20 h-9 w-9 sm:h-10 sm:w-10"
                 onClick={() => setSearchOpen(!searchOpen)}
               >
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
 
-              {/* Favorites panel - hidden on mobile, accessible via mobile menu */}
+              {/* Favorites panel - desktop only (mobile: inside ☰ menu) */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -568,7 +568,7 @@ export default function Home() {
                 )}
               </Button>
 
-              {/* Orders history - hidden on mobile, accessible via mobile menu */}
+              {/* Orders history - desktop only (mobile: inside ☰ menu) */}
               <Sheet open={ordersOpen} onOpenChange={setOrdersOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -757,10 +757,10 @@ export default function Home() {
                 </SheetContent>
               </Sheet>
 
-              {/* Cart */}
+              {/* Cart - desktop only (mobile: inside ☰ menu) */}
               <Sheet open={cartOpen} onOpenChange={setCartOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-pink/20 relative h-9 w-9 sm:h-10 sm:w-10">
+                  <Button variant="ghost" size="icon" className="hidden sm:inline-flex rounded-2xl hover:bg-kid-pink/20 relative h-9 w-9 sm:h-10 sm:w-10">
                     <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
                     {totalItems > 0 && (
                       <motion.span
@@ -871,14 +871,19 @@ export default function Home() {
                 </SheetContent>
               </Sheet>
 
-              {/* Mobile Menu */}
+              {/* Mobile Menu - hamburger with cart badge */}
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild className="lg:hidden">
-                  <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-kid-blue/20 h-9 w-9 sm:h-10 sm:w-10">
-                    <Menu className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+                  <Button variant="ghost" size="icon" className="sm:hidden rounded-2xl hover:bg-kid-blue/20 h-9 w-9 sm:h-10 sm:w-10 relative">
+                    <Menu className="h-5 w-5 text-foreground/70" />
+                    {totalItems > 0 && (
+                      <span className="absolute top-0.5 right-0.5 bg-kid-orange text-white text-[9px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
+                        {totalItems}
+                      </span>
+                    )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[85vw] sm:max-w-sm bg-white p-0">
+                <SheetContent className="w-[85vw] sm:max-w-sm bg-white p-0 flex flex-col">
                   <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                   <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-5 sm:p-6 text-white">
                     <span className="text-3xl sm:text-4xl">🎒</span>
@@ -887,7 +892,7 @@ export default function Home() {
                   </div>
 
                   {/* Mobile search */}
-                  <div className="px-4 pt-4">
+                  <div className="px-4 pt-4 shrink-0">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
                       <Input
@@ -932,7 +937,64 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <nav className="p-4 space-y-1">
+                  {/* Quick actions - Favorites, Cart, Orders */}
+                  <div className="px-4 pt-3 pb-1 shrink-0">
+                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider px-4 mb-2">Ações rápidas</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setTimeout(() => setFavoritesOpen(true), 250);
+                        }}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-pink/5 hover:bg-kid-pink/10 border border-kid-pink/10 transition-all"
+                      >
+                        <div className="relative">
+                          <Heart className={`h-5 w-5 ${favorites.size > 0 ? "text-kid-pink" : "text-foreground/40"}`} fill={favorites.size > 0 ? "currentColor" : "none"} />
+                          {favorites.size > 0 && (
+                            <span className="absolute -top-1.5 -right-2 bg-kid-pink text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
+                              {favorites.size}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-semibold text-foreground/60">Favoritos</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setTimeout(() => setCartOpen(true), 250);
+                        }}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-orange/5 hover:bg-kid-orange/10 border border-kid-orange/10 transition-all"
+                      >
+                        <div className="relative">
+                          <ShoppingCart className="h-5 w-5 text-foreground/40" />
+                          {totalItems > 0 && (
+                            <span className="absolute -top-1.5 -right-2 bg-kid-orange text-white text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
+                              {totalItems}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-semibold text-foreground/60">Carrinho</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setTimeout(() => openOrders(), 250);
+                        }}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-green/5 hover:bg-kid-green/10 border border-kid-green/10 transition-all"
+                      >
+                        <ClipboardList className="h-5 w-5 text-foreground/40" />
+                        <span className="text-[11px] font-semibold text-foreground/60">Pedidos</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Navigation links */}
+                  <div className="px-4 pt-3 pb-1">
+                    <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider px-4 mb-2">Navegação</p>
+                  </div>
+                  <nav className="px-4 pb-4 space-y-0.5">
                     {navLinks.map((link) => (
                       <a
                         key={link.href}
@@ -944,35 +1006,6 @@ export default function Home() {
                         {link.label}
                       </a>
                     ))}
-
-                    {/* Orders link in mobile menu */}
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setTimeout(() => openOrders(), 250);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-green hover:bg-kid-green/5 rounded-2xl font-semibold transition-all w-full text-left"
-                    >
-                      <ClipboardList className="h-4 w-4" />
-                      Meus Pedidos
-                    </button>
-
-                    {/* Favorites link in mobile menu */}
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setTimeout(() => setFavoritesOpen(true), 250);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-pink hover:bg-kid-pink/5 rounded-2xl font-semibold transition-all w-full text-left"
-                    >
-                      <Heart className={`h-4 w-4 ${favorites.size > 0 ? "text-kid-pink" : ""}`} fill={favorites.size > 0 ? "currentColor" : "none"} />
-                      Meus Favoritos
-                      {favorites.size > 0 && (
-                        <span className="ml-auto bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                          {favorites.size}
-                        </span>
-                      )}
-                    </button>
                   </nav>
 
                   {/* Mobile menu footer */}

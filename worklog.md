@@ -149,3 +149,25 @@ Stage Summary:
 - Histórico de pedidos com expansão de detalhes
 - Atualização de status e cancelamento de pedidos
 - Lint passa limpo, dev server compila sem erros
+
+---
+Task ID: 5
+Agent: main
+Task: Fix mobile menu — hamburger ☰ should contain Search, Favorites, Cart, Orders
+
+Work Log:
+- Hid individual Search, Favorites, Orders, Cart header buttons on mobile (added `hidden sm:inline-flex` / `sm:hidden`)
+- Redesigned mobile hamburger menu interior with two sections:
+  1. "Ações rápidas" — 3-column grid with Favoritos, Carrinho, Pedidos tiles (each with badge counters)
+  2. "Navegação" — standard nav links (Início, Categorias, Produtos, Sobre, Contato)
+- Search bar remains at top of mobile menu (always visible when menu opens)
+- Added cart badge on hamburger button itself (shows totalItems count)
+- Mobile menu SheetContent now uses `flex flex-col` for proper scrolling
+- All transitions from menu to sub-sheets (favorites/cart/orders) use 250ms timeout for smooth close→open
+
+Stage Summary:
+- On mobile: header shows only Logo + ☰ hamburger (with cart badge)
+- ☰ menu contains: Search bar, Favoritos/Carrinho/Pedidos tiles with badges, and nav links
+- On desktop: all individual buttons remain visible (Search, Favorites, Orders, Cart)
+- Favorites sheet is a proper panel (not a like/unlike toggle)
+- Lint passes cleanly
