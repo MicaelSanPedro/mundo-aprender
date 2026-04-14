@@ -2177,7 +2177,22 @@ export default function Home() {
             exit={{ opacity: 0, scale: 0.8 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => {
+              const startY = window.scrollY;
+              const distance = -startY;
+              const duration = 600;
+              let start: number | null = null;
+              function step(timestamp: number) {
+                if (!start) start = timestamp;
+                const progress = Math.min((timestamp - start) / duration, 1);
+                const ease = progress < 0.5
+                  ? 4 * progress * progress * progress
+                  : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                window.scrollTo(0, startY + distance * ease);
+                if (progress < 1) requestAnimationFrame(step);
+              }
+              requestAnimationFrame(step);
+            }}
             className="fixed bottom-6 right-6 z-40 w-12 h-12 bg-kid-orange text-white rounded-2xl shadow-kid-orange flex items-center justify-center hover:bg-kid-orange/90 transition-colors"
           >
             <ChevronUp className="h-5 w-5" />
