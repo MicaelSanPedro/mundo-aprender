@@ -303,7 +303,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [justAdded, setJustAdded] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [showFavorites, setShowFavorites] = useState(false);
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [justFavorited, setJustFavorited] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -328,9 +328,7 @@ export default function Home() {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const filteredProducts = showFavorites
-    ? products.filter((p) => favorites.has(p.id))
-    : activeCategory
+  const filteredProducts = activeCategory
     ? products.filter((p) => p.category === activeCategory)
     : products.filter(
         (p) =>
@@ -555,20 +553,14 @@ export default function Home() {
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
 
-              {/* Favorites filter toggle */}
+              {/* Favorites panel */}
               <Button
                 variant="ghost"
                 size="icon"
-                className={`rounded-2xl h-9 w-9 sm:h-10 sm:w-10 transition-all ${showFavorites ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "hover:bg-kid-pink/10"}`}
-                onClick={() => {
-                  setShowFavorites(!showFavorites);
-                  if (!showFavorites) {
-                    setActiveCategory(null);
-                    setSearchQuery("");
-                  }
-                }}
+                className="rounded-2xl hover:bg-kid-pink/10 h-9 w-9 sm:h-10 sm:w-10 relative"
+                onClick={() => setFavoritesOpen(true)}
               >
-                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${showFavorites ? "text-kid-pink" : "text-foreground/60"}`} fill={showFavorites ? "currentColor" : "none"} />
+                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${favorites.size > 0 ? "text-kid-pink" : "text-foreground/60"}`} fill={favorites.size > 0 ? "currentColor" : "none"} />
                 {favorites.size > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-kid-pink text-white text-[9px] sm:text-[10px] font-bold rounded-full w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center">
                     {favorites.size}
@@ -969,34 +961,11 @@ export default function Home() {
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        setShowFavorites(!showFavorites);
-                        if (!showFavorites) {
-                          setActiveCategory(null);
-                          setSearchQuery("");
-                        }
-                        setTimeout(() => {
-                          const header = document.querySelector("header");
-                          const headerHeight = header?.offsetHeight ?? 80;
-                          const targetY = productsRef.current!.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
-                          const startY = window.scrollY;
-                          const distance = targetY - startY;
-                          const duration = 600;
-                          let start: number | null = null;
-                          function step(timestamp: number) {
-                            if (!start) start = timestamp;
-                            const progress = Math.min((timestamp - start) / duration, 1);
-                            const ease = progress < 0.5
-                              ? 4 * progress * progress * progress
-                              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-                            window.scrollTo(0, startY + distance * ease);
-                            if (progress < 1) requestAnimationFrame(step);
-                          }
-                          requestAnimationFrame(step);
-                        }, 250);
+                        setTimeout(() => setFavoritesOpen(true), 250);
                       }}
                       className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-pink hover:bg-kid-pink/5 rounded-2xl font-semibold transition-all w-full text-left"
                     >
-                      <Heart className={`h-4 w-4 ${showFavorites ? "text-kid-pink" : ""}`} fill={showFavorites ? "currentColor" : "none"} />
+                      <Heart className={`h-4 w-4 ${favorites.size > 0 ? "text-kid-pink" : ""}`} fill={favorites.size > 0 ? "currentColor" : "none"} />
                       Meus Favoritos
                       {favorites.size > 0 && (
                         <span className="ml-auto bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -1220,7 +1189,7 @@ export default function Home() {
                 transition={{ delay: i * 0.08 }}
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => { setActiveCategory(activeCategory === cat.id ? null : cat.id); setShowFavorites(false); }}
+                onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
                 className={`relative group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                   activeCategory === cat.id
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
@@ -1265,32 +1234,7 @@ export default function Home() {
       {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
       <section id="produtos" ref={productsRef} className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {showFavorites ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12"
-            >
-              <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-pink/10 text-kid-pink font-semibold text-sm border-kid-pink/20">
-                ❤️ Meus Favoritos
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
-                Produtos que <span className="text-kid-pink">Você Amou</span> ❤️
-              </h2>
-              <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
-                {filteredProducts.length > 0
-                  ? `${filteredProducts.length} favorito${filteredProducts.length === 1 ? "" : "s"} salvo${filteredProducts.length === 1 ? "" : "s"}`
-                  : "Você ainda não favoritou nenhum produto"}
-              </p>
-              <Button
-                variant="ghost"
-                className="mt-3 text-kid-pink hover:bg-kid-pink/10 rounded-2xl text-sm font-semibold"
-                onClick={() => setShowFavorites(false)}
-              >
-                ✕ Limpar filtro
-              </Button>
-            </motion.div>
-          ) : searchQuery.trim() !== "" ? (
+          {searchQuery.trim() !== "" ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1887,6 +1831,128 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* ═══════════════ FAVORITES SHEET ═══════════════ */}
+      <Sheet open={favoritesOpen} onOpenChange={setFavoritesOpen}>
+        <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
+          <SheetTitle className="sr-only">Meus Favoritos</SheetTitle>
+          <div className="bg-gradient-to-r from-kid-pink to-kid-purple p-6 text-white">
+            <div className="flex items-center gap-3">
+              <Heart className="h-6 w-6" fill="currentColor" />
+              <h2 className="text-xl font-bold">Meus Favoritos</h2>
+            </div>
+            <p className="text-white/80 text-sm mt-1">
+              {favorites.size === 0
+                ? "Nenhum favorito ainda"
+                : `${favorites.size} produto${favorites.size === 1 ? "" : "s"} salvo${favorites.size === 1 ? "" : "s"}`}
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+            {favorites.size === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <span className="text-6xl mb-4">💝</span>
+                <p className="text-lg font-semibold text-foreground/60">Nenhum favorito ainda</p>
+                <p className="text-sm text-foreground/40 mt-1">Clique no ❤️ dos produtos que você gostou!</p>
+                <Button
+                  className="mt-4 rounded-2xl bg-kid-pink hover:bg-kid-pink/90 text-white font-semibold"
+                  onClick={() => setFavoritesOpen(false)}
+                >
+                  Ver Produtos
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {products
+                  .filter((p) => favorites.has(p.id))
+                  .map((product) => {
+                    const inCart = cartItems.some((item) => item.id === product.id);
+                    return (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="flex items-center gap-3 bg-kid-pink/5 rounded-2xl p-3 border border-kid-pink/20"
+                      >
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                          {product.emoji}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate">{product.name}</p>
+                          <p className="text-kid-pink font-bold text-sm">
+                            R$ {product.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            variant={inCart ? "outline" : "default"}
+                            size="sm"
+                            className={`rounded-xl text-[11px] px-2.5 h-8 ${
+                              inCart
+                                ? "border-kid-orange/30 text-kid-orange bg-white"
+                                : "bg-kid-orange hover:bg-kid-orange/90 text-white"
+                            }`}
+                            onClick={() => addToCart(product)}
+                          >
+                            <ShoppingCart className="h-3 w-3 mr-1" />
+                            {inCart ? "No carrinho" : "Comprar"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-xl text-[11px] px-2.5 h-7 text-kid-red hover:bg-kid-red/10"
+                            onClick={() => toggleFavorite(product.id)}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Remover
+                          </Button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+
+          {favorites.size > 0 && (
+            <div className="border-t-2 border-kid-pink/20 p-4 bg-white">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-semibold text-foreground/60">Total dos favoritos:</span>
+                <span className="text-xl font-black text-kid-pink">
+                  R$ {products
+                    .filter((p) => favorites.has(p.id))
+                    .reduce((sum, p) => sum + p.price, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
+              <Button
+                className="w-full rounded-2xl bg-gradient-to-r from-kid-pink to-kid-purple hover:from-kid-pink/90 hover:to-kid-purple/90 text-white font-bold text-base py-5 shadow-kid-pink"
+                onClick={() => {
+                  favorites.forEach((id) => {
+                    const product = products.find((p) => p.id === id);
+                    if (product && !cartItems.some((item) => item.id === id)) {
+                      addToCart(product);
+                    }
+                  });
+                  setFavoritesOpen(false);
+                  setTimeout(() => setCartOpen(true), 250);
+                }}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Adicionar Tudo ao Carrinho 🛒
+              </Button>
+              <Button
+                className="w-full mt-2 rounded-2xl bg-transparent text-[#1a1a2e]/50 hover:text-[#1a1a2e] hover:bg-kid-pink/10"
+                onClick={() => setFavoritesOpen(false)}
+              >
+                Continuar Navegando
+              </Button>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* ═══════════════ CHECKOUT SHEET ═══════════════ */}
       <Sheet open={checkoutOpen} onOpenChange={(open) => {
