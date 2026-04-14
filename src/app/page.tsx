@@ -138,6 +138,50 @@ const statusConfig: Record<string, { color: string; bgColor: string; icon: React
   "cancelado": { color: "text-red-700", bgColor: "bg-red-100 border-red-200", icon: X, label: "Cancelado" },
 };
 
+/* ─── Animated Counter Component ──────────────────────────── */
+
+function AnimatedCounter({ target, suffix = "", prefix = "", decimals = 0, duration = 2000 }: {
+  target: number;
+  suffix?: string;
+  prefix?: string;
+  decimals?: number;
+  duration?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+          const startTime = performance.now();
+          function update(now: number) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            setCount(ease * target);
+            if (progress < 1) requestAnimationFrame(update);
+          }
+          requestAnimationFrame(update);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration, hasStarted]);
+
+  return (
+    <span ref={ref}>
+      {prefix}{decimals > 0 ? count.toFixed(decimals) : Math.round(count).toLocaleString("pt-BR")}{suffix}
+    </span>
+  );
+}
+
 /* ─── FAQ Item Component ──────────────────────────────────── */
 
 function FAQItem({ question, answer, emoji, index }: { question: string; answer: string; emoji: string; index: number }) {
@@ -1611,10 +1655,10 @@ export default function Home() {
               <span className="absolute bottom-0 -right-4 text-3xl animate-float-slow opacity-25">🌟</span>
 
               {[
-                { emoji: "📄", value: "500+", label: "Materiais em PDF", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
-                { emoji: "👨‍👩‍👧‍👦", value: "10.000+", label: "Clientes Felizes", color: "bg-kid-pink/10", border: "border-kid-pink/20" },
-                { emoji: "⭐", value: "4.9/5", label: "Avaliação Média", color: "bg-kid-yellow/10", border: "border-kid-yellow/20" },
-                { emoji: "🏫", value: "2.500+", label: "Escolas Parceiras", color: "bg-kid-green/10", border: "border-kid-green/20" },
+                { emoji: "📄", target: 500, suffix: "+", label: "Materiais em PDF", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
+                { emoji: "👨‍👩‍👧‍👦", target: 10000, suffix: "+", label: "Clientes Felizes", color: "bg-kid-pink/10", border: "border-kid-pink/20" },
+                { emoji: "⭐", target: 4.9, suffix: "/5", label: "Avaliação Média", color: "bg-kid-yellow/10", border: "border-kid-yellow/20", decimals: 1 },
+                { emoji: "🏫", target: 2500, suffix: "+", label: "Escolas Parceiras", color: "bg-kid-green/10", border: "border-kid-green/20" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -1626,7 +1670,9 @@ export default function Home() {
                   className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center`}
                 >
                   <span className="text-3xl md:text-4xl block mb-2">{stat.emoji}</span>
-                  <p className="text-2xl md:text-3xl font-black text-foreground">{stat.value}</p>
+                  <p className="text-2xl md:text-3xl font-black text-foreground">
+                    <AnimatedCounter target={stat.target} suffix={stat.suffix} decimals={"decimals" in stat ? stat.decimals : 0} />
+                  </p>
                   <p className="text-xs md:text-sm text-foreground/50 font-medium mt-1">{stat.label}</p>
                 </motion.div>
               ))}
