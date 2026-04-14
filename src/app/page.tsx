@@ -553,11 +553,11 @@ export default function Home() {
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
 
-              {/* Favorites panel */}
+              {/* Favorites panel - hidden on mobile, accessible via mobile menu */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-2xl hover:bg-kid-pink/10 h-9 w-9 sm:h-10 sm:w-10 relative"
+                className="hidden sm:inline-flex rounded-2xl hover:bg-kid-pink/10 h-9 w-9 sm:h-10 sm:w-10 relative"
                 onClick={() => setFavoritesOpen(true)}
               >
                 <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${favorites.size > 0 ? "text-kid-pink" : "text-foreground/60"}`} fill={favorites.size > 0 ? "currentColor" : "none"} />
