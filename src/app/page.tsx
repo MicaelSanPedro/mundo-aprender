@@ -894,10 +894,12 @@ export default function Home() {
                   {/* Mobile search */}
                   <div className="px-4 pt-4 shrink-0">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-kid-orange/10">
+                        <Search className="h-3 w-3 text-kid-orange" />
+                      </div>
                       <Input
-                        placeholder="Buscar produtos..."
-                        className="pl-9 pr-9 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5 text-sm"
+                        placeholder="O que você procura? 🔍"
+                        className="pl-9 pr-9 rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange bg-gradient-to-r from-kid-orange/5 to-kid-pink/5 shadow-sm focus:shadow-md focus:shadow-kid-orange/10 transition-all duration-300 text-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={(e) => {
@@ -1032,10 +1034,12 @@ export default function Home() {
               >
                 <div className="pb-4">
                   <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-kid-orange/10">
+                      <Search className="h-3.5 w-3.5 text-kid-orange" />
+                    </div>
                     <Input
-                      placeholder="Buscar produtos, matérias..."
-                      className="pl-11 rounded-2xl border-2 border-kid-yellow/40 focus:border-kid-orange bg-kid-yellow/5"
+                      placeholder="O que você procura? 🔍"
+                      className="pl-12 pr-12 rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange bg-gradient-to-r from-kid-orange/5 to-kid-pink/5 shadow-sm focus:shadow-md focus:shadow-kid-orange/10 transition-all duration-300 text-sm"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => {
@@ -1065,10 +1069,10 @@ export default function Home() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl hover:bg-kid-orange/10"
                       onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-4 w-4 text-foreground/30" />
                     </Button>
                   </div>
                 </div>
