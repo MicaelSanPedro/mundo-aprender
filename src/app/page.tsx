@@ -47,12 +47,12 @@ import {
 /* ─── Data ─────────────────────────────────────────────── */
 
 const categories = [
-  { id: "matematica", emoji: "🔢", name: "Matemática", color: "bg-kid-blue", shadow: "shadow-kid-blue", hoverBorder: "hover:border-kid-blue", itemCount: 85 },
-  { id: "portugues", emoji: "📝", name: "Português", color: "bg-kid-pink", shadow: "shadow-kid-pink", hoverBorder: "hover:border-kid-pink", itemCount: 72 },
-  { id: "ciencias", emoji: "🔬", name: "Ciências", color: "bg-kid-green", shadow: "shadow-kid-green", hoverBorder: "hover:border-kid-green", itemCount: 64 },
-  { id: "historia", emoji: "📜", name: "História", color: "bg-kid-orange", shadow: "shadow-kid-orange", hoverBorder: "hover:border-kid-orange", itemCount: 53 },
-  { id: "geografia", emoji: "🌍", name: "Geografia", color: "bg-kid-purple", shadow: "shadow-kid-purple", hoverBorder: "hover:border-kid-purple", itemCount: 48 },
-  { id: "artes", emoji: "🎨", name: "Artes", color: "bg-kid-yellow", shadow: "shadow-kid-yellow", hoverBorder: "hover:border-kid-yellow", itemCount: 61 },
+  { id: "matematica", emoji: "🔢", name: "Matemática", color: "bg-kid-blue", shadow: "shadow-kid-blue", hoverBorder: "hover:border-kid-blue" },
+  { id: "portugues", emoji: "📝", name: "Português", color: "bg-kid-pink", shadow: "shadow-kid-pink", hoverBorder: "hover:border-kid-pink" },
+  { id: "ciencias", emoji: "🔬", name: "Ciências", color: "bg-kid-green", shadow: "shadow-kid-green", hoverBorder: "hover:border-kid-green" },
+  { id: "historia", emoji: "📜", name: "História", color: "bg-kid-orange", shadow: "shadow-kid-orange", hoverBorder: "hover:border-kid-orange" },
+  { id: "geografia", emoji: "🌍", name: "Geografia", color: "bg-kid-purple", shadow: "shadow-kid-purple", hoverBorder: "hover:border-kid-purple" },
+  { id: "artes", emoji: "🎨", name: "Artes", color: "bg-kid-yellow", shadow: "shadow-kid-yellow", hoverBorder: "hover:border-kid-yellow" },
 ];
 
 const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; tag: string | null; tagColor: string }[] = [
@@ -1205,7 +1205,7 @@ export default function Home() {
                   {cat.emoji}
                 </span>
                 <span className="font-bold text-xs sm:text-sm md:text-base text-center leading-tight">{cat.name}</span>
-                <span className="text-[10px] sm:text-xs text-foreground/40 font-medium">{cat.itemCount} itens</span>
+                <span className="text-[10px] sm:text-xs text-foreground/40 font-medium">{products.filter(p => p.category === cat.id).length} itens</span>
                 {activeCategory === cat.id && (
                   <motion.div
                     initial={{ scale: 0 }}
