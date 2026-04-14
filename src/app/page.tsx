@@ -976,10 +976,11 @@ export default function Home() {
           <span className="absolute top-5 left-[50%] text-3xl animate-float-delay-2 opacity-20">🎈</span>
         </div>
 
-        {/* Decorative shapes */}
-        <div className="absolute top-10 right-10 w-20 h-20 md:w-32 md:h-32 bg-white/10 rounded-full blur-sm" />
-        <div className="absolute bottom-10 left-10 w-24 h-24 md:w-40 md:h-40 bg-white/10 rounded-full blur-sm" />
-        <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-2xl rotate-45 blur-sm" />
+        {/* Decorative blob shapes */}
+        <div className="absolute top-10 right-10 w-28 h-28 md:w-44 md:h-44 bg-white/15 blob-1 blur-xl" />
+        <div className="absolute bottom-10 left-10 w-32 h-32 md:w-52 md:h-52 bg-white/10 blob-2 blur-xl" />
+        <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-white/10 blob-1 blur-md opacity-60" />
+        <div className="absolute bottom-1/3 right-1/4 w-12 h-12 bg-white/10 blob-2 blur-md opacity-50" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -1020,13 +1021,13 @@ export default function Home() {
 
               {/* Trust badges */}
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
-                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
                   <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Download Imediato
                 </div>
-                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
                   <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Compra Segura
                 </div>
-                <div className="flex items-center gap-1 sm:gap-1.5 bg-white/20 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm backdrop-blur-sm">
+                <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
                   <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Material Digital PDF
                 </div>
               </div>
@@ -1040,8 +1041,16 @@ export default function Home() {
               className="relative flex items-center justify-center"
             >
               <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 mx-auto lg:mx-0">
+                {/* Decorative background blobs */}
+                <div className="absolute top-4 left-0 w-20 h-20 bg-kid-yellow/20 blob-1 blur-xl" />
+                <div className="absolute bottom-4 right-0 w-24 h-24 bg-kid-pink/20 blob-2 blur-xl" />
+
+                {/* Animated gradient ring */}
+                <div className="absolute inset-[-6px] sm:inset-[-10px] md:inset-[-14px] rounded-full bg-gradient-to-r from-kid-yellow via-kid-pink via-kid-purple to-kid-blue opacity-40 blur-sm" style={{ animation: 'gradient-shift 6s ease infinite', backgroundSize: '300% 300%' }} />
+                <div className="absolute inset-[-3px] sm:inset-[-5px] md:inset-[-7px] rounded-full bg-gradient-to-r from-kid-yellow via-kid-pink to-kid-purple opacity-60" style={{ animation: 'gradient-shift 8s ease infinite', backgroundSize: '300% 300%' }} />
+
                 {/* Main circle */}
-                <div className="absolute inset-0 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center shadow-2xl">
+                <div className="absolute inset-0 glass rounded-full flex items-center justify-center shadow-2xl">
                   <div className="text-center">
                     <span className="text-5xl sm:text-7xl md:text-9xl block animate-bounce-gentle">🎓</span>
                     <p className="text-white font-bold text-sm sm:text-lg md:text-xl mt-2 sm:mt-4 drop-shadow-md">
@@ -1050,11 +1059,25 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Orbiting emojis */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-3xl md:text-5xl animate-float">📚</div>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-3xl md:text-5xl animate-float-delay-2">🔬</div>
-                <div className="absolute top-1/2 -left-4 -translate-y-1/2 text-3xl md:text-5xl animate-float-delay-1">🎨</div>
-                <div className="absolute top-1/2 -right-4 -translate-y-1/2 text-3xl md:text-5xl animate-float-slow">🔢</div>
+                {/* Orbiting emojis - CSS orbit animations */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit text-2xl sm:text-3xl md:text-4xl" style={{ animationDelay: '0s' }}>📚</div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit text-2xl sm:text-3xl md:text-4xl" style={{ animationDelay: '-5s' }}>🔬</div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit-sm text-xl sm:text-2xl md:text-3xl" style={{ animationDelay: '-3s' }}>🎨</div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit-sm text-xl sm:text-2xl md:text-3xl" style={{ animationDelay: '-8s' }}>🔢</div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit text-xl sm:text-2xl md:text-3xl" style={{ animationDelay: '-10s' }}>✏️</div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-orbit-sm text-lg sm:text-xl md:text-2xl" style={{ animationDelay: '-12s' }}>📝</div>
+                </div>
 
                 {/* Small decorative dots */}
                 <div className="absolute top-8 right-8 w-4 h-4 bg-kid-yellow rounded-full animate-sparkle" />
@@ -1077,7 +1100,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ CATEGORIES SECTION ═══════════════ */}
-      <section id="categorias" className="py-16 md:py-24 bg-background">
+      <section id="categorias" className="py-16 md:py-24 bg-background pattern-dots">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1103,7 +1126,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
                 whileHover={{ scale: 1.08, y: -6 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
@@ -1113,6 +1136,13 @@ export default function Home() {
                     : `bg-white ${cat.hoverBorder} hover:shadow-lg`
                 }`}
               >
+                {activeCategory === cat.id && (
+                  <motion.div
+                    layoutId="category-glow"
+                    className={`absolute inset-0 rounded-2xl sm:rounded-3xl ${cat.shadow} opacity-50 blur-md`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
                 <span className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
                   {cat.emoji}
                 </span>
@@ -1323,12 +1353,34 @@ export default function Home() {
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-16">
-              <span className="text-6xl mb-4 block">🔍</span>
-              <p className="text-lg font-semibold text-foreground/60">Nenhum produto encontrado</p>
-              <p className="text-sm text-foreground/40 mt-1">Tente buscar por outro termo</p>
+            <div className="text-center py-16 relative">
+              {/* Floating decorative emojis */}
+              <div className="absolute top-4 left-1/4 text-4xl animate-float opacity-30">🎨</div>
+              <div className="absolute top-8 right-1/4 text-3xl animate-float-delay-1 opacity-25">📚</div>
+              <div className="absolute bottom-8 left-1/3 text-3xl animate-float-delay-2 opacity-20">✏️</div>
+              <div className="absolute bottom-4 right-1/3 text-4xl animate-float-slow opacity-25">🔬</div>
+
+              <div className="relative inline-block mb-6">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full bg-gradient-to-br from-kid-orange/10 to-kid-pink/10 flex items-center justify-center">
+                  <span className="text-5xl sm:text-6xl">🔍</span>
+                </div>
+                {/* Sparkle dots around */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-kid-yellow rounded-full animate-sparkle" />
+                <div className="absolute -bottom-2 -left-2 w-2.5 h-2.5 bg-kid-blue rounded-full animate-sparkle" style={{ animationDelay: "0.7s" }} />
+                <div className="absolute top-1/2 -right-3 w-2 h-2 bg-kid-pink rounded-full animate-sparkle" style={{ animationDelay: "1.2s" }} />
+              </div>
+
+              <p className="text-lg font-bold text-foreground/60">Nenhum produto encontrado</p>
+              <p className="text-sm text-foreground/40 mt-2">Nossos produtos incríveis estão a caminho!</p>
+
+              {/* Shimmer "coming soon" message */}
+              <div className="mt-4 inline-block relative overflow-hidden rounded-full px-5 py-1.5">
+                <div className="shimmer-bg absolute inset-0 rounded-full bg-gradient-to-r from-kid-orange/5 via-kid-yellow/20 to-kid-pink/5" />
+                <p className="relative text-sm font-semibold text-kid-orange">✨ Em breve novidades por aqui!</p>
+              </div>
+
               <Button
-                className="mt-4 rounded-2xl bg-kid-blue text-white font-semibold"
+                className="mt-6 rounded-2xl bg-kid-blue text-white font-semibold hover:shadow-kid-blue hover:scale-105 transition-all duration-300"
                 onClick={() => { setSearchQuery(""); setActiveCategory(null); }}
               >
                 Ver Todos os Produtos
@@ -1366,8 +1418,17 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
-                className={`relative ${t.bgColor} border-2 ${t.borderColor} rounded-3xl p-6 md:p-8`}
+                whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                className={`relative ${t.bgColor} border-2 ${t.borderColor} rounded-3xl p-6 md:p-8 overflow-hidden group`}
               >
+                {/* Large decorative emoji watermark */}
+                <span className="absolute -bottom-4 -right-4 text-[6rem] opacity-[0.06] select-none pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-500">
+                  {i === 0 ? "👩‍🏫" : i === 1 ? "💗" : "🔬"}
+                </span>
+
+                {/* Subtle border gradient overlay on hover */}
+                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-kid-yellow/10 via-transparent to-kid-pink/10 pointer-events-none" />
+
                 {/* Quote mark */}
                 <span className="absolute -top-3 left-6 text-4xl">💬</span>
 
@@ -1433,42 +1494,32 @@ export default function Home() {
 
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="w-10 h-10 bg-kid-blue/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Download className="h-5 w-5 text-kid-blue" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-foreground">Download Imediato</p>
-                    <p className="text-xs text-foreground/50">Receba seus PDFs no instante</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="w-10 h-10 bg-kid-green/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Shield className="h-5 w-5 text-kid-green" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-foreground">Acesso por 24h</p>
-                    <p className="text-xs text-foreground/50">Link de download com validade</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="w-10 h-10 bg-kid-pink/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Heart className="h-5 w-5 text-kid-pink" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-foreground">Feito com Carinho</p>
-                    <p className="text-xs text-foreground/50">Aprovado por educadores</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="w-10 h-10 bg-kid-purple/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Award className="h-5 w-5 text-kid-purple" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-foreground">3 Downloads</p>
-                    <p className="text-xs text-foreground/50">Baixe até 3 vezes cada PDF</p>
-                  </div>
-                </div>
+                {[
+                  { icon: Download, color: "kid-blue", title: "Download Imediato", desc: "Receba seus PDFs no instante" },
+                  { icon: Shield, color: "kid-green", title: "Acesso por 24h", desc: "Link de download com validade" },
+                  { icon: Heart, color: "kid-pink", title: "Feito com Carinho", desc: "Aprovado por educadores" },
+                  { icon: Award, color: "kid-purple", title: "3 Downloads", desc: "Baixe até 3 vezes cada PDF" },
+                ].map((feat, fi) => (
+                  <motion.div
+                    key={feat.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: fi * 0.1 }}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    className="relative flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm border-2 border-transparent hover:border-kid-orange/20 transition-all duration-300 group overflow-hidden"
+                  >
+                    {/* Gradient border glow on hover */}
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-kid-yellow/5 via-transparent to-kid-pink/5 pointer-events-none" />
+                    <div className={`w-10 h-10 bg-${feat.color}/10 rounded-xl flex items-center justify-center shrink-0`}>
+                      <feat.icon className={`h-5 w-5 text-${feat.color}`} />
+                    </div>
+                    <div className="relative">
+                      <p className="font-bold text-sm text-foreground">{feat.title}</p>
+                      <p className="text-xs text-foreground/50">{feat.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
 
@@ -1477,8 +1528,14 @@ export default function Home() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="grid grid-cols-2 gap-4 md:gap-6"
+              className="relative grid grid-cols-2 gap-4 md:gap-6"
             >
+              {/* Floating school-themed decorative emojis */}
+              <span className="absolute -top-8 -left-4 text-3xl animate-float opacity-25">📚</span>
+              <span className="absolute -top-6 -right-2 text-2xl animate-float-delay-1 opacity-20">✏️</span>
+              <span className="absolute -bottom-6 left-1/4 text-2xl animate-float-delay-2 opacity-20">🎒</span>
+              <span className="absolute bottom-0 -right-4 text-3xl animate-float-slow opacity-25">🌟</span>
+
               {[
                 { emoji: "📄", value: "500+", label: "Materiais em PDF", color: "bg-kid-blue/10", border: "border-kid-blue/20" },
                 { emoji: "👨‍👩‍👧‍👦", value: "10.000+", label: "Clientes Felizes", color: "bg-kid-pink/10", border: "border-kid-pink/20" },
@@ -1490,7 +1547,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.12, duration: 0.4 }}
                   whileHover={{ scale: 1.05, y: -4 }}
                   className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center`}
                 >
@@ -1517,6 +1574,10 @@ export default function Home() {
             <div className="absolute top-6 left-8 text-4xl animate-float opacity-30">📧</div>
             <div className="absolute bottom-6 right-8 text-4xl animate-float-delay-2 opacity-30">🎁</div>
             <div className="absolute top-1/2 left-4 text-3xl animate-float-delay-1 opacity-20">📬</div>
+            <div className="absolute top-8 right-1/4 text-3xl animate-float-delay-3 opacity-20">🧸</div>
+            <div className="absolute bottom-12 left-1/4 text-3xl animate-float-slow opacity-20">🎈</div>
+            <div className="absolute top-1/3 right-8 text-2xl animate-float opacity-15">🌟</div>
+            <div className="absolute bottom-1/3 left-8 text-2xl animate-float-delay-2 opacity-15">🎨</div>
 
             <div className="relative max-w-lg mx-auto">
               <span className="text-4xl sm:text-5xl md:text-6xl block mb-3 sm:mb-4">📬</span>
@@ -1528,21 +1589,26 @@ export default function Home() {
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Input
-                  type="email"
-                  placeholder="Seu melhor e-mail..."
-                  className="flex-1 rounded-2xl border-2 border-white/60 bg-white/80 backdrop-blur-sm text-foreground placeholder:text-foreground/40 h-12 text-base"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
-                />
-                <Button
-                  className="rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold px-8 h-12 shadow-kid-orange hover:shadow-lg transition-all"
-                  onClick={handleSubscribe}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Inscrever-se
-                </Button>
+                <div className="relative flex-1">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-kid-orange/10 via-kid-pink/10 to-kid-purple/10 opacity-50 blur-sm" />
+                  <Input
+                    type="email"
+                    placeholder="Seu melhor e-mail..."
+                    className="relative flex-1 w-full rounded-2xl border-2 border-white/70 bg-white/90 backdrop-blur-md text-foreground placeholder:text-foreground/40 h-14 text-base shadow-lg shadow-black/5 focus:shadow-xl focus:shadow-kid-orange/10 transition-all duration-300"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
+                  />
+                </div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button
+                    className="rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold px-8 h-14 text-base shadow-kid-orange hover:shadow-lg transition-all animate-pulse-glow"
+                    onClick={handleSubscribe}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Inscrever-se
+                  </Button>
+                </motion.div>
               </div>
 
               <AnimatePresence>
@@ -1571,6 +1637,9 @@ export default function Home() {
 
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer id="contato" className="relative bg-foreground text-white/80">
+        {/* Gradient overlay at top */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+
         {/* Colorful top border */}
         <div className="h-2 bg-gradient-to-r from-kid-yellow via-kid-pink via-kid-purple to-kid-blue" />
 
@@ -1589,13 +1658,20 @@ export default function Home() {
                 o aprendizado uma aventura incrível. Baixe, imprima e divirta-se!
               </p>
               <div className="flex gap-2">
-                {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
-                  <button
+                {[
+                  { Icon: Facebook, color: "hover:bg-[#1877F2] hover:text-white" },
+                  { Icon: Instagram, color: "hover:bg-[#E4405F] hover:text-white" },
+                  { Icon: Twitter, color: "hover:bg-[#1DA1F2] hover:text-white" },
+                  { Icon: Youtube, color: "hover:bg-[#FF0000] hover:text-white" },
+                ].map(({ Icon, color }, i) => (
+                  <motion.button
                     key={i}
-                    className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center hover:bg-kid-orange/50 transition-colors duration-200"
+                    whileHover={{ scale: 1.15, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={`w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center transition-all duration-200 ${color}`}
                   >
                     <Icon className="h-4 w-4" />
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -1695,11 +1771,18 @@ export default function Home() {
             <p className="text-xs text-white/30">
               © 2026 Mundo Aprender - Todos os direitos reservados. Feito com 💛 no Brasil
             </p>
-            <div className="flex items-center gap-4 text-xs text-white/30">
-              <span>💳 Visa</span>
-              <span>💳 Mastercard</span>
-              <span>💳 Pix</span>
-              <span>💳 Boleto</span>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {[
+                { label: "Visa", emoji: "💳", color: "bg-[#1A1F71]/30 border-[#1A1F71]/20" },
+                { label: "Mastercard", emoji: "💳", color: "bg-[#EB001B]/20 border-[#EB001B]/20" },
+                { label: "Pix", emoji: "📱", color: "bg-[#32BCAD]/20 border-[#32BCAD]/20" },
+                { label: "Boleto", emoji: "🏦", color: "bg-[#FF6600]/20 border-[#FF6600]/20" },
+              ].map((payment) => (
+                <div key={payment.label} className={`flex items-center gap-1 rounded-lg border px-2 py-1 ${payment.color}`}>
+                  <span className="text-xs">{payment.emoji}</span>
+                  <span className="text-[10px] text-white/40 font-medium">{payment.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

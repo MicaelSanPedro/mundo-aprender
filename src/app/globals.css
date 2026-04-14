@@ -142,6 +142,32 @@
   50% { opacity: 0.5; transform: scale(0.8); }
 }
 
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+
+@keyframes orbit-sm {
+  0% { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+}
+
+@keyframes wave-text {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
@@ -185,53 +211,38 @@
   animation: sparkle 1.5s ease-in-out infinite;
 }
 
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #FFF8E1;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #FFD43B, #FF922B);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #FF922B, #F783AC);
-}
 
 /* Colorful shadow utilities */
 .shadow-kid-yellow {
-  box-shadow: 0 8px 30px rgba(255, 212, 59, 0.35);
+  box-shadow: 0 8px 30px rgba(255, 212, 59, 0.3), 0 2px 8px rgba(255, 212, 59, 0.15);
 }
 
 .shadow-kid-blue {
-  box-shadow: 0 8px 30px rgba(77, 171, 247, 0.35);
+  box-shadow: 0 8px 30px rgba(77, 171, 247, 0.3), 0 2px 8px rgba(77, 171, 247, 0.15);
 }
 
 .shadow-kid-green {
-  box-shadow: 0 8px 30px rgba(105, 219, 124, 0.35);
+  box-shadow: 0 8px 30px rgba(105, 219, 124, 0.3), 0 2px 8px rgba(105, 219, 124, 0.15);
 }
 
 .shadow-kid-pink {
-  box-shadow: 0 8px 30px rgba(247, 131, 172, 0.35);
+  box-shadow: 0 8px 30px rgba(247, 131, 172, 0.3), 0 2px 8px rgba(247, 131, 172, 0.15);
 }
 
 .shadow-kid-orange {
-  box-shadow: 0 8px 30px rgba(255, 146, 43, 0.35);
+  box-shadow: 0 8px 30px rgba(255, 146, 43, 0.3), 0 2px 8px rgba(255, 146, 43, 0.15);
 }
 
 .shadow-kid-purple {
-  box-shadow: 0 8px 30px rgba(177, 151, 252, 0.35);
+  box-shadow: 0 8px 30px rgba(177, 151, 252, 0.3), 0 2px 8px rgba(177, 151, 252, 0.15);
 }
 
 /* Fun gradient backgrounds */
 .gradient-hero {
-  background: linear-gradient(135deg, #FFD43B 0%, #4DABF7 50%, #B197FC 100%);
+  background: linear-gradient(135deg, #FFD43B 0%, #FF922B 25%, #F783AC 50%, #B197FC 75%, #4DABF7 100%);
+  background-size: 300% 300%;
+  animation: gradient-shift 12s ease infinite;
 }
 
 .gradient-promo {
@@ -239,7 +250,9 @@
 }
 
 .gradient-newsletter {
-  background: linear-gradient(135deg, #69DB7C 0%, #4DABF7 50%, #FFD43B 100%);
+  background: linear-gradient(135deg, #38D9A9 0%, #4DABF7 30%, #B197FC 60%, #F783AC 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 10s ease infinite;
 }
 
 /* Playful card hover */
@@ -251,17 +264,64 @@
   transform: translateY(-8px) scale(1.02);
 }
 
-/* Wavy divider */
-.wavy-divider {
-  position: relative;
+/* Shimmer effect for empty state */
+.shimmer-bg {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.5) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
 
-.wavy-divider::after {
-  content: "🌊 🐠 🐙 🦀 🐚";
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;
-  white-space: nowrap;
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Decorative blob shapes */
+.blob-1 {
+  border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+}
+
+.blob-2 {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+/* Orbit animation classes */
+.animate-orbit {
+  animation: orbit 20s linear infinite;
+}
+
+.animate-orbit-sm {
+  animation: orbit-sm 15s linear infinite;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FFD43B, #FF922B);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #FF922B, #F783AC);
+}
+
+/* Dotted pattern background */
+.pattern-dots {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
