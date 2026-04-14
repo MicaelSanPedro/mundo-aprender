@@ -1321,7 +1321,7 @@ export default function Home() {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product, i) => (
                 <motion.div
@@ -1331,7 +1331,7 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`card-hover group relative bg-white rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
+                  className={`card-hover group relative bg-white rounded-2xl sm:rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
                 >
                   {/* Discount badge */}
                   {product.tag && (
@@ -1369,8 +1369,8 @@ export default function Home() {
                   </Button>
 
                   {/* Product image placeholder */}
-                  <div className={`relative ${product.bgColor} p-6 md:p-8 flex items-center justify-center aspect-square`}>
-                    <span className="text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
+                  <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square`}>
+                    <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
                       {product.emoji}
                     </span>
                     {/* Decorative background pattern */}
@@ -1382,7 +1382,7 @@ export default function Home() {
                   </div>
 
                   {/* Product info */}
-                  <div className="p-4 md:p-5">
+                  <div className="p-2.5 sm:p-4 md:p-5">
                     <div className="flex items-center gap-1 mb-2">
                       {Array.from({ length: 5 }).map((_, j) => (
                         <Star
@@ -1395,25 +1395,25 @@ export default function Home() {
                       <span className="text-xs text-foreground/40 ml-1">({product.reviews})</span>
                     </div>
 
-                    <h3 className="font-bold text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">
+                    <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">
                       {product.name}
                     </h3>
-                    <p className="text-xs text-foreground/50 line-clamp-2 mb-3">{product.description}</p>
+                    <p className="text-[10px] sm:text-xs text-foreground/50 line-clamp-2 mb-2 sm:mb-3">{product.description}</p>
 
                     <div className="flex items-center justify-between">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-base sm:text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
                         {product.originalPrice && (
-                          <span className="text-xs text-foreground/30 line-through">
+                          <span className="text-[10px] sm:text-xs text-foreground/30 line-through">
                             R$ {product.originalPrice.toFixed(2)}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <motion.div whileTap={{ scale: 0.95 }} className="mt-3">
+                    <motion.div whileTap={{ scale: 0.95 }} className="mt-2 sm:mt-3">
                       <Button
-                        className={`w-full rounded-2xl font-bold text-sm py-5 transition-all duration-300 ${
+                        className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${
                           justAdded === product.id
                             ? "bg-kid-green text-white"
                             : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"
@@ -1426,8 +1426,8 @@ export default function Home() {
                           </span>
                         ) : (
                           <span className="flex items-center justify-center gap-1">
-                            <ShoppingCart className="h-4 w-4" />
-                            Adicionar ao Carrinho
+                            <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            Adicionar
                           </span>
                         )}
                       </Button>
