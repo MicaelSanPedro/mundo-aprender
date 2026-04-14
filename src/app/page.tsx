@@ -58,39 +58,6 @@ const categories = [
 const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; tag: string | null; tagColor: string }[] = [
 ];
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Professora Maria Silva",
-    role: "Professora do 2º Ano - Escola Municipal",
-    emoji: "👩‍🏫",
-    rating: 5,
-    text: "Os materiais em PDF da Mundo Aprender transformaram minha sala de aula! Eu imprimo as atividades e as crianças ficaram muito mais engajadas — os resultados nas provas melhoraram demais!",
-    bgColor: "bg-kid-blue/10",
-    borderColor: "border-kid-blue/30",
-  },
-  {
-    id: 2,
-    name: "Ana Paula Oliveira",
-    role: "Mãe da Sofia, 7 anos",
-    emoji: "👩",
-    rating: 5,
-    text: "Comprei o kit de alfabetização em PDF e minha filha aprendeu a ler em 2 meses! As atividades para imprimir são super divertidas e ela não quer parar de estudar.",
-    bgColor: "bg-kid-pink/10",
-    borderColor: "border-kid-pink/30",
-  },
-  {
-    id: 3,
-    name: "Pedro Santos",
-    role: "Pai do Lucas, 9 anos",
-    emoji: "👨",
-    rating: 5,
-    text: "O PDF de laboratório de ciências é incrível! Meu filho agora quer ser cientista. Imprimimos os experimentos em casa e as instruções são super claras e divertidas!",
-    bgColor: "bg-kid-green/10",
-    borderColor: "border-kid-green/30",
-  },
-];
-
 const navLinks = [
   { label: "Início", href: "#inicio" },
   { label: "Categorias", href: "#categorias" },
@@ -170,6 +137,53 @@ const statusConfig: Record<string, { color: string; bgColor: string; icon: React
   "entregue": { color: "text-green-700", bgColor: "bg-green-100 border-green-200", icon: CheckCircle2, label: "Concluído" },
   "cancelado": { color: "text-red-700", bgColor: "bg-red-100 border-red-200", icon: X, label: "Cancelado" },
 };
+
+/* ─── FAQ Item Component ──────────────────────────────────── */
+
+function FAQItem({ question, answer, emoji, index }: { question: string; answer: string; emoji: string; index: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.08, duration: 0.3 }}
+      className="bg-white rounded-2xl border-2 border-kid-blue/10 overflow-hidden shadow-sm hover:shadow-md hover:border-kid-blue/20 transition-all duration-200"
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left"
+      >
+        <span className="text-xl sm:text-2xl shrink-0">{emoji}</span>
+        <span className="flex-1 font-semibold text-sm sm:text-base text-foreground">{question}</span>
+        <motion.div
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown className="h-5 w-5 text-foreground/30 shrink-0" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
+              <div className="border-t border-kid-blue/10 pt-3 sm:pt-4 ml-8 sm:ml-10">
+                <p className="text-sm text-foreground/60 leading-relaxed">{answer}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 /* ─── Component ─────────────────────────────────────────── */
 
@@ -1390,7 +1404,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ TESTIMONIALS ═══════════════ */}
+      {/* ═══════════════ HOW IT WORKS ═══════════════ */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -1399,59 +1413,119 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-pink/10 text-kid-pink font-semibold text-sm border-kid-pink/20">
-              💖 Feedback dos Nossos Clientes
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-orange/10 text-kid-orange font-semibold text-sm border-kid-orange/20">
+              📋 Simples e Rápido
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
-              O que dizem os professores e pais <span className="text-kid-pink">😊</span>
+              Como <span className="text-kid-orange">Funciona</span>?
             </h2>
             <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
-              Mais de 10.000 famílias satisfeitas em todo o Brasil
+              Em apenas 3 passos você já pode usar nossos materiais didáticos em PDF
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+          <div className="grid sm:grid-cols-3 gap-6 md:gap-8 relative">
+            {/* Connecting line */}
+            <div className="hidden sm:block absolute top-20 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-kid-orange/30 via-kid-pink/30 to-kid-purple/30" />
+
+            {[
+              {
+                step: "01",
+                emoji: "🔍",
+                title: "Escolha seu Material",
+                description: "Navegue pelas categorias ou use a busca para encontrar o PDF perfeito para o aprendizado.",
+                color: "from-kid-orange to-kid-yellow",
+                bgColor: "bg-kid-orange/5",
+                borderColor: "border-kid-orange/20",
+              },
+              {
+                step: "02",
+                emoji: "💳",
+                title: "Finalize a Compra",
+                description: "Adicione ao carrinho, preencha seus dados e pague com Pix, cartão ou boleto de forma segura.",
+                color: "from-kid-pink to-kid-orange",
+                bgColor: "bg-kid-pink/5",
+                borderColor: "border-kid-pink/20",
+              },
+              {
+                step: "03",
+                emoji: "📥",
+                title: "Receba e Imprima",
+                description: "O download do PDF é liberado na hora! Imprima quantas vezes quiser e comece a usar.",
+                color: "from-kid-purple to-kid-pink",
+                bgColor: "bg-kid-purple/5",
+                borderColor: "border-kid-purple/20",
+              },
+            ].map((item, i) => (
               <motion.div
-                key={t.id}
-                initial={{ opacity: 0, y: 20 }}
+                key={item.step}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
+                transition={{ delay: i * 0.15, duration: 0.4 }}
                 whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`relative ${t.bgColor} border-2 ${t.borderColor} rounded-3xl p-6 md:p-8 overflow-hidden group`}
+                className={`relative text-center ${item.bgColor} border-2 ${item.borderColor} rounded-3xl p-6 md:p-8`}
               >
-                {/* Large decorative emoji watermark */}
-                <span className="absolute -bottom-4 -right-4 text-[6rem] opacity-[0.06] select-none pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-500">
-                  {i === 0 ? "👩‍🏫" : i === 1 ? "💗" : "🔬"}
+                <div className={`inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${item.color} text-white text-3xl md:text-4xl shadow-lg mb-4`}>
+                  {item.emoji}
+                </div>
+                <span className="absolute top-4 right-4 text-4xl md:text-5xl font-black text-foreground/[0.04]">
+                  {item.step}
                 </span>
-
-                {/* Subtle border gradient overlay on hover */}
-                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-kid-yellow/10 via-transparent to-kid-pink/10 pointer-events-none" />
-
-                {/* Quote mark */}
-                <span className="absolute -top-3 left-6 text-4xl">💬</span>
-
-                <div className="flex items-center gap-1 mb-4 mt-2">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-kid-yellow text-kid-yellow" />
-                  ))}
-                </div>
-
-                <p className="text-foreground/70 leading-relaxed text-sm md:text-base italic mb-6">
-                  &ldquo;{t.text}&rdquo;
-                </p>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm">
-                    {t.emoji}
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-foreground">{t.name}</p>
-                    <p className="text-xs text-foreground/50">{t.role}</p>
-                  </div>
-                </div>
+                <h3 className="font-bold text-base md:text-lg text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-foreground/60 leading-relaxed">{item.description}</p>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ FAQ ═══════════════ */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-blue/10 text-kid-blue font-semibold text-sm border-kid-blue/20">
+              ❓ Dúvidas Frequentes
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
+              Perguntas <span className="text-kid-blue">Frequentes</span>
+            </h2>
+          </motion.div>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: "Como recebo o PDF após a compra?",
+                a: "Após a confirmação do pagamento, o download é liberado automaticamente. Você recebe o link por e-mail e também pode acessar pela área 'Meus Pedidos'. O link é válido por 24 horas.",
+                emoji: "📥",
+              },
+              {
+                q: "Posso imprimir quantas vezes quiser?",
+                a: "Sim! Após o download, o PDF é seu. Você pode imprimir quantas cópias precisar para uso pessoal ou em sala de aula. Recomendamos impressão em papel sulfite 75g ou superior.",
+                emoji: "🖨️",
+              },
+              {
+                q: "Os materiais são para qual faixa etária?",
+                a: "Nossos materiais cobrem do 1º ao 9º ano do Ensino Fundamental. Cada produto tem a indicação de série/ano na descrição, facilitando a escolha do material adequado.",
+                emoji: "👨‍🎓",
+              },
+              {
+                q: "Qual a forma de pagamento?",
+                a: "Aceitamos Pix (aprovação instantânea), cartão de crédito (em até 12x), e boleto bancário. Para Pix e cartão, o download é liberado em minutos!",
+                emoji: "💳",
+              },
+              {
+                q: "Posso solicitar reembolso?",
+                a: "Sim! Oferecemos garantia de 7 dias. Se o material não atender suas expectativas, entre em contato pelo e-mail contato@mundoaprender.com.br e devolvemos 100% do valor.",
+                emoji: "🛡️",
+              },
+            ].map((faq, i) => (
+              <FAQItem key={i} question={faq.q} answer={faq.a} emoji={faq.emoji} index={i} />
             ))}
           </div>
         </div>
