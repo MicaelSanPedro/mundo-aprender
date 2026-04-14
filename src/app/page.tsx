@@ -1454,50 +1454,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ PROMO BANNER ═══════════════ */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="relative gradient-promo rounded-2xl sm:rounded-3xl md:rounded-[2rem] overflow-hidden p-6 sm:p-8 md:p-12 lg:p-16 text-center text-white"
-          >
-            {/* Decorative elements */}
-            <div className="absolute top-4 left-6 text-4xl animate-float opacity-40">🔥</div>
-            <div className="absolute bottom-4 right-8 text-4xl animate-float-delay-2 opacity-40">🎁</div>
-            <div className="absolute top-8 right-1/4 text-2xl animate-float-delay-1 opacity-30">⭐</div>
-            <div className="absolute bottom-8 left-1/4 text-2xl animate-float-slow opacity-30">✨</div>
-
-            <div className="relative">
-              <Badge className="mb-4 px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-sm backdrop-blur-sm border-0">
-                ⏰ Oferta por tempo limitado!
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight">
-                Promoção da <span className="text-kid-yellow">Semana!</span>
-              </h2>
-              <p className="mt-3 text-lg sm:text-xl md:text-2xl font-semibold text-white/90">
-                Kit Completo de PDFs com <span className="text-kid-yellow font-black text-2xl sm:text-3xl md:text-4xl">30% OFF</span>
-              </p>
-              <p className="mt-2 text-white/70 max-w-lg mx-auto">
-                Atividades de Matemática + Português + Ciências + Artes. Tudo que seu filho precisa
-                para estudar, em PDF pronto para imprimir!
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button className="w-full sm:w-auto rounded-2xl bg-white text-kid-orange font-bold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
-                  Aproveitar Agora! 🎉
-                </Button>
-                <Button
-                  className="w-full sm:w-auto rounded-2xl border-2 border-white/40 bg-transparent text-white font-semibold px-6 sm:px-8 py-5 sm:py-6 hover:bg-white/15 backdrop-blur-sm"
-                >
-                  Ver Detalhes
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* ═══════════════ TESTIMONIALS ═══════════════ */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
