@@ -568,7 +568,7 @@ export default function Home() {
                   }
                 }}
               >
-                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${showFavorites ? "fill-kid-pink text-kid-pink" : "text-foreground/60"}`} />
+                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${showFavorites ? "text-kid-pink" : "text-foreground/60"}`} fill={showFavorites ? "currentColor" : "none"} />
                 {favorites.size > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-kid-pink text-white text-[9px] sm:text-[10px] font-bold rounded-full w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center">
                     {favorites.size}
@@ -996,7 +996,7 @@ export default function Home() {
                       }}
                       className="flex items-center gap-3 px-4 py-3 text-foreground/70 hover:text-kid-pink hover:bg-kid-pink/5 rounded-2xl font-semibold transition-all w-full text-left"
                     >
-                      <Heart className={`h-4 w-4 ${showFavorites ? "fill-kid-pink text-kid-pink" : ""}`} />
+                      <Heart className={`h-4 w-4 ${showFavorites ? "text-kid-pink" : ""}`} fill={showFavorites ? "currentColor" : "none"} />
                       Meus Favoritos
                       {favorites.size > 0 && (
                         <span className="ml-auto bg-kid-pink text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -1385,9 +1385,9 @@ export default function Home() {
                     >
                       <Heart className={`h-4 w-4 transition-colors ${
                         favorites.has(product.id)
-                          ? "fill-kid-pink text-kid-pink"
+                          ? "text-kid-pink"
                           : "text-foreground/30 hover:text-kid-pink"
-                      }`} />
+                      }`} fill={favorites.has(product.id) ? "currentColor" : "none"} />
                     </motion.div>
                   </Button>
 
