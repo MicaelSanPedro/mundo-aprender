@@ -279,6 +279,7 @@ export default function Home() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
+  const [expandedDescId, setExpandedDescId] = useState<number | null>(null);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1413,7 +1414,23 @@ export default function Home() {
                     <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">
                       {product.name}
                     </h3>
-                    <p className="text-[10px] sm:text-xs text-foreground/50 line-clamp-2 mb-2 sm:mb-3">{product.description}</p>
+                    <p
+                      className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${
+                        expandedDescId === product.id ? "" : "line-clamp-2"
+                      }`}
+                    >
+                      {product.description}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedDescId(expandedDescId === product.id ? null : product.id);
+                      }}
+                      className="text-[10px] sm:text-xs text-kid-blue font-semibold hover:text-kid-blue/70 hover:underline -mt-1.5 mb-1.5 block transition-colors"
+                    >
+                      {expandedDescId === product.id ? "Ver menos ▲" : "Ver mais ▼"}
+                    </button>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-baseline gap-1">
