@@ -55,7 +55,24 @@ const categories = [
   { id: "artes", emoji: "🎨", name: "Artes", color: "bg-kid-yellow", shadow: "shadow-kid-yellow", hoverBorder: "hover:border-kid-yellow" },
 ];
 
-const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; tag: string | null; tagColor: string }[] = [
+const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; tag: string | null; tagColor: string; image?: string; link?: string }[] = [
+  {
+    id: 1,
+    name: "O Código Secreto do Mundo",
+    description: "Um guia divertido de superpoderes matemáticos! Descubra como a matemática está escondida em tudo — das teias de aranha às batidas da música.",
+    price: 4.99,
+    originalPrice: null,
+    rating: 5,
+    reviews: 12,
+    emoji: "🔢",
+    bgColor: "bg-gradient-to-br from-kid-blue/10 to-kid-purple/10",
+    borderHover: "hover:border-kid-blue/40",
+    category: "Matemática",
+    tag: "Novo!",
+    tagColor: "bg-kid-green/90 text-white",
+    image: "/product-2.png",
+    link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
+  },
 ];
 
 const navLinks = [
@@ -604,20 +621,34 @@ export default function Home() {
                                     <div className="px-4 pb-4 border-t border-kid-green/10 pt-3">
                                       <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido (Digital PDF):</p>
                                       <div className="space-y-2">
-                                        {order.items.map((item) => (
-                                          <div key={item.id} className="flex items-center gap-2 bg-kid-green/5 rounded-xl p-2">
-                                            <span className="text-xl">{item.emoji}</span>
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-semibold truncate">{item.name}</p>
-                                              <div className="flex items-center gap-1 mt-0.5">
-                                                <FileText className="h-2.5 w-2.5 text-kid-blue" />
-                                                <p className="text-[10px] text-kid-blue font-medium">PDF Digital</p>
-                                                <p className="text-[10px] text-foreground/30">• Qtd: {item.quantity}</p>
+                                        {order.items.map((item) => {
+                                          const prod = products.find((p) => p.id === item.id);
+                                          return (
+                                            <div key={item.id} className="flex items-center gap-2 bg-kid-green/5 rounded-xl p-2">
+                                              <span className="text-xl">{item.emoji}</span>
+                                              <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-semibold truncate">{item.name}</p>
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                  <FileText className="h-2.5 w-2.5 text-kid-blue" />
+                                                  <p className="text-[10px] text-kid-blue font-medium">PDF Digital</p>
+                                                  <p className="text-[10px] text-foreground/30">• Qtd: {item.quantity}</p>
+                                                </div>
                                               </div>
+                                              <span className="text-xs font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
+                                              {(order.status === "enviado" || order.status === "entregue") && prod?.link && (
+                                                <a
+                                                  href={prod.link}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="flex-shrink-0 w-7 h-7 rounded-lg bg-kid-blue/10 hover:bg-kid-blue/20 flex items-center justify-center transition-colors"
+                                                  title="Baixar PDF"
+                                                >
+                                                  <Download className="h-3.5 w-3.5 text-kid-blue" />
+                                                </a>
+                                              )}
                                             </div>
-                                            <span className="text-xs font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
-                                          </div>
-                                        ))}
+                                          );
+                                        })}
                                       </div>
 
                                       <div className="mt-3 pt-3 border-t border-kid-green/10">
@@ -1340,17 +1371,29 @@ export default function Home() {
                     </motion.div>
                   </Button>
 
-                  {/* Product image placeholder */}
-                  <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square`}>
-                    <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
-                      {product.emoji}
-                    </span>
-                    {/* Decorative background pattern */}
-                    <div className="absolute inset-0 opacity-5">
-                      <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-current" />
-                      <div className="absolute bottom-4 left-3 w-6 h-6 rounded-lg bg-current rotate-12" />
-                      <div className="absolute top-1/2 left-1/2 w-20 h-20 rounded-full bg-current" />
-                    </div>
+                  {/* Product image */}
+                  <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden`}>
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
+                      />
+                    ) : (
+                      <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
+                        {product.emoji}
+                      </span>
+                    )}
+                    {!product.image && (
+                      <>
+                        {/* Decorative background pattern */}
+                        <div className="absolute inset-0 opacity-5">
+                          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-current" />
+                          <div className="absolute bottom-4 left-3 w-6 h-6 rounded-lg bg-current rotate-12" />
+                          <div className="absolute top-1/2 left-1/2 w-20 h-20 rounded-full bg-current" />
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Product info */}
@@ -2222,13 +2265,31 @@ export default function Home() {
                 </div>
 
                 <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <Download className="h-4 w-4 text-kid-blue" />
                     <p className="text-sm font-semibold">Download Imediato</p>
                   </div>
-                  <p className="text-xs text-foreground/60">
-                    Seus PDFs estarão disponíveis para download imediato. Acesse a seção "Meus Pedidos" para baixar cada material. Link válido por 24h com até 3 downloads por produto.
-                  </p>
+                  <div className="space-y-2">
+                    {completedOrder.items.map((item) => {
+                      const prod = products.find((p) => p.id === item.id);
+                      return (
+                        <a
+                          key={item.id}
+                          href={prod?.link || "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-kid-blue/10 hover:bg-kid-blue/20 rounded-xl p-3 transition-colors group"
+                        >
+                          <FileText className="h-4 w-4 text-kid-blue flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold truncate group-hover:text-kid-blue transition-colors">{item.name}</p>
+                            <p className="text-[10px] text-foreground/40">PDF Digital</p>
+                          </div>
+                          <Download className="h-3.5 w-3.5 text-kid-blue group-hover:scale-110 transition-transform" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="mt-6 space-y-3">
