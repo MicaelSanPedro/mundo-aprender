@@ -2497,29 +2497,59 @@ export default function Home() {
                       <p className="text-3xl font-black text-kid-green">{completedOrder.orderNumber}</p>
                     </div>
 
-                    <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Download className="h-4 w-4 text-kid-blue" />
-                        <p className="text-sm font-semibold">Download Imediato</p>
+                    <div className="mt-6 text-left bg-kid-green/5 rounded-2xl p-4 border-2 border-kid-green/20">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Download className="h-5 w-5 text-kid-green" />
+                        <p className="text-sm font-bold text-kid-green">Seu material está pronto!</p>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {completedOrder.items.map((item) => {
                           const prod = products.find((p) => p.id === item.id);
+                          const link = prod?.link || "";
                           return (
-                            <a
-                              key={item.id}
-                              href={prod?.link || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 bg-kid-blue/10 hover:bg-kid-blue/20 rounded-xl p-3 transition-colors group"
-                            >
-                              <FileText className="h-4 w-4 text-kid-blue flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold truncate group-hover:text-kid-blue transition-colors">{item.name}</p>
-                                <p className="text-[10px] text-foreground/40">PDF Digital</p>
+                            <div key={item.id} className="bg-white rounded-xl p-3 border border-kid-green/10 shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-lg">{item.emoji}</span>
+                                <p className="text-sm font-bold truncate flex-1">{item.name}</p>
                               </div>
-                              <Download className="h-3.5 w-3.5 text-kid-blue group-hover:scale-110 transition-transform" />
-                            </a>
+                              <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full p-3 bg-kid-green hover:bg-kid-green/90 text-white rounded-xl font-bold transition-colors text-sm"
+                              >
+                                <Download className="h-4 w-4" />
+                                Baixar Material (PDF)
+                              </a>
+                              {link && (
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      await navigator.clipboard.writeText(link);
+                                      const el = document.getElementById(`copy-link-${item.id}`);
+                                      if (el) el.classList.replace("opacity-0", "opacity-100");
+                                      setTimeout(() => {
+                                        const el2 = document.getElementById(`copy-link-${item.id}`);
+                                        if (el2) el2.classList.replace("opacity-100", "opacity-0");
+                                      }, 2000);
+                                    } catch {
+                                      const ta = document.createElement("textarea");
+                                      ta.value = link;
+                                      document.body.appendChild(ta);
+                                      ta.select();
+                                      document.execCommand("copy");
+                                      document.body.removeChild(ta);
+                                    }
+                                  }}
+                                  className="flex items-center justify-center gap-1.5 w-full mt-2 p-2 rounded-xl text-xs text-foreground/50 hover:text-kid-blue hover:bg-kid-blue/5 transition-colors"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                  Copiar link do material
+                                  <Check className="h-3 w-3 text-kid-green opacity-0" id={`copy-link-${item.id}`} style={{ transition: "opacity 0.2s" }} />
+                                </button>
+                              )}
+                            </div>
                           );
                         })}
                       </div>
