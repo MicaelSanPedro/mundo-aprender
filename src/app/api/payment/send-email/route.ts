@@ -1,14 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Lazy init do Resend - só cria quando tiver API key
-let resendInstance: ReturnType<typeof import("resend").Resend> | null = null;
-function getResend() {
-  if (!resendInstance && process.env.RESEND_API_KEY) {
-    const { Resend } = require("resend");
-    resendInstance = new Resend(process.env.RESEND_API_KEY);
-  }
-  return resendInstance;
-}
+import nodemailer from "nodemailer";
 
 interface OrderItem {
   id: number;
@@ -25,12 +16,6 @@ interface Product {
   link?: string;
 }
 
-interface Customer {
-  name: string;
-  email: string;
-  phone: string;
-}
-
 // Lista de produtos do site (mesma do page.tsx)
 const products: Product[] = [
   {
@@ -39,6 +24,22 @@ const products: Product[] = [
     link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
   },
 ];
+
+// Criar transporter do Gmail SMTP
+function createTransporter() {
+  const email = process.env.GMAIL_EMAIL;
+  const password = process.env.GMAIL_APP_PASSWORD;
+
+  if (!email || !password) return null;
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: email,
+      pass: password,
+    },
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,13 +53,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const resendKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "Mundo Aprender <onboarding@resend.dev>";
-
-    // Se não tem API key, loga mas não falha
-    if (!resendKey) {
-      console.log(`[EMAIL SKIP] Sem RESEND_API_KEY configurada. Pedido ${orderNumber} - ${customer.email}`);
-      return NextResponse.json({ sent: false, reason: "no_api_key" });
+    const transporter = createTransporter();
+    if (!transporter) {
+      console.log(`[EMAIL SKIP] Sem GMAIL_EMAIL ou GMAIL_APP_PASSWORD. Pedido ${orderNumber} - ${customer.email}`);
+      return NextResponse.json({ sent: false, reason: "no_gmail_config" });
     }
 
     // Montar lista de links de download dos itens
@@ -87,8 +85,7 @@ export async function POST(request: NextRequest) {
             .greeting { font-size: 18px; color: #333; margin-bottom: 8px; }
             .subtext { font-size: 14px; color: #666; margin-bottom: 20px; }
             .order-badge { display: inline-block; background: #f0f4ff; padding: 8px 16px; border-radius: 12px; font-size: 13px; color: #00b4d8; font-weight: 700; margin-bottom: 20px; }
-            .download-card { border: 2px solid #e8f4fd; border-radius: 16px; padding: 16px; margin-bottom: 12px; background: #fafcff; transition: all 0.2s; }
-            .download-card:hover { border-color: #00b4d8; }
+            .download-card { border: 2px solid #e8f4fd; border-radius: 16px; padding: 16px; margin-bottom: 12px; background: #fafcff; }
             .item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
             .item-emoji { font-size: 24px; }
             .item-name { font-size: 15px; font-weight: 700; color: #333; }
@@ -114,7 +111,7 @@ export async function POST(request: NextRequest) {
               <p class="greeting">Olá, ${customer.name}! 🎉</p>
               <p class="subtext">O pagamento do seu pedido foi confirmado e seus materiais estão prontos para download.</p>
               <div class="order-badge">Pedido ${orderNumber}</div>
-              
+
               ${downloadItems.map((item: { name: string; link: string; emoji: string }) => `
                 <div class="download-card">
                   <div class="item-header">
@@ -135,37 +132,27 @@ export async function POST(request: NextRequest) {
             <div class="footer">
               <p>Obrigado por escolher o <strong>Mundo Aprender</strong>! 💜</p>
               <p>Qualquer dúvida, entre em contato conosco.</p>
-              <p style="margin-top: 12px;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL || "https://mundoaprender.com"}">mundoaprender.com</a>
-              </p>
             </div>
           </div>
         </body>
       </html>
     `;
 
-    const resend = getResend();
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [customer.email],
-      subject: `🎉 Seu material do Mundo Aprender chegou! Pedido ${orderNumber}`,
+    const gmailEmail = process.env.GMAIL_EMAIL!;
+
+    const info = await transporter.sendMail({
+      from: `"Mundo Aprender" <${gmailEmail}>`,
+      to: customer.email,
+      subject: `Seu material do Mundo Aprender chegou! Pedido ${orderNumber}`,
       html: htmlEmail,
     });
 
-    if (error) {
-      console.error("[EMAIL ERROR]", error);
-      return NextResponse.json(
-        { error: "Erro ao enviar email", details: error.message },
-        { status: 500 }
-      );
-    }
-
-    console.log(`[EMAIL SENT] Pedido ${orderNumber} para ${customer.email} - ID: ${data?.id}`);
-    return NextResponse.json({ sent: true, emailId: data?.id });
+    console.log(`[EMAIL SENT] Pedido ${orderNumber} para ${customer.email} - MsgID: ${info.messageId}`);
+    return NextResponse.json({ sent: true, messageId: info.messageId });
   } catch (error) {
     console.error("[EMAIL ERROR]", error);
     return NextResponse.json(
-      { error: "Erro ao processar envio de email" },
+      { error: "Erro ao enviar email", details: error instanceof Error ? error.message : "unknown" },
       { status: 500 }
     );
   }
