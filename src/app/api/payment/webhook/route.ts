@@ -18,6 +18,7 @@ interface Order {
   createdAt: string;
   updatedAt: string;
   abacatePayId?: string;
+  emailSent?: boolean;
 }
 
 async function readOrders(): Promise<Order[]> {
@@ -35,13 +36,42 @@ async function writeOrders(orders: Order[]): Promise<void> {
   await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf-8");
 }
 
+// Disparar email de confirmação
+async function sendConfirmationEmail(order: Order) {
+  if (order.emailSent) return;
+
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/payment/send-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderNumber: order.orderNumber,
+        items: order.items,
+        customer: order.customer,
+        total: order.total,
+      }),
+    });
+
+    const result = await res.json();
+    if (result.sent) {
+      console.log(`[WEBHOOK EMAIL] Enviado para ${order.customer.email} - Pedido ${order.orderNumber}`);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("[WEBHOOK EMAIL] Falha:", error);
+    return false;
+  }
+}
+
 // Webhook recebe confirmação de pagamento da AbacatePay
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log("Received webhook:", JSON.stringify(body));
 
-    // AbacatePay v1 webhook: body.data.id = pix ID, body.data.status = status
+    // AbacatePay v1 webhook
     const pixId = body.data?.id || body.id || body.paymentId;
     const status = body.data?.status || body.status;
 
@@ -64,8 +94,13 @@ export async function POST(request: NextRequest) {
         if (orders[orderIndex].status !== "enviado") {
           orders[orderIndex].status = "enviado";
           orders[orderIndex].updatedAt = new Date().toISOString();
+
+          // Enviar email com links de download
+          const emailSent = await sendConfirmationEmail(orders[orderIndex]);
+          orders[orderIndex].emailSent = emailSent;
+
           await writeOrders(orders);
-          console.log(`Pedido ${orders[orderIndex].orderNumber} atualizado para enviado`);
+          console.log(`Pedido ${orders[orderIndex].orderNumber} atualizado para enviado. Email: ${emailSent ? "sim" : "nao"}`);
         }
       } else {
         console.log(`Nenhum pedido encontrado para AbacatePay ID: ${pixId}`);

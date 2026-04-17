@@ -171,3 +171,30 @@ Stage Summary:
 - On desktop: all individual buttons remain visible (Search, Favorites, Orders, Cart)
 - Favorites sheet is a proper panel (not a like/unlike toggle)
 - Lint passes cleanly
+
+---
+Task ID: 6
+Agent: main
+Task: Integrar AbacatePay PIX + envio automático de email com link de download
+
+Work Log:
+- Descobri que a AbacatePay tem 2 versões de API (v1 e v2) com chaves e endpoints diferentes
+- Key `abc_dev_` é v1, endpoint correto: POST /v1/pixQrCode/create
+- Key `key_` é v2, endpoint correto: POST /v2/transparents/create
+- Reescrevi `/api/payment/create/route.ts` para usar v1/pixQrCode/create com amount em centavos
+- Criei `/api/payment/check/route.ts` para checar status via GET /v1/pixQrCode/check?id=...
+- Atualizei `/api/payment/webhook/route.ts` para aceitar formato v1 de webhook
+- Atualizei polling no frontend (page.tsx) para checar status na AbacatePay a cada 3s
+- Instalei pacote `resend` para envio de emails
+- Criei `/api/payment/send-email/route.ts` com template HTML bonito (estilo infantil/colorido)
+- Email contém: nome do cliente, número do pedido, botões de download de cada produto, valor total
+- Integrei envio automático de email em 2 pontos: PUT /api/orders/[id] (quando status muda pra "enviado") e webhook
+- Adicionei campo `emailSent` nos pedidos para evitar envio duplicado
+- Lazy init do Resend para não crashar no build sem API key
+
+Stage Summary:
+- QR Code PIX gerado com sucesso via AbacatePay v1
+- Polling checa status a cada 3s na AbacatePay (timeout de 10 min)
+- Webhook pronto para produção
+- Email automático configurado (precisa de RESEND_API_KEY no .env)
+- Se não tiver API key do Resend, o sistema funciona normalmente, só skipa o email
