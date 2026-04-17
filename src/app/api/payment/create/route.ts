@@ -84,70 +84,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call AbacatePay API
-    const abacatePayBody = {
-      customer: {
-        name: customer.name,
-        email: customer.email,
-        phone: (customer.phone || "").replace(/\D/g, ""),
-      },
-      products: items.map((item: OrderItem) => ({
-        description: item.name,
-        quantity: item.quantity,
-        priceInCents: Math.round(item.price * 100),
-      })),
-      frequency: "ONE_TIME",
-    };
+    // Calcular total em centavos
+    const totalInCents = Math.round(
+      (total || items.reduce((sum: number, item: OrderItem) => sum + item.price * item.quantity, 0)) * 100
+    );
 
-    const abacatePayRes = await fetch("https://api.abacatepay.com/v2/payment", {
+    // Criar QR Code PIX via AbacatePay API v1
+    const description = items.map((i: OrderItem) => i.name).join(", ");
+
+    const abacatePayRes = await fetch("https://api.abacatepay.com/v1/pixQrCode/create", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(abacatePayBody),
+      body: JSON.stringify({
+        amount: totalInCents,
+        description: `Mundo Aprender - ${description}`,
+        metadata: {
+          customerEmail: customer.email,
+          customerName: customer.name,
+        },
+      }),
     });
 
     if (!abacatePayRes.ok) {
       const errorText = await abacatePayRes.text();
       console.error("AbacatePay API error:", abacatePayRes.status, errorText);
       return NextResponse.json(
-        { error: "Failed to create payment. Please try again." },
+        { error: "Erro ao gerar QR Code. Tente novamente." },
         { status: 502 }
       );
     }
 
     const abacatePayData = await abacatePayRes.json();
 
-    // Create order in local system
+    if (!abacatePayData.success || !abacatePayData.data) {
+      console.error("AbacatePay response error:", JSON.stringify(abacatePayData));
+      return NextResponse.json(
+        { error: "Erro ao gerar pagamento. Tente novamente." },
+        { status: 502 }
+      );
+    }
+
+    const pixData = abacatePayData.data;
+
+    // Criar pedido no sistema local
     const now = new Date().toISOString();
     const order: Order = {
       id: generateId(),
       orderNumber: generateOrderNumber(),
       items,
       customer,
-      total: total || items.reduce((sum: number, item: OrderItem) => sum + item.price * item.quantity, 0),
+      total: totalInCents / 100,
       status: "pendente",
       createdAt: now,
       updatedAt: now,
-      abacatePayId: abacatePayData.id,
+      abacatePayId: pixData.id,
     };
 
     const orders = await readOrders();
     orders.push(order);
     await writeOrders(orders);
 
-    // Return combined data
+    // Retornar dados do pedido + QR Code
     return NextResponse.json({
       ...order,
-      pixQrCode: abacatePayData.pixQrCode,
-      pixBrCode: abacatePayData.pixBrCode,
-      paymentStatus: abacatePayData.status,
+      pixQrCode: pixData.brCodeBase64, // imagem do QR Code em base64
+      pixBrCode: pixData.brCode, // código copia-e-cola
+      paymentStatus: pixData.status,
     }, { status: 201 });
   } catch (error) {
     console.error("Payment create error:", error);
     return NextResponse.json(
-      { error: "Invalid request body" },
+      { error: "Erro ao processar pedido. Tente novamente." },
       { status: 400 }
     );
   }

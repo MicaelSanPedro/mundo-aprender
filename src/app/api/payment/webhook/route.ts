@@ -35,36 +35,40 @@ async function writeOrders(orders: Order[]): Promise<void> {
   await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf-8");
 }
 
+// Webhook recebe confirmação de pagamento da AbacatePay
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-
     console.log("Received webhook:", JSON.stringify(body));
 
-    // AbacatePay webhook sends the payment status
-    const paymentId = body.id || body.paymentId;
-    const status = body.status;
+    // AbacatePay v1 webhook: body.data.id = pix ID, body.data.status = status
+    const pixId = body.data?.id || body.id || body.paymentId;
+    const status = body.data?.status || body.status;
 
-    if (!paymentId || !status) {
+    if (!pixId || !status) {
       return NextResponse.json(
         { error: "Missing payment ID or status" },
         { status: 400 }
       );
     }
 
-    if (status === "PAID") {
+    console.log(`Webhook: pixId=${pixId}, status=${status}`);
+
+    if (status === "COMPLETED" || status === "PAID" || status === "paid" || status === "completed") {
       const orders = await readOrders();
       const orderIndex = orders.findIndex(
-        (o) => o.abacatePayId === paymentId
+        (o) => o.abacatePayId === pixId
       );
 
       if (orderIndex !== -1) {
-        orders[orderIndex].status = "enviado";
-        orders[orderIndex].updatedAt = new Date().toISOString();
-        await writeOrders(orders);
-        console.log(`Order ${orders[orderIndex].orderNumber} updated to enviado`);
+        if (orders[orderIndex].status !== "enviado") {
+          orders[orderIndex].status = "enviado";
+          orders[orderIndex].updatedAt = new Date().toISOString();
+          await writeOrders(orders);
+          console.log(`Pedido ${orders[orderIndex].orderNumber} atualizado para enviado`);
+        }
       } else {
-        console.log(`No order found for AbacatePay payment ID: ${paymentId}`);
+        console.log(`Nenhum pedido encontrado para AbacatePay ID: ${pixId}`);
       }
     }
 

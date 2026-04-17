@@ -412,18 +412,39 @@ export default function Home() {
     }
   };
 
-  // Poll order status for PIX payment confirmation
-  const startPixPolling = useCallback((orderId: string) => {
+  // Poll payment status directly from AbacatePay API
+  const startPixPolling = useCallback((pixId: string, orderId: string) => {
     if (pixPollRef.current) clearInterval(pixPollRef.current);
+    let attempts = 0;
+    const maxAttempts = 200; // 200 * 3s = 10 minutos max
     pixPollRef.current = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        if (pixPollRef.current) clearInterval(pixPollRef.current);
+        setPixPolling(false);
+        return;
+      }
       try {
-        const res = await fetch(`/api/orders/${orderId}`);
-        if (res.ok) {
-          const order = await res.json();
-          if (order.status === "enviado" || order.status === "entregue") {
+        // Checar status na AbacatePay
+        const checkRes = await fetch(`/api/payment/check?pixId=${pixId}`);
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          const pixStatus = checkData.status;
+          // Se pago, atualizar pedido local e mostrar sucesso
+          if (pixStatus === "COMPLETED" || pixStatus === "PAID") {
             if (pixPollRef.current) clearInterval(pixPollRef.current);
             setPixPolling(false);
-            setCompletedOrder(order);
+            // Atualizar status no banco local
+            await fetch(`/api/orders/${orderId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "enviado" }),
+            });
+            const orderRes = await fetch(`/api/orders/${orderId}`);
+            if (orderRes.ok) {
+              const updatedOrder = await orderRes.json();
+              setCompletedOrder(updatedOrder);
+            }
             setCartItems([]);
           }
         }
@@ -435,13 +456,13 @@ export default function Home() {
 
   // Start polling when pixPolling becomes true
   useEffect(() => {
-    if (pixPolling && pixData?.orderId) {
-      startPixPolling(pixData.orderId);
+    if (pixPolling && pixData?.paymentId && pixData?.orderId) {
+      startPixPolling(pixData.paymentId, pixData.orderId);
     }
     return () => {
       if (pixPollRef.current) clearInterval(pixPollRef.current);
     };
-  }, [pixPolling, pixData?.orderId, startPixPolling]);
+  }, [pixPolling, pixData?.paymentId, pixData?.orderId, startPixPolling]);
 
   // Copy PIX code to clipboard
   const copyPixCode = async () => {
