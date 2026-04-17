@@ -42,6 +42,9 @@ import {
   Loader2,
   Download,
   FileText,
+  Copy,
+  Check,
+  QrCode,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -273,6 +276,12 @@ export default function Home() {
   });
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
+  // PIX payment state
+  const [pixData, setPixData] = useState<{ qrCodeUrl: string; brCode: string; paymentId: string; orderId: string } | null>(null);
+  const [pixPolling, setPixPolling] = useState(false);
+  const [pixCopied, setPixCopied] = useState(false);
+  const pixPollRef = useRef<NodeJS.Timeout | null>(null);
+
   // Order history state
   const [ordersOpen, setOrdersOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -360,15 +369,19 @@ export default function Home() {
     setCheckoutStep(1);
     setCustomer({ name: "", email: "", phone: "" });
     setCompletedOrder(null);
+    setPixData(null);
+    setPixPolling(false);
+    setPixCopied(false);
+    if (pixPollRef.current) clearInterval(pixPollRef.current);
     setCartOpen(false);
     setTimeout(() => setCheckoutOpen(true), 200);
   };
 
-  // Submit order
+  // Submit order — creates AbacatePay PIX payment
   const handleCheckout = async () => {
     setCheckoutLoading(true);
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/payment/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -377,15 +390,76 @@ export default function Home() {
           total: totalPrice,
         }),
       });
-      if (!res.ok) throw new Error("Erro ao criar pedido");
-      const order: Order = await res.json();
-      setCompletedOrder(order);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Erro ao criar pagamento");
+      }
+      const data = await res.json();
+      setPixData({
+        qrCodeUrl: data.pixQrCode,
+        brCode: data.pixBrCode,
+        paymentId: data.abacatePayId,
+        orderId: data.id,
+      });
+      setCompletedOrder(data);
       setCheckoutStep(3);
-      setCartItems([]);
-    } catch {
-      alert("Erro ao processar pedido. Tente novamente.");
+      // Start polling for payment status
+      setPixPolling(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro ao processar pedido. Tente novamente.");
     } finally {
       setCheckoutLoading(false);
+    }
+  };
+
+  // Poll order status for PIX payment confirmation
+  const startPixPolling = useCallback((orderId: string) => {
+    if (pixPollRef.current) clearInterval(pixPollRef.current);
+    pixPollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/orders/${orderId}`);
+        if (res.ok) {
+          const order = await res.json();
+          if (order.status === "enviado" || order.status === "entregue") {
+            if (pixPollRef.current) clearInterval(pixPollRef.current);
+            setPixPolling(false);
+            setCompletedOrder(order);
+            setCartItems([]);
+          }
+        }
+      } catch {
+        // silently continue polling
+      }
+    }, 3000);
+  }, []);
+
+  // Start polling when pixPolling becomes true
+  useEffect(() => {
+    if (pixPolling && pixData?.orderId) {
+      startPixPolling(pixData.orderId);
+    }
+    return () => {
+      if (pixPollRef.current) clearInterval(pixPollRef.current);
+    };
+  }, [pixPolling, pixData?.orderId, startPixPolling]);
+
+  // Copy PIX code to clipboard
+  const copyPixCode = async () => {
+    if (!pixData) return;
+    try {
+      await navigator.clipboard.writeText(pixData.brCode);
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 2500);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = pixData.brCode;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 2500);
     }
   };
 
@@ -2241,93 +2315,216 @@ export default function Home() {
                 </div>
 
                 <Button
-                  className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold text-lg py-6 shadow-kid-green"
+                  className="w-full rounded-2xl bg-gradient-to-r from-[#00b4d8] to-[#0096c7] hover:from-[#0096c7] hover:to-[#0077b6] text-white font-bold text-lg py-6 shadow-[#00b4d8]/30"
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
                 >
                   {checkoutLoading ? (
                     <span className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Processando...
+                      Gerando PIX...
                     </span>
                   ) : (
-                    "Confirmar Compra 🎉"
+                    <span className="flex items-center justify-center gap-2">
+                      <QrCode className="h-5 w-5" />
+                      Pagar com Pix
+                    </span>
                   )}
                 </Button>
               </motion.div>
             )}
 
-            {/* Step 3: Success */}
+            {/* Step 3: PIX Payment / Success */}
             {checkoutStep === 3 && completedOrder && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-8"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                >
-                  <span className="text-7xl block mb-4">🎉</span>
-                </motion.div>
-                <h3 className="text-2xl font-black text-foreground">Pedido Confirmado!</h3>
-                <p className="text-foreground/60 mt-2">
-                  Seu pedido foi realizado com sucesso!
-                </p>
+              <>
+                {/* PIX Payment Waiting Screen */}
+                {pixPolling && pixData ? (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="space-y-5"
+                  >
+                    <div className="text-center mb-2">
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <span className="text-5xl">📱</span>
+                      </motion.div>
+                      <h3 className="text-lg font-bold mt-3">Pagamento via PIX</h3>
+                      <p className="text-sm text-foreground/60 mt-1">
+                        Escaneie o QR Code ou copie o código
+                      </p>
+                    </div>
 
-                <div className="mt-6 bg-kid-green/10 rounded-2xl p-6 border-2 border-kid-green/20 inline-block">
-                  <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
-                  <p className="text-3xl font-black text-kid-green">{completedOrder.orderNumber}</p>
-                </div>
-
-                <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Download className="h-4 w-4 text-kid-blue" />
-                    <p className="text-sm font-semibold">Download Imediato</p>
-                  </div>
-                  <div className="space-y-2">
-                    {completedOrder.items.map((item) => {
-                      const prod = products.find((p) => p.id === item.id);
-                      return (
-                        <a
-                          key={item.id}
-                          href={prod?.link || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 bg-kid-blue/10 hover:bg-kid-blue/20 rounded-xl p-3 transition-colors group"
-                        >
-                          <FileText className="h-4 w-4 text-kid-blue flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold truncate group-hover:text-kid-blue transition-colors">{item.name}</p>
-                            <p className="text-[10px] text-foreground/40">PDF Digital</p>
+                    {/* QR Code */}
+                    <div className="flex justify-center">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#00b4d8]/20"
+                      >
+                        {pixData.qrCodeUrl ? (
+                          <img
+                            src={pixData.qrCodeUrl}
+                            alt="QR Code PIX"
+                            className="w-52 h-52 rounded-xl"
+                          />
+                        ) : (
+                          <div className="w-52 h-52 rounded-xl bg-gray-100 flex items-center justify-center">
+                            <QrCode className="h-16 w-16 text-gray-300" />
                           </div>
-                          <Download className="h-3.5 w-3.5 text-kid-blue group-hover:scale-110 transition-transform" />
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
+                        )}
+                      </motion.div>
+                    </div>
 
-                <div className="mt-6 space-y-3">
-                  <Button
-                    className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-6"
-                    onClick={() => {
-                      setCheckoutOpen(false);
-                      setTimeout(() => openOrders(), 300);
-                    }}
+                    {/* Amount */}
+                    <div className="text-center">
+                      <p className="text-xs text-foreground/40">Valor total</p>
+                      <p className="text-2xl font-black text-[#00b4d8]">
+                        R$ {totalPrice.toFixed(2)}
+                      </p>
+                    </div>
+
+                    {/* Copy PIX Code */}
+                    <div className="space-y-2">
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                        <p className="text-[10px] text-foreground/40 mb-1 font-medium">Código PIX (copia e cola)</p>
+                        <p className="text-xs text-foreground/70 font-mono break-all leading-relaxed line-clamp-3">
+                          {pixData.brCode}
+                        </p>
+                      </div>
+                      <Button
+                        className="w-full rounded-2xl font-bold py-5 transition-all"
+                        variant={pixCopied ? "default" : "outline"}
+                        onClick={copyPixCode}
+                      >
+                        <AnimatePresence mode="wait">
+                          {pixCopied ? (
+                            <motion.span
+                              key="copied"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="flex items-center justify-center gap-2"
+                            >
+                              <Check className="h-4 w-4" />
+                              Código Copiado!
+                            </motion.span>
+                          ) : (
+                            <motion.span
+                              key="copy"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="flex items-center justify-center gap-2"
+                            >
+                              <Copy className="h-4 w-4" />
+                              Copiar código PIX
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </Button>
+                    </div>
+
+                    {/* Status / Polling indicator */}
+                    <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Loader2 className="h-5 w-5 text-amber-500" />
+                        </motion.div>
+                        <div>
+                          <p className="text-sm font-semibold text-amber-700">Aguardando pagamento...</p>
+                          <p className="text-xs text-amber-500/70">
+                            Identificaremos automaticamente quando o pagamento for confirmado
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Order number */}
+                    <div className="text-center">
+                      <p className="text-xs text-foreground/40">Pedido</p>
+                      <p className="text-sm font-bold text-foreground/60">{completedOrder.orderNumber}</p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* Success Screen — payment confirmed */
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
                   >
-                    <ClipboardList className="h-5 w-5 mr-2" />
-                    Ver Meus Pedidos
-                  </Button>
-                  <Button
-                    className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                    onClick={() => setCheckoutOpen(false)}
-                  >
-                    Continuar Comprando
-                  </Button>
-                </div>
-              </motion.div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                    >
+                      <span className="text-7xl block mb-4">🎉</span>
+                    </motion.div>
+                    <h3 className="text-2xl font-black text-foreground">Pagamento Confirmado!</h3>
+                    <p className="text-foreground/60 mt-2">
+                      Seu pedido foi realizado com sucesso!
+                    </p>
+
+                    <div className="mt-6 bg-kid-green/10 rounded-2xl p-6 border-2 border-kid-green/20 inline-block">
+                      <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
+                      <p className="text-3xl font-black text-kid-green">{completedOrder.orderNumber}</p>
+                    </div>
+
+                    <div className="mt-6 text-left bg-kid-yellow/5 rounded-2xl p-4 border border-kid-yellow/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Download className="h-4 w-4 text-kid-blue" />
+                        <p className="text-sm font-semibold">Download Imediato</p>
+                      </div>
+                      <div className="space-y-2">
+                        {completedOrder.items.map((item) => {
+                          const prod = products.find((p) => p.id === item.id);
+                          return (
+                            <a
+                              key={item.id}
+                              href={prod?.link || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-kid-blue/10 hover:bg-kid-blue/20 rounded-xl p-3 transition-colors group"
+                            >
+                              <FileText className="h-4 w-4 text-kid-blue flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold truncate group-hover:text-kid-blue transition-colors">{item.name}</p>
+                                <p className="text-[10px] text-foreground/40">PDF Digital</p>
+                              </div>
+                              <Download className="h-3.5 w-3.5 text-kid-blue group-hover:scale-110 transition-transform" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 space-y-3">
+                      <Button
+                        className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-6"
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setTimeout(() => openOrders(), 300);
+                        }}
+                      >
+                        <ClipboardList className="h-5 w-5 mr-2" />
+                        Ver Meus Pedidos
+                      </Button>
+                      <Button
+                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
+                        onClick={() => setCheckoutOpen(false)}
+                      >
+                        Continuar Comprando
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </>
             )}
           </div>
         </SheetContent>

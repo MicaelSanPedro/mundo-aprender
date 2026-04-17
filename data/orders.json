@@ -49,27 +49,5 @@
     "status": "enviado",
     "createdAt": "2026-04-14T01:35:10.160Z",
     "updatedAt": "2026-04-14T03:19:08.073Z"
-  },
-  {
-    "id": "mo2bburigj1rh17",
-    "orderNumber": "#MUN-39882",
-    "items": [
-      {
-        "id": 1,
-        "name": "O Código Secreto do Mundo",
-        "price": 4.99,
-        "emoji": "🔢",
-        "quantity": 1
-      }
-    ],
-    "customer": {
-      "name": "DAMARIS TORRES DE AQUINO SAN PEDRO",
-      "email": "damatorres50@hotmail.com",
-      "phone": "(66) 98444-7849"
-    },
-    "total": 4.99,
-    "status": "em processamento",
-    "createdAt": "2026-04-17T02:52:27.390Z",
-    "updatedAt": "2026-04-17T02:52:27.390Z"
   }
 ]
