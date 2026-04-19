@@ -398,7 +398,7 @@ export default function Home() {
       setPixData({
         qrCodeUrl: data.pixQrCode,
         brCode: data.pixBrCode,
-        paymentId: data.abacatePayId,
+        paymentId: data.mercadoPagoId,
         orderId: data.id,
       });
       setCompletedOrder(data);
@@ -412,8 +412,8 @@ export default function Home() {
     }
   };
 
-  // Poll payment status directly from AbacatePay API
-  const startPixPolling = useCallback((pixId: string, orderId: string) => {
+  // Poll payment status directly from Mercado Pago API
+  const startPixPolling = useCallback((mpPaymentId: string, orderId: string) => {
     if (pixPollRef.current) clearInterval(pixPollRef.current);
     let attempts = 0;
     const maxAttempts = 200; // 200 * 3s = 10 minutos max
@@ -425,13 +425,13 @@ export default function Home() {
         return;
       }
       try {
-        // Checar status na AbacatePay
-        const checkRes = await fetch(`/api/payment/check?pixId=${pixId}`);
+        // Checar status no Mercado Pago
+        const checkRes = await fetch(`/api/payment/check?paymentId=${mpPaymentId}`);
         if (checkRes.ok) {
           const checkData = await checkRes.json();
-          const pixStatus = checkData.status;
-          // Se pago, atualizar pedido local e mostrar sucesso
-          if (pixStatus === "COMPLETED" || pixStatus === "PAID") {
+          const mpStatus = checkData.status;
+          // Mercado Pago: "approved" = pago
+          if (mpStatus === "approved") {
             if (pixPollRef.current) clearInterval(pixPollRef.current);
             setPixPolling(false);
             // Atualizar status no banco local

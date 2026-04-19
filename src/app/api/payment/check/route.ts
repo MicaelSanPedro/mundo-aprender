@@ -1,38 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Checar status do pagamento PIX junto à AbacatePay
+// Checar status do pagamento PIX junto ao Mercado Pago
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const pixId = searchParams.get("pixId");
+    const paymentId = searchParams.get("paymentId");
 
-    if (!pixId) {
+    if (!paymentId) {
       return NextResponse.json(
-        { error: "pixId is required" },
+        { error: "paymentId is required" },
         { status: 400 }
       );
     }
 
-    const apiKey = process.env.ABACATEPAY_API_KEY;
-    if (!apiKey) {
+    const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    if (!accessToken) {
       return NextResponse.json(
-        { error: "Payment API key not configured" },
+        { error: "Mercado Pago access token not configured" },
         { status: 500 }
       );
     }
 
-    const res = await fetch(
-      `https://api.abacatepay.com/v1/pixQrCode/check?id=${pixId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      }
-    );
+    const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("AbacatePay check error:", res.status, errorText);
+      console.error("Mercado Pago check error:", res.status, errorText);
       return NextResponse.json(
         { error: "Erro ao checar pagamento" },
         { status: 502 }
@@ -42,10 +39,10 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
 
     return NextResponse.json({
-      success: data.success,
-      pixId: data.data?.id,
-      status: data.data?.status,
-      expiresAt: data.data?.expiresAt,
+      id: data.id,
+      status: data.status, // "approved", "pending", "rejected", etc.
+      statusDetail: data.status_detail,
+      externalReference: data.external_reference,
     });
   } catch (error) {
     console.error("Payment check error:", error);

@@ -17,7 +17,7 @@ interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
-  abacatePayId?: string;
+  mercadoPagoId?: string;
   emailSent?: boolean;
 }
 
@@ -39,7 +39,6 @@ async function writeOrders(orders: Order[]): Promise<void> {
 // Disparar email de confirmação
 async function sendConfirmationEmail(order: Order) {
   if (order.emailSent) return;
-
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const res = await fetch(`${baseUrl}/api/payment/send-email`, {
@@ -52,7 +51,6 @@ async function sendConfirmationEmail(order: Order) {
         total: order.total,
       }),
     });
-
     const result = await res.json();
     if (result.sent) {
       console.log(`[WEBHOOK EMAIL] Enviado para ${order.customer.email} - Pedido ${order.orderNumber}`);
@@ -65,51 +63,74 @@ async function sendConfirmationEmail(order: Order) {
   }
 }
 
-// Webhook recebe confirmação de pagamento da AbacatePay
+// Webhook do Mercado Pago - recebe notificação de pagamento
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    console.log("Received webhook:", JSON.stringify(body));
+    // Mercado Pago envia different formats:
+    // Query params: ?data.id=12345&type=payment
+    // Ou body JSON
+    const { searchParams } = new URL(request.url);
+    const queryId = searchParams.get("data.id");
+    const queryType = searchParams.get("type");
 
-    // AbacatePay v1 webhook
-    const pixId = body.data?.id || body.id || body.paymentId;
-    const status = body.data?.status || body.status;
-
-    if (!pixId || !status) {
-      return NextResponse.json(
-        { error: "Missing payment ID or status" },
-        { status: 400 }
-      );
+    // Tentar ler body se existir
+    let bodyData = null;
+    try {
+      bodyData = await request.json();
+    } catch {
+      // Sem body, usar query params
     }
 
-    console.log(`Webhook: pixId=${pixId}, status=${status}`);
+    // Se é notificação de pagamento
+    if ((queryType === "payment" || bodyData?.type === "payment") && (queryId || bodyData?.data?.id)) {
+      const paymentId = queryId || bodyData?.data?.id;
+      console.log(`[MP WEBHOOK] Notificação de pagamento: ${paymentId}`);
 
-    if (status === "COMPLETED" || status === "PAID" || status === "paid" || status === "completed") {
-      const orders = await readOrders();
-      const orderIndex = orders.findIndex(
-        (o) => o.abacatePayId === pixId
-      );
+      // Consultar o pagamento no Mercado Pago pra pegar o status
+      const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+      if (!accessToken) {
+        console.error("[MP WEBHOOK] Sem access token configurado");
+        return NextResponse.json({ received: true });
+      }
 
-      if (orderIndex !== -1) {
-        if (orders[orderIndex].status !== "enviado") {
-          orders[orderIndex].status = "enviado";
-          orders[orderIndex].updatedAt = new Date().toISOString();
+      const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-          // Enviar email com links de download
-          const emailSent = await sendConfirmationEmail(orders[orderIndex]);
-          orders[orderIndex].emailSent = emailSent;
+      if (mpRes.ok) {
+        const mpPayment = await mpRes.json();
+        const externalRef = mpPayment.external_reference;
+        const mpStatus = mpPayment.status; // "approved", "pending", "rejected", etc.
 
-          await writeOrders(orders);
-          console.log(`Pedido ${orders[orderIndex].orderNumber} atualizado para enviado. Email: ${emailSent ? "sim" : "nao"}`);
+        console.log(`[MP WEBHOOK] Status: ${mpStatus}, External ref: ${externalRef}`);
+
+        if (mpStatus === "approved" && externalRef) {
+          // Encontrar pedido pelo external_reference (que é o nosso order.id)
+          const orders = await readOrders();
+          const orderIndex = orders.findIndex((o) => o.id === externalRef);
+
+          if (orderIndex !== -1) {
+            if (orders[orderIndex].status !== "enviado") {
+              orders[orderIndex].status = "enviado";
+              orders[orderIndex].updatedAt = new Date().toISOString();
+
+              // Enviar email
+              const emailSent = await sendConfirmationEmail(orders[orderIndex]);
+              orders[orderIndex].emailSent = emailSent;
+
+              await writeOrders(orders);
+              console.log(`[MP WEBHOOK] Pedido ${orders[orderIndex].orderNumber} atualizado para enviado. Email: ${emailSent ? "sim" : "nao"}`);
+            }
+          } else {
+            console.log(`[MP WEBHOOK] Pedido não encontrado para ref: ${externalRef}`);
+          }
         }
-      } else {
-        console.log(`Nenhum pedido encontrado para AbacatePay ID: ${pixId}`);
       }
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Webhook error:", error);
+    console.error("[MP WEBHOOK] Erro:", error);
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }

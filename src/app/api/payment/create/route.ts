@@ -27,7 +27,7 @@ interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
-  abacatePayId?: string;
+  mercadoPagoId?: string;
 }
 
 async function readOrders(): Promise<Order[]> {
@@ -76,71 +76,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.ABACATEPAY_API_KEY;
-    if (!apiKey) {
+    const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+    if (!accessToken) {
       return NextResponse.json(
-        { error: "Payment API key not configured" },
+        { error: "Mercado Pago access token not configured" },
         { status: 500 }
       );
     }
 
-    // Calcular total em centavos
-    const totalInCents = Math.round(
-      (total || items.reduce((sum: number, item: OrderItem) => sum + item.price * item.quantity, 0)) * 100
-    );
-
-    // Criar QR Code PIX via AbacatePay API v1
+    // Calcular total
+    const orderTotal = total || items.reduce((sum: number, item: OrderItem) => sum + item.price * item.quantity, 0);
     const description = items.map((i: OrderItem) => i.name).join(", ");
 
-    const abacatePayRes = await fetch("https://api.abacatepay.com/v1/pixQrCode/create", {
+    // Criar pagamento PIX via Mercado Pago
+    const idempotencyKey = generateId();
+    const mercadoPagoBody = {
+      transaction_amount: Number(orderTotal.toFixed(2)),
+      description: `Mundo Aprender - ${description}`,
+      payment_method_id: "pix",
+      payer: {
+        email: customer.email,
+        first_name: customer.name.split(" ")[0] || customer.name,
+        last_name: customer.name.split(" ").slice(1).join(" ") || "",
+        identification: {
+          type: "CPF",
+          number: "00000000000", // CPF genérico - o Mercado Pago não obriga CPF pra PIX
+        },
+      },
+      external_reference: idempotencyKey,
+      notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || "",
+    };
+
+    const mercadoPagoRes = await fetch("https://api.mercadopago.com/v1/payments", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
+        "X-Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify({
-        amount: totalInCents,
-        description: `Mundo Aprender - ${description}`,
-        metadata: {
-          customerEmail: customer.email,
-          customerName: customer.name,
-        },
-      }),
+      body: JSON.stringify(mercadoPagoBody),
     });
 
-    if (!abacatePayRes.ok) {
-      const errorText = await abacatePayRes.text();
-      console.error("AbacatePay API error:", abacatePayRes.status, errorText);
+    if (!mercadoPagoRes.ok) {
+      const errorText = await mercadoPagoRes.text();
+      console.error("Mercado Pago API error:", mercadoPagoRes.status, errorText);
       return NextResponse.json(
-        { error: "Erro ao gerar QR Code. Tente novamente." },
+        { error: "Erro ao gerar pagamento PIX. Tente novamente." },
         { status: 502 }
       );
     }
 
-    const abacatePayData = await abacatePayRes.json();
+    const mpData = await mercadoPagoRes.json();
 
-    if (!abacatePayData.success || !abacatePayData.data) {
-      console.error("AbacatePay response error:", JSON.stringify(abacatePayData));
+    // Verificar se veio os dados do PIX
+    const pixData = mpData.point_of_interaction?.transaction_data;
+    if (!pixData?.qr_code_base64) {
+      console.error("PIX data missing:", JSON.stringify(mpData).substring(0, 300));
       return NextResponse.json(
-        { error: "Erro ao gerar pagamento. Tente novamente." },
+        { error: "Erro ao gerar QR Code PIX. Tente novamente." },
         { status: 502 }
       );
     }
-
-    const pixData = abacatePayData.data;
 
     // Criar pedido no sistema local
     const now = new Date().toISOString();
     const order: Order = {
-      id: generateId(),
+      id: idempotencyKey,
       orderNumber: generateOrderNumber(),
       items,
       customer,
-      total: totalInCents / 100,
+      total: orderTotal,
       status: "pendente",
       createdAt: now,
       updatedAt: now,
-      abacatePayId: pixData.id,
+      mercadoPagoId: String(mpData.id),
     };
 
     const orders = await readOrders();
@@ -150,9 +159,10 @@ export async function POST(request: NextRequest) {
     // Retornar dados do pedido + QR Code
     return NextResponse.json({
       ...order,
-      pixQrCode: pixData.brCodeBase64, // imagem do QR Code em base64
-      pixBrCode: pixData.brCode, // código copia-e-cola
-      paymentStatus: pixData.status,
+      pixQrCode: `data:image/png;base64,${pixData.qr_code_base64}`,
+      pixBrCode: pixData.qr_code,
+      ticketUrl: pixData.ticket_url,
+      paymentStatus: mpData.status,
     }, { status: 201 });
   } catch (error) {
     console.error("Payment create error:", error);
