@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import emailjs from "@emailjs/browser";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -399,6 +400,44 @@ export default function Home() {
     }
   };
 
+  const sendConfirmationEmailJS = useCallback(async (order: Order) => {
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+
+    if (!publicKey || !serviceId || !templateId) {
+      console.log("[EMAILJS] Credenciais não configuradas. Pulando envio.");
+      return;
+    }
+
+    emailjs.init(publicKey);
+
+    const firstItem = order.items[0];
+    const prod = products.find((p) => p.id === firstItem.id);
+    const link = prod?.link || "";
+
+    try {
+      await emailjs.send(serviceId, templateId, {
+        to_email: order.customer.email,
+        to_name: order.customer.name.split(" ")[0],
+        order_number: order.orderNumber,
+        product_name: firstItem.name,
+        product_emoji: firstItem.emoji,
+        product_link: link,
+        total: `R$ ${Number(order.total).toFixed(2)}`,
+        items_list: order.items
+          .map((item) => {
+            const p = products.find((pr) => pr.id === item.id);
+            return `${item.emoji} ${item.name} - ${p?.link || "#"}`;
+          })
+          .join("<br>"),
+      });
+      console.log("[EMAILJS] Email enviado com sucesso para:", order.customer.email);
+    } catch (error) {
+      console.error("[EMAILJS] Erro ao enviar email:", error);
+    }
+  }, []);
+
   // Handle payment callback from Mercado Pago redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -433,6 +472,7 @@ export default function Home() {
             setCompletedOrder(orderData);
             if (paymentStatus === "approved") {
               setCartItems([]);
+              sendConfirmationEmailJS(orderData);
             }
           }
         } catch (error) {
