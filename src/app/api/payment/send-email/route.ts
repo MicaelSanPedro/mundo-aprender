@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 
 interface OrderItem {
   id: number;
@@ -16,7 +15,6 @@ interface Product {
   link?: string;
 }
 
-// Lista de produtos do site (mesma do page.tsx)
 const products: Product[] = [
   {
     id: 1,
@@ -24,22 +22,6 @@ const products: Product[] = [
     link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
   },
 ];
-
-// Criar transporter do Gmail SMTP
-function createTransporter() {
-  const email = process.env.GMAIL_EMAIL;
-  const password = process.env.GMAIL_APP_PASSWORD;
-
-  if (!email || !password) return null;
-
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: email,
-      pass: password,
-    },
-  });
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,13 +35,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transporter = createTransporter();
-    if (!transporter) {
-      console.log(`[EMAIL SKIP] Sem GMAIL_EMAIL ou GMAIL_APP_PASSWORD. Pedido ${orderNumber} - ${customer.email}`);
+    const gmailEmail = process.env.GMAIL_EMAIL;
+    const gmailPassword = process.env.GMAIL_APP_PASSWORD;
+
+    if (!gmailEmail || !gmailPassword) {
+      console.log(`[EMAIL SKIP] Sem GMAIL_EMAIL ou GMAIL_APP_PASSWORD. Pedido ${orderNumber}`);
       return NextResponse.json({ sent: false, reason: "no_gmail_config" });
     }
 
-    // Montar lista de links de download dos itens
+    // Lazy import nodemailer only when actually sending
+    let nodemailer: any;
+    try {
+      nodemailer = (await import("nodemailer")).default;
+    } catch {
+      console.log("[EMAIL SKIP] nodemailer not available");
+      return NextResponse.json({ sent: false, reason: "nodemailer_missing" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: gmailEmail,
+        pass: gmailPassword,
+      },
+    });
+
     const downloadItems = items.map((item: OrderItem) => {
       const product = products.find((p) => p.id === item.id);
       return {
@@ -69,7 +69,6 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Montar HTML do email
     const htmlEmail = `
       <!DOCTYPE html>
       <html>
@@ -103,12 +102,12 @@ export async function POST(request: NextRequest) {
         <body>
           <div class="container">
             <div class="header">
-              <div class="confetti">🎉📚🌈</div>
+              <div class="confetti">📚🌈</div>
               <h1>Mundo Aprender</h1>
               <p>Seu material educativo chegou!</p>
             </div>
             <div class="content">
-              <p class="greeting">Olá, ${customer.name}! 🎉</p>
+              <p class="greeting">Olá, ${customer.name}!</p>
               <p class="subtext">O pagamento do seu pedido foi confirmado e seus materiais estão prontos para download.</p>
               <div class="order-badge">Pedido ${orderNumber}</div>
 
@@ -119,7 +118,7 @@ export async function POST(request: NextRequest) {
                     <span class="item-name">${item.name}</span>
                   </div>
                   <a href="${item.link}" target="_blank" class="download-btn">
-                    📥 Baixar Material (PDF)
+                    Baixar Material (PDF)
                   </a>
                 </div>
               `).join("")}
@@ -130,15 +129,13 @@ export async function POST(request: NextRequest) {
               </div>
             </div>
             <div class="footer">
-              <p>Obrigado por escolher o <strong>Mundo Aprender</strong>! 💜</p>
+              <p>Obrigado por escolher o <strong>Mundo Aprender</strong>!</p>
               <p>Qualquer dúvida, entre em contato conosco.</p>
             </div>
           </div>
         </body>
       </html>
     `;
-
-    const gmailEmail = process.env.GMAIL_EMAIL!;
 
     const info = await transporter.sendMail({
       from: `"Mundo Aprender" <${gmailEmail}>`,
@@ -147,12 +144,12 @@ export async function POST(request: NextRequest) {
       html: htmlEmail,
     });
 
-    console.log(`[EMAIL SENT] Pedido ${orderNumber} para ${customer.email} - MsgID: ${info.messageId}`);
+    console.log(`[EMAIL SENT] Pedido ${orderNumber} para ${customer.email}`);
     return NextResponse.json({ sent: true, messageId: info.messageId });
   } catch (error) {
     console.error("[EMAIL ERROR]", error);
     return NextResponse.json(
-      { error: "Erro ao enviar email", details: error instanceof Error ? error.message : "unknown" },
+      { error: "Erro ao enviar email" },
       { status: 500 }
     );
   }
