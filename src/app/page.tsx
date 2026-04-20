@@ -44,7 +44,6 @@ import {
   FileText,
   Copy,
   Check,
-  QrCode,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -276,11 +275,10 @@ export default function Home() {
   });
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
-  // PIX payment state
-  const [pixData, setPixData] = useState<{ qrCodeUrl: string; brCode: string; paymentId: string; orderId: string } | null>(null);
-  const [pixPolling, setPixPolling] = useState(false);
-  const [pixCopied, setPixCopied] = useState(false);
-  const pixPollRef = useRef<NodeJS.Timeout | null>(null);
+  // Payment callback state (Checkout Pro redirect)
+  const [paymentResult, setPaymentResult] = useState<{ status: string; orderId: string; paymentId: string } | null>(null);
+  const [paymentResultOrder, setPaymentResultOrder] = useState<Order | null>(null);
+  const [paymentResultLoading, setPaymentResultLoading] = useState(false);
 
   // Order history state
   const [ordersOpen, setOrdersOpen] = useState(false);
@@ -369,15 +367,13 @@ export default function Home() {
     setCheckoutStep(1);
     setCustomer({ name: "", email: "", phone: "" });
     setCompletedOrder(null);
-    setPixData(null);
-    setPixPolling(false);
-    setPixCopied(false);
-    if (pixPollRef.current) clearInterval(pixPollRef.current);
+    setPaymentResult(null);
+    setPaymentResultOrder(null);
     setCartOpen(false);
     setTimeout(() => setCheckoutOpen(true), 200);
   };
 
-  // Submit order — creates AbacatePay PIX payment
+  // Submit order — creates Mercado Pago Checkout Pro Preference
   const handleCheckout = async () => {
     setCheckoutLoading(true);
     try {
@@ -395,94 +391,59 @@ export default function Home() {
         throw new Error(errData.error || "Erro ao criar pagamento");
       }
       const data = await res.json();
-      setPixData({
-        qrCodeUrl: data.pixQrCode,
-        brCode: data.pixBrCode,
-        paymentId: data.mercadoPagoId,
-        orderId: data.id,
-      });
-      setCompletedOrder(data);
-      setCheckoutStep(3);
-      // Start polling for payment status
-      setPixPolling(true);
+      // Redirect to Mercado Pago checkout
+      window.location.href = data.initPoint;
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erro ao processar pedido. Tente novamente.");
-    } finally {
       setCheckoutLoading(false);
     }
   };
 
-  // Poll payment status directly from Mercado Pago API
-  const startPixPolling = useCallback((mpPaymentId: string, orderId: string) => {
-    if (pixPollRef.current) clearInterval(pixPollRef.current);
-    let attempts = 0;
-    const maxAttempts = 200; // 200 * 3s = 10 minutos max
-    pixPollRef.current = setInterval(async () => {
-      attempts++;
-      if (attempts > maxAttempts) {
-        if (pixPollRef.current) clearInterval(pixPollRef.current);
-        setPixPolling(false);
-        return;
-      }
-      try {
-        // Checar status no Mercado Pago
-        const checkRes = await fetch(`/api/payment/check?paymentId=${mpPaymentId}`);
-        if (checkRes.ok) {
-          const checkData = await checkRes.json();
-          const mpStatus = checkData.status;
-          // Mercado Pago: "approved" = pago
-          if (mpStatus === "approved") {
-            if (pixPollRef.current) clearInterval(pixPollRef.current);
-            setPixPolling(false);
-            // Atualizar status no banco local
+  // Handle payment callback from Mercado Pago redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment_status");
+    const orderId = params.get("order_id");
+    const paymentId = params.get("payment_id");
+
+    if (paymentStatus && orderId) {
+      setPaymentResult({ status: paymentStatus, orderId, paymentId: paymentId || "" });
+      setCheckoutOpen(true);
+      setCheckoutStep(3);
+
+      // Clean URL params
+      window.history.replaceState({}, "", "/");
+
+      // Fetch order data
+      const fetchOrder = async () => {
+        setPaymentResultLoading(true);
+        try {
+          // If approved, make sure order status is updated
+          if (paymentStatus === "approved") {
             await fetch(`/api/orders/${orderId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ status: "enviado" }),
             });
-            const orderRes = await fetch(`/api/orders/${orderId}`);
-            if (orderRes.ok) {
-              const updatedOrder = await orderRes.json();
-              setCompletedOrder(updatedOrder);
-            }
-            setCartItems([]);
           }
+          const orderRes = await fetch(`/api/orders/${orderId}`);
+          if (orderRes.ok) {
+            const orderData = await orderRes.json();
+            setPaymentResultOrder(orderData);
+            setCompletedOrder(orderData);
+            if (paymentStatus === "approved") {
+              setCartItems([]);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao buscar pedido:", error);
+        } finally {
+          setPaymentResultLoading(false);
         }
-      } catch {
-        // silently continue polling
-      }
-    }, 3000);
+      };
+      fetchOrder();
+    }
   }, []);
-
-  // Start polling when pixPolling becomes true
-  useEffect(() => {
-    if (pixPolling && pixData?.paymentId && pixData?.orderId) {
-      startPixPolling(pixData.paymentId, pixData.orderId);
-    }
-    return () => {
-      if (pixPollRef.current) clearInterval(pixPollRef.current);
-    };
-  }, [pixPolling, pixData?.paymentId, pixData?.orderId, startPixPolling]);
-
-  // Copy PIX code to clipboard
-  const copyPixCode = async () => {
-    if (!pixData) return;
-    try {
-      await navigator.clipboard.writeText(pixData.brCode);
-      setPixCopied(true);
-      setTimeout(() => setPixCopied(false), 2500);
-    } catch {
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = pixData.brCode;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      setPixCopied(true);
-      setTimeout(() => setPixCopied(false), 2500);
-    }
-  };
 
   // Fetch orders
   const fetchOrders = async () => {
@@ -2336,149 +2297,46 @@ export default function Home() {
                 </div>
 
                 <Button
-                  className="w-full rounded-2xl bg-gradient-to-r from-[#00b4d8] to-[#0096c7] hover:from-[#0096c7] hover:to-[#0077b6] text-white font-bold text-lg py-6 shadow-[#00b4d8]/30"
+                  className="w-full rounded-2xl bg-gradient-to-r from-kid-blue to-[#0096c7] hover:from-[#0096c7] hover:to-[#0077b6] text-white font-bold text-lg py-6 shadow-[#00b4d8]/30"
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
                 >
                   {checkoutLoading ? (
                     <span className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Gerando PIX...
+                      Preparando pagamento...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      <QrCode className="h-5 w-5" />
-                      Pagar com Pix
+                      <Shield className="h-5 w-5" />
+                      Ir para o Pagamento
                     </span>
                   )}
                 </Button>
               </motion.div>
             )}
 
-            {/* Step 3: PIX Payment / Success */}
-            {checkoutStep === 3 && completedOrder && (
+            {/* Step 3: Payment Result (Checkout Pro callback) */}
+            {checkoutStep === 3 && (
               <>
-                {/* PIX Payment Waiting Screen */}
-                {pixPolling && pixData ? (
+                {/* Loading state */}
+                {paymentResultLoading && (
                   <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-16 space-y-4"
                   >
-                    <div className="text-center mb-2">
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <span className="text-5xl">📱</span>
-                      </motion.div>
-                      <h3 className="text-lg font-bold mt-3">Pagamento via PIX</h3>
-                      <p className="text-sm text-foreground/60 mt-1">
-                        Escaneie o QR Code ou copie o código
-                      </p>
-                    </div>
-
-                    {/* QR Code */}
-                    <div className="flex justify-center">
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="bg-white rounded-2xl p-4 shadow-lg border-2 border-[#00b4d8]/20"
-                      >
-                        {pixData.qrCodeUrl ? (
-                          <img
-                            src={pixData.qrCodeUrl}
-                            alt="QR Code PIX"
-                            className="w-52 h-52 rounded-xl"
-                          />
-                        ) : (
-                          <div className="w-52 h-52 rounded-xl bg-gray-100 flex items-center justify-center">
-                            <QrCode className="h-16 w-16 text-gray-300" />
-                          </div>
-                        )}
-                      </motion.div>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="text-center">
-                      <p className="text-xs text-foreground/40">Valor total</p>
-                      <p className="text-2xl font-black text-[#00b4d8]">
-                        R$ {totalPrice.toFixed(2)}
-                      </p>
-                    </div>
-
-                    {/* Copy PIX Code */}
-                    <div className="space-y-2">
-                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
-                        <p className="text-[10px] text-foreground/40 mb-1 font-medium">Código PIX (copia e cola)</p>
-                        <p className="text-xs text-foreground/70 font-mono break-all leading-relaxed line-clamp-3">
-                          {pixData.brCode}
-                        </p>
-                      </div>
-                      <Button
-                        className="w-full rounded-2xl font-bold py-5 transition-all"
-                        variant={pixCopied ? "default" : "outline"}
-                        onClick={copyPixCode}
-                      >
-                        <AnimatePresence mode="wait">
-                          {pixCopied ? (
-                            <motion.span
-                              key="copied"
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="flex items-center justify-center gap-2"
-                            >
-                              <Check className="h-4 w-4" />
-                              Código Copiado!
-                            </motion.span>
-                          ) : (
-                            <motion.span
-                              key="copy"
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="flex items-center justify-center gap-2"
-                            >
-                              <Copy className="h-4 w-4" />
-                              Copiar código PIX
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </Button>
-                    </div>
-
-                    {/* Status / Polling indicator */}
-                    <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                      <div className="flex items-center gap-3">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Loader2 className="h-5 w-5 text-amber-500" />
-                        </motion.div>
-                        <div>
-                          <p className="text-sm font-semibold text-amber-700">Aguardando pagamento...</p>
-                          <p className="text-xs text-amber-500/70">
-                            Identificaremos automaticamente quando o pagamento for confirmado
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Order number */}
-                    <div className="text-center">
-                      <p className="text-xs text-foreground/40">Pedido</p>
-                      <p className="text-sm font-bold text-foreground/60">{completedOrder.orderNumber}</p>
-                    </div>
+                    <Loader2 className="h-10 w-10 text-kid-blue animate-spin" />
+                    <p className="text-sm text-foreground/60">Verificando pagamento...</p>
                   </motion.div>
-                ) : (
-                  /* Success Screen — payment confirmed */
+                )}
+
+                {/* Success — payment approved */}
+                {!paymentResultLoading && paymentResult?.status === "approved" && paymentResultOrder && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
+                    className="text-center py-4"
                   >
                     <motion.div
                       initial={{ scale: 0 }}
@@ -2492,18 +2350,18 @@ export default function Home() {
                       Seu pedido foi realizado com sucesso!
                     </p>
 
-                    <div className="mt-6 bg-kid-green/10 rounded-2xl p-6 border-2 border-kid-green/20 inline-block">
+                    <div className="mt-4 bg-kid-green/10 rounded-2xl p-4 border-2 border-kid-green/20 inline-block">
                       <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
-                      <p className="text-3xl font-black text-kid-green">{completedOrder.orderNumber}</p>
+                      <p className="text-2xl font-black text-kid-green">{paymentResultOrder.orderNumber}</p>
                     </div>
 
-                    <div className="mt-6 text-left bg-kid-green/5 rounded-2xl p-4 border-2 border-kid-green/20">
-                      <div className="flex items-center gap-2 mb-4">
+                    <div className="mt-4 text-left bg-kid-green/5 rounded-2xl p-4 border-2 border-kid-green/20">
+                      <div className="flex items-center gap-2 mb-3">
                         <Download className="h-5 w-5 text-kid-green" />
                         <p className="text-sm font-bold text-kid-green">Seu material está pronto!</p>
                       </div>
                       <div className="space-y-3">
-                        {completedOrder.items.map((item) => {
+                        {paymentResultOrder.items.map((item) => {
                           const prod = products.find((p) => p.id === item.id);
                           const link = prod?.link || "";
                           return (
@@ -2555,11 +2413,13 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="mt-6 space-y-3">
+                    <div className="mt-5 space-y-3">
                       <Button
                         className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-6"
                         onClick={() => {
                           setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
                           setTimeout(() => openOrders(), 300);
                         }}
                       >
@@ -2568,9 +2428,132 @@ export default function Home() {
                       </Button>
                       <Button
                         className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                        onClick={() => setCheckoutOpen(false)}
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
                       >
                         Continuar Comprando
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Pending — payment processing */}
+                {!paymentResultLoading && paymentResult?.status === "pending" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
+                  >
+                    <span className="text-7xl block mb-4">⏳</span>
+                    <h3 className="text-xl font-black text-foreground">Pagamento Pendente</h3>
+                    <p className="text-foreground/60 mt-2">
+                      Seu pagamento está sendo processado. Você receberá o material assim que for confirmado!
+                    </p>
+                    {paymentResultOrder && (
+                      <div className="mt-4 bg-amber-50 rounded-2xl p-4 border border-amber-200 inline-block">
+                        <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
+                        <p className="text-xl font-black text-amber-600">{paymentResultOrder.orderNumber}</p>
+                      </div>
+                    )}
+                    <div className="mt-6 space-y-3">
+                      <Button
+                        className="w-full rounded-2xl bg-kid-blue hover:bg-kid-blue/90 text-white font-bold py-6"
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                          setTimeout(() => openOrders(), 300);
+                        }}
+                      >
+                        <ClipboardList className="h-5 w-5 mr-2" />
+                        Ver Meus Pedidos
+                      </Button>
+                      <Button
+                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
+                      >
+                        Continuar Comprando
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Rejected / Failed */}
+                {!paymentResultLoading && paymentResult?.status === "rejected" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
+                  >
+                    <span className="text-7xl block mb-4">😔</span>
+                    <h3 className="text-xl font-black text-foreground">Pagamento Recusado</h3>
+                    <p className="text-foreground/60 mt-2">
+                      O pagamento não foi aprovado. Tente novamente com outro método de pagamento.
+                    </p>
+                    <div className="mt-6 space-y-3">
+                      <Button
+                        className="w-full rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold py-6"
+                        onClick={() => {
+                          setCheckoutStep(2);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
+                      >
+                        Tentar Novamente
+                      </Button>
+                      <Button
+                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
+                      >
+                        Continuar Comprando
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Error */}
+                {!paymentResultLoading && paymentResult?.status === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
+                  >
+                    <span className="text-7xl block mb-4">❌</span>
+                    <h3 className="text-xl font-black text-foreground">Erro ao Processar</h3>
+                    <p className="text-foreground/60 mt-2">
+                      Ocorreu um erro ao verificar o pagamento. Tente novamente.
+                    </p>
+                    <div className="mt-6 space-y-3">
+                      <Button
+                        className="w-full rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold py-6"
+                        onClick={() => {
+                          setCheckoutStep(2);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
+                      >
+                        Tentar Novamente
+                      </Button>
+                      <Button
+                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
+                        onClick={() => {
+                          setCheckoutOpen(false);
+                          setPaymentResult(null);
+                          setPaymentResultOrder(null);
+                        }}
+                      >
+                        Voltar à Loja
                       </Button>
                     </div>
                   </motion.div>

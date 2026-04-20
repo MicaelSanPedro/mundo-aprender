@@ -27,7 +27,7 @@ interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
-  mercadoPagoId?: string;
+  mercadoPagoPreferenceId?: string;
 }
 
 async function readOrders(): Promise<Order[]> {
@@ -85,63 +85,88 @@ export async function POST(request: NextRequest) {
     }
 
     // Calcular total
-    const orderTotal = total || items.reduce((sum: number, item: OrderItem) => sum + item.price * item.quantity, 0);
-    const description = items.map((i: OrderItem) => i.name).join(", ");
+    const orderTotal =
+      total ||
+      items.reduce(
+        (sum: number, item: OrderItem) => sum + item.price * item.quantity,
+        0
+      );
 
-    // Criar pagamento PIX via Mercado Pago
-    const idempotencyKey = generateId();
-    const mercadoPagoBody = {
-      transaction_amount: Number(orderTotal.toFixed(2)),
-      description: `Mundo Aprender - ${description}`,
-      payment_method_id: "pix",
+    // Gerar ID único para o pedido
+    const orderId = generateId();
+
+    // URL base da aplicação
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    // Montar itens no formato do Mercado Pago
+    const mpItems = items.map((item: OrderItem) => ({
+      id: String(item.id),
+      title: item.name,
+      quantity: item.quantity,
+      currency_id: "BRL",
+      unit_price: Number(item.price.toFixed(2)),
+    }));
+
+    // Separar nome e sobrenome
+    const nameParts = customer.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    // Criar Preference do Mercado Pago (Checkout Pro)
+    const preferenceBody = {
+      items: mpItems,
       payer: {
+        name: firstName,
+        surname: lastName,
         email: customer.email,
-        first_name: customer.name.split(" ")[0] || customer.name,
-        last_name: customer.name.split(" ").slice(1).join(" ") || "",
-        identification: {
-          type: "CPF",
-          number: "00000000000", // CPF genérico - o Mercado Pago não obriga CPF pra PIX
+        phone: {
+          number: customer.phone.replace(/\D/g, "") || "11999999999",
         },
       },
-      external_reference: idempotencyKey,
-      notification_url: process.env.MERCADO_PAGO_WEBHOOK_URL || "",
+      back_urls: {
+        success: `${baseUrl}/api/payment/callback?status=approved&external_reference=${orderId}`,
+        pending: `${baseUrl}/api/payment/callback?status=pending&external_reference=${orderId}`,
+        failure: `${baseUrl}/api/payment/callback?status=rejected&external_reference=${orderId}`,
+      },
+      auto_return: "approved",
+      notification_url: `${baseUrl}/api/payment/webhook`,
+      external_reference: orderId,
+      statement_descriptor: "MUNDO APRENDER",
     };
 
-    const mercadoPagoRes = await fetch("https://api.mercadopago.com/v1/payments", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify(mercadoPagoBody),
-    });
+    const mpRes = await fetch(
+      "https://api.mercadopago.com/v1/preferences",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": orderId,
+        },
+        body: JSON.stringify(preferenceBody),
+      }
+    );
 
-    if (!mercadoPagoRes.ok) {
-      const errorText = await mercadoPagoRes.text();
-      console.error("Mercado Pago API error:", mercadoPagoRes.status, errorText);
+    if (!mpRes.ok) {
+      const errorText = await mpRes.text();
+      console.error(
+        "Mercado Pago Preference API error:",
+        mpRes.status,
+        errorText
+      );
       return NextResponse.json(
-        { error: "Erro ao gerar pagamento PIX. Tente novamente." },
+        { error: "Erro ao criar pagamento. Tente novamente." },
         { status: 502 }
       );
     }
 
-    const mpData = await mercadoPagoRes.json();
+    const mpData = await mpRes.json();
 
-    // Verificar se veio os dados do PIX
-    const pixData = mpData.point_of_interaction?.transaction_data;
-    if (!pixData?.qr_code_base64) {
-      console.error("PIX data missing:", JSON.stringify(mpData).substring(0, 300));
-      return NextResponse.json(
-        { error: "Erro ao gerar QR Code PIX. Tente novamente." },
-        { status: 502 }
-      );
-    }
-
-    // Criar pedido no sistema local
+    // Salvar pedido local
     const now = new Date().toISOString();
     const order: Order = {
-      id: idempotencyKey,
+      id: orderId,
       orderNumber: generateOrderNumber(),
       items,
       customer,
@@ -149,21 +174,24 @@ export async function POST(request: NextRequest) {
       status: "pendente",
       createdAt: now,
       updatedAt: now,
-      mercadoPagoId: String(mpData.id),
+      mercadoPagoPreferenceId: String(mpData.id),
     };
 
     const orders = await readOrders();
     orders.push(order);
     await writeOrders(orders);
 
-    // Retornar dados do pedido + QR Code
-    return NextResponse.json({
-      ...order,
-      pixQrCode: `data:image/png;base64,${pixData.qr_code_base64}`,
-      pixBrCode: pixData.qr_code,
-      ticketUrl: pixData.ticket_url,
-      paymentStatus: mpData.status,
-    }, { status: 201 });
+    // Retornar URL do checkout do Mercado Pago
+    return NextResponse.json(
+      {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        // Use sandbox_init_point for testing, init_point for production
+        initPoint: mpData.init_point,
+        sandboxInitPoint: mpData.sandbox_init_point,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Payment create error:", error);
     return NextResponse.json(
