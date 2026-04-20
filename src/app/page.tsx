@@ -426,11 +426,8 @@ export default function Home() {
         product_link: link,
         total: `R$ ${Number(order.total).toFixed(2)}`,
         items_list: order.items
-          .map((item) => {
-            const p = products.find((pr) => pr.id === item.id);
-            return `${item.emoji} ${item.name} - ${p?.link || "#"}`;
-          })
-          .join("<br>"),
+          .map((item) => `${item.emoji} ${item.name} - ${products.find((pr) => pr.id === item.id)?.link || "#"}`)
+          .join(" | "),
       });
       console.log("[EMAILJS] Email enviado com sucesso para:", order.customer.email);
     } catch (error) {
