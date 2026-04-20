@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import mercadopago from "mercadopago";
 
 const ORDERS_FILE = path.join(process.cwd(), "data", "orders.json");
 
@@ -99,23 +100,25 @@ export async function POST(request: NextRequest) {
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-    // Montar itens no formato do Mercado Pago
-    const mpItems = items.map((item: OrderItem) => ({
-      id: String(item.id),
-      title: item.name,
-      quantity: item.quantity,
-      currency_id: "BRL",
-      unit_price: Number(item.price.toFixed(2)),
-    }));
-
     // Separar nome e sobrenome
     const nameParts = customer.name.trim().split(/\s+/);
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "";
 
+    // Configurar SDK do Mercado Pago
+    mercadopago.configure({
+      access_token: accessToken,
+    });
+
     // Criar Preference do Mercado Pago (Checkout Pro)
-    const preferenceBody = {
-      items: mpItems,
+    const preference = await mercadopago.preferences.create({
+      items: items.map((item: OrderItem) => ({
+        id: String(item.id),
+        title: item.name,
+        quantity: item.quantity,
+        currency_id: "BRL",
+        unit_price: Number(item.price.toFixed(2)),
+      })),
       payer: {
         name: firstName,
         surname: lastName,
@@ -133,35 +136,9 @@ export async function POST(request: NextRequest) {
       notification_url: `${baseUrl}/api/payment/webhook`,
       external_reference: orderId,
       statement_descriptor: "MUNDO APRENDER",
-    };
+    });
 
-    const mpRes = await fetch(
-      "https://api.mercadopago.com/v1/preferences",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          "X-Idempotency-Key": orderId,
-        },
-        body: JSON.stringify(preferenceBody),
-      }
-    );
-
-    if (!mpRes.ok) {
-      const errorText = await mpRes.text();
-      console.error(
-        "Mercado Pago Preference API error:",
-        mpRes.status,
-        errorText
-      );
-      return NextResponse.json(
-        { error: "Erro ao criar pagamento. Tente novamente." },
-        { status: 502 }
-      );
-    }
-
-    const mpData = await mpRes.json();
+    const mpData = preference.body;
 
     // Salvar pedido local
     const now = new Date().toISOString();
@@ -186,14 +163,29 @@ export async function POST(request: NextRequest) {
       {
         orderId: order.id,
         orderNumber: order.orderNumber,
-        // Use sandbox_init_point for testing, init_point for production
         initPoint: mpData.init_point,
         sandboxInitPoint: mpData.sandbox_init_point,
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Payment create error:", error);
+
+    // Melhor mensagem de erro baseada no que o MP retorna
+    const mpMessage = error?.message || "";
+    if (mpMessage.includes("pending") || mpMessage.includes("pending state")) {
+      return NextResponse.json(
+        { error: "Sua conta Mercado Pago ainda está em processo de aprovação. Aguarde alguns minutos e tente novamente." },
+        { status: 502 }
+      );
+    }
+    if (mpMessage.includes("not found") || mpMessage.includes("unauthorized") || mpMessage.includes("invalid")) {
+      return NextResponse.json(
+        { error: "Problema com as credenciais do Mercado Pago. Verifique se a aplicação foi aprovada no painel do Mercado Pago." },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Erro ao processar pedido. Tente novamente." },
       { status: 400 }
