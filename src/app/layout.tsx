@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Mundo Aprender" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/favicon.ico",
   },
 };
 
