@@ -1352,149 +1352,148 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Illustration area — Floating Knowledge Portal */}
+            {/* Illustration area — Magic Open Book */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative flex items-center justify-center"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="relative flex items-end justify-center"
             >
-              <div className="relative w-full max-w-[420px] aspect-square mx-auto lg:mx-0">
+              <div className="relative w-full max-w-[420px] aspect-[4/5] mx-auto lg:mx-0">
 
-                {/* Animated gradient mesh background */}
-                <div className="absolute inset-4 rounded-[2rem] bg-gradient-to-br from-kid-yellow/20 via-kid-pink/15 to-kid-purple/20 blur-xl" />
+                {/* Soft radial glow from book */}
+                <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[50%] bg-gradient-to-t from-kid-yellow/25 via-kid-pink/10 to-transparent rounded-full blur-2xl" />
 
-                {/* Central glowing portal */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {/* Outer glow rings */}
-                  <div className="absolute w-[65%] h-[65%] rounded-full bg-gradient-to-r from-kid-yellow/30 via-kid-pink/25 to-kid-purple/30 blur-lg" style={{ animation: 'gradient-shift 8s ease infinite', backgroundSize: '300% 300%' }} />
-                  <div className="absolute w-[55%] h-[55%] rounded-full border-2 border-white/15 backdrop-blur-sm" />
+                {/* Knowledge beam — light rays going up */}
+                <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-[2px] h-[35%] bg-gradient-to-t from-white/30 via-kid-yellow/15 to-transparent" />
+                <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-[40%] h-[25%] bg-gradient-to-t from-white/5 to-transparent rounded-full blur-md" />
 
-                  {/* Inner portal */}
-                  <div className="relative w-[45%] h-[45%] rounded-full glass shadow-2xl flex items-center justify-center">
-                    <div className="text-center px-4">
-                      <span className="text-4xl sm:text-5xl md:text-6xl block" style={{ animation: 'float-bounce 3s ease-in-out infinite' }}>🎓</span>
-                      <p className="text-white font-extrabold text-[10px] sm:text-sm md:text-base mt-1 sm:mt-2 drop-shadow-md leading-tight">
-                        O Mundo é Sua<br />Sala de Aula!
-                      </p>
-                    </div>
+                {/* ═══ OPEN BOOK ═══ */}
+                <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[80%]" style={{ perspective: '800px' }}>
+                  <div className="relative flex" style={{ transform: 'rotateX(15deg)', transformStyle: 'preserve-3d' }}>
+                    {/* Left page */}
+                    <motion.div
+                      initial={{ opacity: 0, rotateY: 60 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                      className="flex-1 glass rounded-l-2xl sm:rounded-l-3xl border border-white/20 shadow-xl overflow-hidden"
+                      style={{ transformOrigin: 'right center' }}
+                    >
+                      <div className="bg-gradient-to-br from-kid-blue/15 to-kid-purple/10 p-3 sm:p-4 md:p-5 h-full min-h-[100px] sm:min-h-[130px] md:min-h-[160px] flex flex-col items-center justify-center gap-1">
+                        <span className="text-2xl sm:text-3xl md:text-4xl">🔢</span>
+                        <div className="flex gap-0.5">
+                          {[1,2,3].map(i => (
+                            <span key={i} className="text-[8px] sm:text-[10px] md:text-xs text-white/50 font-mono">{3 + i}×{i + 1}={((3+i)*(i+1))}</span>
+                          ))}
+                        </div>
+                        <div className="w-8 h-[1px] bg-white/20 mt-1" />
+                        <span className="text-[7px] sm:text-[9px] text-white/40">Matemática</span>
+                      </div>
+                    </motion.div>
+                    {/* Right page */}
+                    <motion.div
+                      initial={{ opacity: 0, rotateY: -60 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+                      className="flex-1 glass rounded-r-2xl sm:rounded-r-3xl border border-white/20 shadow-xl overflow-hidden"
+                      style={{ transformOrigin: 'left center' }}
+                    >
+                      <div className="bg-gradient-to-bl from-kid-pink/15 to-kid-orange/10 p-3 sm:p-4 md:p-5 h-full min-h-[100px] sm:min-h-[130px] md:min-h-[160px] flex flex-col items-center justify-center gap-1">
+                        <span className="text-2xl sm:text-3xl md:text-4xl">📝</span>
+                        <p className="text-[9px] sm:text-[11px] md:text-xs text-white/60 leading-tight text-center italic">
+                          "A, B, C...<br/>Aprender<br/>é mágico!"
+                        </p>
+                        <div className="w-8 h-[1px] bg-white/20 mt-1" />
+                        <span className="text-[7px] sm:text-[9px] text-white/40">Português</span>
+                      </div>
+                    </motion.div>
+                    {/* Book spine shadow */}
+                    <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-black/10 rounded-full shadow-inner" />
                   </div>
                 </div>
 
-                {/* Floating subject cards — 3D perspective */}
-                {/* Card 1: Matemática — top-left */}
-                <motion.div
-                  initial={{ opacity: 0, x: -30, y: -20 }}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.6, type: "spring" }}
-                  className="absolute top-[2%] left-[2%] sm:top-[5%] sm:left-[3%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 4s ease-in-out infinite' }}>
-                    <div className="glass rounded-2xl p-2.5 sm:p-3 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(-8deg) rotateX(5deg)' }}>
-                      <span className="text-xl sm:text-2xl md:text-3xl">🔢</span>
-                      <p className="text-white font-bold text-[8px] sm:text-[10px] md:text-xs mt-0.5">Matemática</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* ═══ FLOATING ELEMENTS — rising from book ═══ */}
+                {/* Element 1: Star — rises top-left */}
+                <motion.span
+                  initial={{ opacity: 0, y: 60, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.0, duration: 1, type: "spring" }}
+                  className="absolute top-[5%] left-[10%] text-3xl sm:text-4xl md:text-5xl"
+                  style={{ animation: 'float-bounce 3.5s ease-in-out infinite', animationDelay: '0s' }}
+                >⭐</motion.span>
 
-                {/* Card 2: Português — top-right */}
-                <motion.div
-                  initial={{ opacity: 0, x: 30, y: -20 }}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  transition={{ delay: 0.7, duration: 0.6, type: "spring" }}
-                  className="absolute top-[2%] right-[2%] sm:top-[5%] sm:right-[3%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 4.5s ease-in-out infinite', animationDelay: '0.5s' }}>
-                    <div className="glass rounded-2xl p-2.5 sm:p-3 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(8deg) rotateX(5deg)' }}>
-                      <span className="text-xl sm:text-2xl md:text-3xl">📝</span>
-                      <p className="text-white font-bold text-[8px] sm:text-[10px] md:text-xs mt-0.5">Português</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Element 2: Pencil — rises top-right */}
+                <motion.span
+                  initial={{ opacity: 0, y: 60, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.2, duration: 1, type: "spring" }}
+                  className="absolute top-[8%] right-[8%] text-2xl sm:text-3xl md:text-4xl"
+                  style={{ animation: 'float-bounce 4s ease-in-out infinite', animationDelay: '0.8s' }}
+                >✏️</motion.span>
 
-                {/* Card 3: Jogos — bottom-left */}
-                <motion.div
-                  initial={{ opacity: 0, x: -25, y: 25 }}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  transition={{ delay: 0.9, duration: 0.6, type: "spring" }}
-                  className="absolute bottom-[12%] left-[0%] sm:bottom-[15%] sm:left-[2%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 3.8s ease-in-out infinite', animationDelay: '1s' }}>
-                    <div className="glass rounded-2xl p-2.5 sm:p-3 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(-5deg) rotateX(-5deg)' }}>
-                      <span className="text-xl sm:text-2xl md:text-3xl">🎲</span>
-                      <p className="text-white font-bold text-[8px] sm:text-[10px] md:text-xs mt-0.5">Jogos</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Element 3: Palette — mid-left */}
+                <motion.span
+                  initial={{ opacity: 0, y: 50, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.4, duration: 1, type: "spring" }}
+                  className="absolute top-[25%] left-[3%] text-2xl sm:text-3xl"
+                  style={{ animation: 'float-bounce 3.2s ease-in-out infinite', animationDelay: '1.5s' }}
+                >🎨</motion.span>
 
-                {/* Card 4: Atividades — bottom-right */}
-                <motion.div
-                  initial={{ opacity: 0, x: 25, y: 25 }}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  transition={{ delay: 1.1, duration: 0.6, type: "spring" }}
-                  className="absolute bottom-[12%] right-[0%] sm:bottom-[15%] sm:right-[2%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 4.2s ease-in-out infinite', animationDelay: '1.5s' }}>
-                    <div className="glass rounded-2xl p-2.5 sm:p-3 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(5deg) rotateX(-5deg)' }}>
-                      <span className="text-xl sm:text-2xl md:text-3xl">✏️</span>
-                      <p className="text-white font-bold text-[8px] sm:text-[10px] md:text-xs mt-0.5">Atividades</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Element 4: Dice — mid-right */}
+                <motion.span
+                  initial={{ opacity: 0, y: 50, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.6, duration: 1, type: "spring" }}
+                  className="absolute top-[22%] right-[2%] text-2xl sm:text-3xl"
+                  style={{ animation: 'float-bounce 4.5s ease-in-out infinite', animationDelay: '0.3s' }}
+                >🎲</motion.span>
 
-                {/* Card 5: Histórias — far left */}
-                <motion.div
-                  initial={{ opacity: 0, x: -35 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.3, duration: 0.6, type: "spring" }}
-                  className="absolute top-[42%] -translate-y-1/2 left-[-2%] sm:left-[-1%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 5s ease-in-out infinite', animationDelay: '2s' }}>
-                    <div className="glass rounded-2xl p-2 sm:p-2.5 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(-12deg)' }}>
-                      <span className="text-lg sm:text-xl md:text-2xl">📚</span>
-                      <p className="text-white font-bold text-[7px] sm:text-[9px] md:text-[10px] mt-0.5 whitespace-nowrap">Histórias</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Element 5: Lightbulb — upper-center */}
+                <motion.span
+                  initial={{ opacity: 0, y: 40, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.8, duration: 1, type: "spring" }}
+                  className="absolute top-[0%] left-1/2 -translate-x-1/2 text-3xl sm:text-4xl md:text-5xl"
+                  style={{ animation: 'float-bounce 2.8s ease-in-out infinite', animationDelay: '1s' }}
+                >💡</motion.span>
 
-                {/* Card 6: Sílabas — far right */}
-                <motion.div
-                  initial={{ opacity: 0, x: 35 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.5, duration: 0.6, type: "spring" }}
-                  className="absolute top-[42%] -translate-y-1/2 right-[-2%] sm:right-[-1%]"
-                  style={{ perspective: '600px' }}
-                >
-                  <div style={{ animation: 'float-bounce 4.8s ease-in-out infinite', animationDelay: '2.5s' }}>
-                    <div className="glass rounded-2xl p-2 sm:p-2.5 shadow-lg border border-white/20 hover:scale-110 transition-transform cursor-default" style={{ transform: 'rotateY(12deg)' }}>
-                      <span className="text-lg sm:text-xl md:text-2xl">📖</span>
-                      <p className="text-white font-bold text-[7px] sm:text-[9px] md:text-[10px] mt-0.5 whitespace-nowrap">Sílabas</p>
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Element 6: Music — lower-left */}
+                <motion.span
+                  initial={{ opacity: 0, y: 30, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 2.0, duration: 0.8, type: "spring" }}
+                  className="absolute top-[42%] left-[5%] text-xl sm:text-2xl"
+                  style={{ animation: 'float-bounce 3.8s ease-in-out infinite', animationDelay: '2s' }}
+                >🎵</motion.span>
 
-                {/* Sparkle dots */}
-                <div className="absolute top-[15%] right-[25%] w-3 h-3 bg-kid-yellow rounded-full animate-sparkle shadow-lg shadow-kid-yellow/50" />
-                <div className="absolute bottom-[20%] left-[20%] w-2.5 h-2.5 bg-kid-pink rounded-full animate-sparkle shadow-lg shadow-kid-pink/50" style={{ animationDelay: '0.7s' }} />
-                <div className="absolute top-[50%] left-[10%] w-2 h-2 bg-kid-green rounded-full animate-sparkle shadow-lg shadow-kid-green/50" style={{ animationDelay: '1.3s' }} />
-                <div className="absolute bottom-[35%] right-[15%] w-2.5 h-2.5 bg-kid-blue rounded-full animate-sparkle shadow-lg shadow-kid-blue/50" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-[30%] left-[35%] w-2 h-2 bg-kid-purple rounded-full animate-sparkle shadow-lg shadow-kid-purple/50" style={{ animationDelay: '0.3s' }} />
-                <div className="absolute top-[65%] right-[35%] w-2 h-2 bg-kid-yellow rounded-full animate-sparkle shadow-lg shadow-kid-yellow/50" style={{ animationDelay: '1.7s' }} />
+                {/* Element 7: Globe — lower-right */}
+                <motion.span
+                  initial={{ opacity: 0, y: 30, scale: 0 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 2.2, duration: 0.8, type: "spring" }}
+                  className="absolute top-[40%] right-[5%] text-xl sm:text-2xl"
+                  style={{ animation: 'float-bounce 4.2s ease-in-out infinite', animationDelay: '1.2s' }}
+                >🌍</motion.span>
 
-                {/* Constellation lines — connecting dots with SVG */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
-                  <line x1="95" y1="55" x2="175" y2="170" stroke="white" strokeWidth="0.5" opacity="0.12" />
-                  <line x1="305" y1="55" x2="225" y2="170" stroke="white" strokeWidth="0.5" opacity="0.12" />
-                  <line x1="75" y1="280" x2="165" y2="210" stroke="white" strokeWidth="0.5" opacity="0.1" />
-                  <line x1="325" y1="280" x2="235" y2="210" stroke="white" strokeWidth="0.5" opacity="0.1" />
-                  <line x1="20" y1="190" x2="155" y2="180" stroke="white" strokeWidth="0.5" opacity="0.08" />
-                  <line x1="380" y1="190" x2="245" y2="180" stroke="white" strokeWidth="0.5" opacity="0.08" />
-                </svg>
+                {/* Element 8: Rocket — shoots up from book */}
+                <motion.span
+                  initial={{ opacity: 0, y: 80, scale: 0.5 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 1.1, duration: 1.2, type: "spring" }}
+                  className="absolute top-[12%] right-[25%] text-2xl sm:text-3xl"
+                  style={{ animation: 'float-bounce 3s ease-in-out infinite', animationDelay: '0.5s' }}
+                >🚀</motion.span>
+
+                {/* Scattered sparkle dots — asymmetric positions */}
+                <div className="absolute top-[15%] left-[30%] w-2 h-2 bg-kid-yellow/80 rounded-full animate-sparkle" />
+                <div className="absolute top-[32%] left-[42%] w-1.5 h-1.5 bg-white/60 rounded-full animate-sparkle" style={{ animationDelay: '0.5s' }} />
+                <div className="absolute top-[18%] right-[35%] w-2 h-2 bg-kid-pink/70 rounded-full animate-sparkle" style={{ animationDelay: '1s' }} />
+                <div className="absolute top-[38%] left-[22%] w-1.5 h-1.5 bg-kid-blue/60 rounded-full animate-sparkle" style={{ animationDelay: '1.5s' }} />
+                <div className="absolute top-[45%] right-[30%] w-2 h-2 bg-kid-green/60 rounded-full animate-sparkle" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[8%] left-[55%] w-1.5 h-1.5 bg-kid-purple/60 rounded-full animate-sparkle" style={{ animationDelay: '0.8s' }} />
+                <div className="absolute top-[28%] right-[15%] w-2 h-2 bg-kid-yellow/60 rounded-full animate-sparkle" style={{ animationDelay: '1.3s' }} />
+
               </div>
             </motion.div>
           </div>
