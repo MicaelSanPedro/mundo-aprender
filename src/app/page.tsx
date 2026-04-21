@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, memo } from "react";
 import emailjs from "@emailjs/browser";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -260,6 +260,95 @@ function FAQItem({ question, answer, emoji, index }: { question: string; answer:
   );
 }
 
+/* ─── Product Card (memoized) ──────────────────────────── */
+
+interface ProductCardProps {
+  product: (typeof products)[0];
+  isFavorite: boolean;
+  isJustFavorited: boolean;
+  isJustAdded: boolean;
+  isDescExpanded: boolean;
+  onToggleFavorite: (id: number) => void;
+  onAddToCart: (product: (typeof products)[0]) => void;
+  onToggleDesc: (id: number) => void;
+}
+
+const ProductCard = memo(function ProductCard({
+  product, isFavorite, isJustFavorited, isJustAdded, isDescExpanded,
+  onToggleFavorite, onAddToCart, onToggleDesc,
+}: ProductCardProps) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className={`card-hover group relative bg-white rounded-2xl sm:rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
+    >
+      {product.tag && (
+        <div className="absolute top-3 left-3 z-10">
+          <Badge className={`${product.tagColor} text-white font-bold text-xs rounded-xl px-2.5 py-1 shadow-md`}>
+            {product.tag}
+          </Badge>
+        </div>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${isFavorite ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "bg-white/80 hover:bg-kid-pink/20"}`}
+        onClick={(e) => { e.stopPropagation(); onToggleFavorite(product.id); }}
+      >
+        <motion.div animate={isJustFavorited ? { scale: [1, 1.4, 1] } : {}} transition={{ duration: 0.3 }}>
+          <Heart className={`h-4 w-4 transition-colors ${isFavorite ? "text-kid-pink" : "text-foreground/30 hover:text-kid-pink"}`} fill={isFavorite ? "currentColor" : "none"} />
+        </motion.div>
+      </Button>
+      <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden`}>
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md" />
+        ) : (
+          <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">{product.emoji}</span>
+        )}
+      </div>
+      <div className="p-2.5 sm:p-4 md:p-5">
+        <div className="flex items-center gap-1 mb-2">
+          {Array.from({ length: 5 }).map((_, j) => (
+            <Star key={j} className={`h-3.5 w-3.5 ${j < product.rating ? "fill-kid-yellow text-kid-yellow" : "fill-gray-200 text-gray-200"}`} />
+          ))}
+          <span className="text-xs text-foreground/40 ml-1">({product.reviews})</span>
+        </div>
+        <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">{product.name}</h3>
+        <p className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${isDescExpanded ? "" : "line-clamp-2"}`}>
+          {product.description}
+        </p>
+        <button type="button" onClick={(e) => { e.stopPropagation(); onToggleDesc(product.id); }}
+          className="text-[10px] sm:text-xs text-kid-blue font-semibold hover:text-kid-blue/70 hover:underline -mt-1.5 mb-1.5 block transition-colors">
+          {isDescExpanded ? "Ver menos ▲" : "Ver mais ▼"}
+        </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-baseline gap-1">
+            <span className="text-base sm:text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
+            {product.originalPrice && (
+              <span className="text-[10px] sm:text-xs text-foreground/30 line-through">R$ {product.originalPrice.toFixed(2)}</span>
+            )}
+          </div>
+        </div>
+        <motion.div whileTap={{ scale: 0.95 }} className="mt-2 sm:mt-3">
+          <Button
+            className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${isJustAdded ? "bg-kid-green text-white" : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"}`}
+            onClick={() => onAddToCart(product)}
+          >
+            {isJustAdded ? (
+              <span className="flex items-center justify-center gap-1">Adicionado! ✅</span>
+            ) : (
+              <span className="flex items-center justify-center gap-1"><ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Adicionar</span>
+            )}
+          </Button>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+});
+
 /* ─── Component ─────────────────────────────────────────── */
 
 export default function Home() {
@@ -304,15 +393,20 @@ export default function Home() {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const filteredProducts = activeSubcategory
+  const deferredSearch = useDeferredValue(searchQuery);
+
+  const filteredProducts = useMemo(() => {
+    const query = deferredSearch;
+    return activeSubcategory
     ? products.filter((p) => p.subcategory === activeSubcategory)
     : activeCategory
     ? products.filter((p) => p.category === activeCategory)
     : products.filter(
         (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchQuery.toLowerCase())
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.description.toLowerCase().includes(query.toLowerCase())
       );
+  }, [deferredSearch, activeCategory, activeSubcategory]);
 
   const addToCart = useCallback((product: (typeof products)[0]) => {
     setCartItems((prev) => {
@@ -1496,145 +1590,18 @@ export default function Home() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
             <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product, i) => (
-                <motion.div
+              {filteredProducts.map((product) => (
+                <ProductCard
                   key={product.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`card-hover group relative bg-white rounded-2xl sm:rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
-                >
-                  {/* Discount badge */}
-                  {product.tag && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <Badge className={`${product.tagColor} text-white font-bold text-xs rounded-xl px-2.5 py-1 shadow-md`}>
-                        {product.tag}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Favorite button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${
-                      favorites.has(product.id)
-                        ? "bg-kid-pink/15 hover:bg-kid-pink/25"
-                        : "bg-white/80 hover:bg-kid-pink/20"
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(product.id);
-                    }}
-                  >
-                    <motion.div
-                      animate={justFavorited === product.id ? { scale: [1, 1.4, 1] } : {}}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Heart className={`h-4 w-4 transition-colors ${
-                        favorites.has(product.id)
-                          ? "text-kid-pink"
-                          : "text-foreground/30 hover:text-kid-pink"
-                      }`} fill={favorites.has(product.id) ? "currentColor" : "none"} />
-                    </motion.div>
-                  </Button>
-
-                  {/* Product image */}
-                  <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden`}>
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
-                      />
-                    ) : (
-                      <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">
-                        {product.emoji}
-                      </span>
-                    )}
-                    {!product.image && (
-                      <>
-                        {/* Decorative background pattern */}
-                        <div className="absolute inset-0 opacity-5">
-                          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-current" />
-                          <div className="absolute bottom-4 left-3 w-6 h-6 rounded-lg bg-current rotate-12" />
-                          <div className="absolute top-1/2 left-1/2 w-20 h-20 rounded-full bg-current" />
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Product info */}
-                  <div className="p-2.5 sm:p-4 md:p-5">
-                    <div className="flex items-center gap-1 mb-2">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <Star
-                          key={j}
-                          className={`h-3.5 w-3.5 ${
-                            j < product.rating ? "fill-kid-yellow text-kid-yellow" : "fill-gray-200 text-gray-200"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-xs text-foreground/40 ml-1">({product.reviews})</span>
-                    </div>
-
-                    <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">
-                      {product.name}
-                    </h3>
-                    <p
-                      className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${
-                        expandedDescId === product.id ? "" : "line-clamp-2"
-                      }`}
-                    >
-                      {product.description}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedDescId(expandedDescId === product.id ? null : product.id);
-                      }}
-                      className="text-[10px] sm:text-xs text-kid-blue font-semibold hover:text-kid-blue/70 hover:underline -mt-1.5 mb-1.5 block transition-colors"
-                    >
-                      {expandedDescId === product.id ? "Ver menos ▲" : "Ver mais ▼"}
-                    </button>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-base sm:text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
-                        {product.originalPrice && (
-                          <span className="text-[10px] sm:text-xs text-foreground/30 line-through">
-                            R$ {product.originalPrice.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <motion.div whileTap={{ scale: 0.95 }} className="mt-2 sm:mt-3">
-                      <Button
-                        className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${
-                          justAdded === product.id
-                            ? "bg-kid-green text-white"
-                            : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"
-                        }`}
-                        onClick={() => addToCart(product)}
-                      >
-                        {justAdded === product.id ? (
-                          <span className="flex items-center justify-center gap-1">
-                            Adicionado! ✅
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center gap-1">
-                            <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            Adicionar
-                          </span>
-                        )}
-                      </Button>
-                    </motion.div>
-                  </div>
-                </motion.div>
+                  product={product}
+                  isFavorite={favorites.has(product.id)}
+                  isJustFavorited={justFavorited === product.id}
+                  isJustAdded={justAdded === product.id}
+                  isDescExpanded={expandedDescId === product.id}
+                  onToggleFavorite={toggleFavorite}
+                  onAddToCart={addToCart}
+                  onToggleDesc={(id) => setExpandedDescId(expandedDescId === id ? null : id)}
+                />
               ))}
             </AnimatePresence>
           </div>
