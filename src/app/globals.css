@@ -207,6 +207,12 @@
   animation: slide-in-up 0.6s ease-out forwards;
 }
 
+/* Float bounce — gentle up/down float */
+@keyframes float-bounce {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
 .animate-sparkle {
   animation: sparkle 1.5s ease-in-out infinite;
 }
