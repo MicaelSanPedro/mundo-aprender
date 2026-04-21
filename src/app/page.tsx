@@ -271,11 +271,12 @@ interface ProductCardProps {
   onToggleFavorite: (id: number) => void;
   onAddToCart: (product: (typeof products)[0]) => void;
   onToggleDesc: (id: number) => void;
+  onPreviewImage: (src: string, name: string) => void;
 }
 
 const ProductCard = memo(function ProductCard({
   product, isFavorite, isJustFavorited, isJustAdded, isDescExpanded,
-  onToggleFavorite, onAddToCart, onToggleDesc,
+  onToggleFavorite, onAddToCart, onToggleDesc, onPreviewImage,
 }: ProductCardProps) {
   return (
     <motion.div
@@ -302,13 +303,24 @@ const ProductCard = memo(function ProductCard({
           <Heart className={`h-4 w-4 transition-colors ${isFavorite ? "text-kid-pink" : "text-foreground/30 hover:text-kid-pink"}`} fill={isFavorite ? "currentColor" : "none"} />
         </motion.div>
       </Button>
-      <div className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden`}>
+      <button
+        type="button"
+        onClick={() => product.image && onPreviewImage(product.image, product.name)}
+        className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden w-full cursor-pointer group/img`}
+      >
         {product.image ? (
-          <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md" />
+          <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-300 drop-shadow-md" />
         ) : (
           <span className="text-3xl sm:text-6xl md:text-7xl group-hover:scale-110 transition-transform duration-300">{product.emoji}</span>
         )}
-      </div>
+        {product.image && (
+          <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 transition-colors duration-200 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 shadow-lg">
+              <Search className="h-5 w-5 text-kid-blue" />
+            </div>
+          </div>
+        )}
+      </button>
       <div className="p-2.5 sm:p-4 md:p-5">
         <div className="flex items-center gap-1 mb-2">
           {Array.from({ length: 5 }).map((_, j) => (
@@ -389,6 +401,7 @@ export default function Home() {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [expandedDescId, setExpandedDescId] = useState<number | null>(null);
+  const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1601,6 +1614,7 @@ export default function Home() {
                   onToggleFavorite={toggleFavorite}
                   onAddToCart={addToCart}
                   onToggleDesc={(id) => setExpandedDescId(expandedDescId === id ? null : id)}
+                  onPreviewImage={(src, name) => setPreviewImage({ src, name })}
                 />
               ))}
             </AnimatePresence>
@@ -2690,6 +2704,64 @@ export default function Home() {
           >
             <ChevronUp className="h-5 w-5" />
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════ IMAGE LIGHTBOX ═══════════════ */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
+            onClick={() => setPreviewImage(null)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+            {/* Close button */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[101] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 flex items-center justify-center hover:bg-white/25 hover:border-white/50 transition-all duration-200 group/close"
+            >
+              <X className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover/close:rotate-90 transition-transform duration-300" />
+            </motion.button>
+
+            {/* Product name */}
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ delay: 0.1 }}
+              className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[101] text-white/80 font-semibold text-sm sm:text-base bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 max-w-[60vw] truncate"
+            >
+              {previewImage.name}
+            </motion.p>
+
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              transition={{ type: "spring", stiffness: 250, damping: 25 }}
+              className="relative z-[101] max-w-full max-h-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl max-w-[90vw] max-h-[80vh] flex items-center justify-center">
+                <img
+                  src={previewImage.src}
+                  alt={previewImage.name}
+                  className="max-w-full max-h-[75vh] object-contain rounded-xl"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
