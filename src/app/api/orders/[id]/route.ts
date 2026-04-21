@@ -17,7 +17,6 @@ interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
-  abacatePayId?: string;
   emailSent?: boolean;
 }
 
