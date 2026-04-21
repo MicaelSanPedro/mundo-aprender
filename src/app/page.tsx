@@ -583,7 +583,7 @@ export default function Home() {
               <span className="text-2xl sm:text-3xl group-hover:animate-wiggle">🎒</span>
               <div className="flex flex-col leading-tight">
                 <span className="text-base sm:text-xl md:text-2xl font-black bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple bg-clip-text text-transparent">
-                  Mundo Alucinar
+                  Mundo Aprender
                 </span>
                 <span className="hidden sm:block text-[10px] md:text-xs text-kid-blue font-semibold -mt-0.5">
                   Brincar &bull; Criar &bull; Aprender ✨
@@ -964,7 +964,7 @@ export default function Home() {
                   <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                   <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-5 sm:p-6 text-white">
                     <span className="text-3xl sm:text-4xl">🎒</span>
-                    <h2 className="text-lg sm:text-xl font-bold mt-2">Mundo Alucinar</h2>
+                    <h2 className="text-lg sm:text-xl font-bold mt-2">Mundo Aprender</h2>
                     <p className="text-white/70 text-xs sm:text-sm">Brincar &bull; Criar &bull; Aprender ✨</p>
                   </div>
 
@@ -1814,7 +1814,7 @@ export default function Home() {
             className="text-center mb-12"
           >
             <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-green/10 text-kid-green font-semibold text-sm border-kid-green/20">
-              🌱 Sobre a Mundo Alucinar
+              🌱 Sobre a Mundo Aprender
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
               Transformando a <span className="text-kid-green">Educação</span> Brasileira
@@ -1829,7 +1829,7 @@ export default function Home() {
               viewport={{ once: true }}
             >
               <p className="text-lg text-foreground/70 leading-relaxed mb-6">
-                A <strong className="text-foreground">Mundo Alucinar</strong> nasceu da paixão por
+                A <strong className="text-foreground">Mundo Aprender</strong> nasceu da paixão por
                 tornar o aprendizado mais divertido e acessível para crianças brasileiras. Acreditamos
                 que cada criança merece materiais didáticos digitais que despertem curiosidade e criatividade.
               </p>
@@ -1999,7 +1999,7 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-3xl">🎒</span>
                 <span className="text-xl font-black bg-gradient-to-r from-kid-yellow to-kid-orange bg-clip-text text-transparent">
-                  Mundo Alucinar
+                  Mundo Aprender
                 </span>
               </div>
               <p className="text-sm text-white/50 leading-relaxed mb-4">
@@ -2135,7 +2135,7 @@ export default function Home() {
           {/* Bottom bar */}
           <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs text-white/30">
-              © 2026 Mundo Alucinar - Todos os direitos reservados. Feito com 💛 no Brasil
+              © 2026 Mundo Aprender - Todos os direitos reservados. Feito com 💛 no Brasil
             </p>
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {[
