@@ -50,15 +50,25 @@ import {
 /* ─── Data ─────────────────────────────────────────────── */
 
 const categories = [
-  { id: "matematica", emoji: "🔢", name: "Matemática", color: "bg-kid-blue", shadow: "shadow-kid-blue", hoverBorder: "hover:border-kid-blue" },
-  { id: "portugues", emoji: "📝", name: "Português", color: "bg-kid-pink", shadow: "shadow-kid-pink", hoverBorder: "hover:border-kid-pink" },
-  { id: "ciencias", emoji: "🔬", name: "Ciências", color: "bg-kid-green", shadow: "shadow-kid-green", hoverBorder: "hover:border-kid-green" },
-  { id: "historia", emoji: "📜", name: "História", color: "bg-kid-orange", shadow: "shadow-kid-orange", hoverBorder: "hover:border-kid-orange" },
-  { id: "geografia", emoji: "🌍", name: "Geografia", color: "bg-kid-purple", shadow: "shadow-kid-purple", hoverBorder: "hover:border-kid-purple" },
-  { id: "artes", emoji: "🎨", name: "Artes", color: "bg-kid-yellow", shadow: "shadow-kid-yellow", hoverBorder: "hover:border-kid-yellow" },
+  {
+    id: "matematica", emoji: "🔢", name: "Matemática", color: "bg-kid-blue", shadow: "shadow-kid-blue", hoverBorder: "hover:border-kid-blue",
+    subcategories: [
+      { id: "mat-historias", name: "Histórias Educativas", emoji: "📚" },
+      { id: "mat-atividades", name: "Atividades", emoji: "✏️" },
+      { id: "mat-jogos", name: "Jogos Matemáticos", emoji: "🎲" },
+    ],
+  },
+  {
+    id: "portugues", emoji: "📝", name: "Português", color: "bg-kid-pink", shadow: "shadow-kid-pink", hoverBorder: "hover:border-kid-pink",
+    subcategories: [
+      { id: "port-silabas", name: "Sílabas", emoji: "📖" },
+      { id: "port-historias", name: "Histórias Educativas", emoji: "📚" },
+      { id: "port-letramento", name: "Letramento", emoji: "✍️" },
+    ],
+  },
 ];
 
-const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; tag: string | null; tagColor: string; image?: string; link?: string }[] = [
+const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; subcategory: string; tag: string | null; tagColor: string; image?: string; link?: string }[] = [
   {
     id: 1,
     name: "O Código Secreto do Mundo",
@@ -70,7 +80,8 @@ const products: { id: number; name: string; description: string; price: number; 
     emoji: "🔢",
     bgColor: "bg-gradient-to-br from-kid-blue/10 to-kid-purple/10",
     borderHover: "hover:border-kid-blue/40",
-    category: "Matemática",
+    category: "portugues",
+    subcategory: "port-historias",
     tag: "Novo!",
     tagColor: "bg-kid-green/90 text-white",
     image: "/product-2.png",
@@ -256,6 +267,7 @@ export default function Home() {
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -292,7 +304,9 @@ export default function Home() {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const filteredProducts = activeCategory
+  const filteredProducts = activeSubcategory
+    ? products.filter((p) => p.subcategory === activeSubcategory)
+    : activeCategory
     ? products.filter((p) => p.category === activeCategory)
     : products.filter(
         (p) =>
@@ -1302,18 +1316,22 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+          {/* Main categories */}
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
             {categories.map((cat, i) => (
               <motion.button
                 key={cat.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-                whileHover={{ scale: 1.08, y: -6 }}
+                transition={{ delay: i * 0.15, duration: 0.4 }}
+                whileHover={{ scale: 1.05, y: -4 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                className={`relative group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
+                onClick={() => {
+                  setActiveCategory(activeCategory === cat.id ? null : cat.id);
+                  setActiveSubcategory(null);
+                }}
+                className={`relative group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                   activeCategory === cat.id
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
                     : `bg-white ${cat.hoverBorder} hover:shadow-lg`
@@ -1326,10 +1344,10 @@ export default function Home() {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-                <span className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
+                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
                   {cat.emoji}
                 </span>
-                <span className="font-bold text-xs sm:text-sm md:text-base text-center leading-tight">{cat.name}</span>
+                <span className="font-bold text-sm sm:text-lg md:text-xl text-center leading-tight">{cat.name}</span>
                 <span className="text-[10px] sm:text-xs text-foreground/40 font-medium">{products.filter(p => p.category === cat.id).length} itens</span>
                 {activeCategory === cat.id && (
                   <motion.div
@@ -1344,20 +1362,77 @@ export default function Home() {
             ))}
           </div>
 
-          {activeCategory && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mt-6 text-center"
-            >
-              <p className="text-foreground/60">
-                Mostrando produtos de{" "}
-                <span className="font-bold text-kid-orange capitalize">
-                  {categories.find((c) => c.id === activeCategory)?.name}
-                </span>
-              </p>
-            </motion.div>
-          )}
+          {/* Subcategories */}
+          <AnimatePresence>
+            {activeCategory && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-8"
+              >
+                <p className="text-center text-sm font-semibold text-foreground/50 mb-4">
+                  Subcategorias de{" "}
+                  <span className="text-kid-orange">
+                    {categories.find((c) => c.id === activeCategory)?.emoji}{" "}
+                    {categories.find((c) => c.id === activeCategory)?.name}
+                  </span>
+                </p>
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                  {categories
+                    .find((c) => c.id === activeCategory)
+                    ?.subcategories.map((sub, i) => (
+                    <motion.button
+                      key={sub.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.08, duration: 0.25 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setActiveSubcategory(activeSubcategory === sub.id ? null : sub.id)}
+                      className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border-2 text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                        activeSubcategory === sub.id
+                          ? "bg-kid-orange text-white border-kid-orange shadow-md"
+                          : "bg-white text-foreground/70 border-foreground/10 hover:border-kid-orange/40 hover:text-kid-orange"
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg">{sub.emoji}</span>
+                      <span>{sub.name}</span>
+                      {activeSubcategory === sub.id && (
+                        <X className="h-3 w-3 ml-0.5" />
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+
+                {/* Active filter summary */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 text-center"
+                >
+                  <p className="text-foreground/50 text-sm">
+                    {activeSubcategory ? (
+                      <>
+                        Mostrando{" "}
+                        <span className="font-bold text-kid-orange">
+                          {categories.find((c) => c.id === activeCategory)?.subcategories.find((s) => s.id === activeSubcategory)?.name}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        Mostrando todos os produtos de{" "}
+                        <span className="font-bold text-kid-orange">
+                          {categories.find((c) => c.id === activeCategory)?.name}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
@@ -1382,21 +1457,22 @@ export default function Home() {
                   : "Nenhum produto encontrado para essa busca"}
               </p>
             </motion.div>
-          ) : activeCategory ? (
+          ) : activeCategory || activeSubcategory ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-12"
             >
               <Badge className="mb-3 px-4 py-1 rounded-full bg-kid-purple/10 text-kid-purple font-semibold text-sm border-kid-purple/20">
-                📂 Categoria Selecionada
+                📂 {activeSubcategory ? "Subcategoria" : "Categoria"} Selecionada
               </Badge>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground">
-                {categories.find((c) => c.id === activeCategory)?.emoji}{" "}
-                {categories.find((c) => c.id === activeCategory)?.name}
+                {activeSubcategory
+                  ? `${categories.find((c) => c.id === activeCategory)?.subcategories.find((s) => s.id === activeSubcategory)?.emoji} ${categories.find((c) => c.id === activeCategory)?.subcategories.find((s) => s.id === activeSubcategory)?.name}`
+                  : `${categories.find((c) => c.id === activeCategory)?.emoji} ${categories.find((c) => c.id === activeCategory)?.name}`}
               </h2>
               <p className="mt-3 text-foreground/60 max-w-lg mx-auto">
-                {filteredProducts.length} produto{filteredProducts.length === 1 ? "" : "s"} nesta categoria
+                {filteredProducts.length} produto{filteredProducts.length === 1 ? "" : "s"} {activeSubcategory ? "nesta subcategoria" : "nesta categoria"}
               </p>
             </motion.div>
           ) : (
@@ -1592,7 +1668,7 @@ export default function Home() {
 
               <Button
                 className="mt-6 rounded-2xl bg-kid-blue text-white font-semibold hover:shadow-kid-blue hover:scale-105 transition-all duration-300"
-                onClick={() => { setSearchQuery(""); setActiveCategory(null); }}
+                onClick={() => { setSearchQuery(""); setActiveCategory(null); setActiveSubcategory(null); }}
               >
                 Ver Todos os Produtos
               </Button>
@@ -1986,12 +2062,29 @@ export default function Home() {
                     <button
                       onClick={() => {
                         setActiveCategory(cat.id);
+                        setActiveSubcategory(null);
                         document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
                       }}
-                      className="text-sm text-white/50 hover:text-kid-yellow transition-colors flex items-center gap-1.5"
+                      className="text-sm text-white/50 hover:text-kid-yellow transition-colors flex items-center gap-1.5 font-semibold"
                     >
                       <span>{cat.emoji}</span> {cat.name}
                     </button>
+                    <ul className="ml-6 mt-1 space-y-1">
+                      {cat.subcategories.map((sub) => (
+                        <li key={sub.id}>
+                          <button
+                            onClick={() => {
+                              setActiveCategory(cat.id);
+                              setActiveSubcategory(sub.id);
+                              document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="text-xs text-white/35 hover:text-kid-yellow/80 transition-colors flex items-center gap-1"
+                          >
+                            <span>{sub.emoji}</span> {sub.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
                 ))}
               </ul>
