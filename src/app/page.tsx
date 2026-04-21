@@ -89,6 +89,13 @@ const products: { id: number; name: string; description: string; price: number; 
   },
 ];
 
+// Quick lookup: subcategory id → { name, emoji }
+const subcategoryMap = Object.fromEntries(
+  categories.flatMap((cat) =>
+    cat.subcategories.map((sub) => [sub.id, { name: sub.name, emoji: sub.emoji }])
+  )
+);
+
 const navLinks = [
   { label: "Início", href: "#inicio" },
   { label: "Categorias", href: "#categorias" },
@@ -328,6 +335,14 @@ const ProductCard = memo(function ProductCard({
           ))}
           <span className="text-xs text-foreground/40 ml-1">({product.reviews})</span>
         </div>
+        {(() => {
+          const sub = subcategoryMap[product.subcategory];
+          return sub ? (
+            <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-kid-blue/70 bg-kid-blue/8 border border-kid-blue/15 rounded-lg px-2 py-0.5 font-medium mb-1.5">
+              {sub.emoji} {sub.name}
+            </span>
+          ) : null;
+        })()}
         <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">{product.name}</h3>
         <p className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${isDescExpanded ? "" : "line-clamp-2"}`}>
           {product.description}
