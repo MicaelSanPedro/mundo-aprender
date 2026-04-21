@@ -2715,49 +2715,53 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
             onClick={() => setPreviewImage(null)}
           >
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-            {/* Close button */}
-            <motion.button
-              initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              onClick={() => setPreviewImage(null)}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[101] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 flex items-center justify-center hover:bg-white/25 hover:border-white/50 transition-all duration-200 group/close"
-            >
-              <X className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover/close:rotate-90 transition-transform duration-300" />
-            </motion.button>
+            {/* Top bar: title + close button — always above image */}
+            <div className="relative z-[110] flex items-center justify-between w-full px-4 pt-3 pb-2 sm:px-8 sm:pt-5 sm:pb-3 shrink-0">
+              {/* Product name */}
+              <motion.p
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ delay: 0.1 }}
+                className="text-white/90 font-semibold text-xs sm:text-base bg-white/10 backdrop-blur-md rounded-full px-3 py-1 sm:px-4 sm:py-1.5 border border-white/20 max-w-[55vw] sm:max-w-[60vw] truncate"
+              >
+                {previewImage.name}
+              </motion.p>
 
-            {/* Product name */}
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: 0.1 }}
-              className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[101] text-white/80 font-semibold text-sm sm:text-base bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 max-w-[60vw] truncate"
-            >
-              {previewImage.name}
-            </motion.p>
+              {/* Close button */}
+              <motion.button
+                initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                onClick={() => setPreviewImage(null)}
+                className="shrink-0 ml-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md border-2 border-white/30 flex items-center justify-center hover:bg-white/25 hover:border-white/50 active:scale-90 transition-all duration-200 group/close"
+              >
+                <X className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover/close:rotate-90 transition-transform duration-300" />
+              </motion.button>
+            </div>
 
-            {/* Image */}
+            {/* Image container — fills remaining space */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
               transition={{ type: "spring", stiffness: 250, damping: 25 }}
-              className="relative z-[101] max-w-full max-h-full"
+              className="relative z-[105] flex-1 min-h-0 w-full flex items-center justify-center px-3 pb-4 sm:px-6 sm:pb-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl max-w-[90vw] max-h-[80vh] flex items-center justify-center">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-5 shadow-2xl max-w-full max-h-full flex items-center justify-center">
                 <img
                   src={previewImage.src}
                   alt={previewImage.name}
-                  className="max-w-full max-h-[75vh] object-contain rounded-xl"
+                  className="max-w-full max-h-full object-contain rounded-xl"
+                  style={{ maxHeight: 'calc(100dvh - 90px)' }}
                 />
               </div>
             </motion.div>
