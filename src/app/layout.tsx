@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Mundo Aprender" }],
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
   },
 };
 
