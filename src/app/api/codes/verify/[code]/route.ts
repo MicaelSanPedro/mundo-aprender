@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import kv from "@vercel/kv";
 
 const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
 
@@ -44,6 +45,16 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json({ valid: false, error: "Produto não encontrado" });
+    }
+
+    // Check if code was already used (single-use)
+    try {
+      const used = await kv.get(`used:${clean}`);
+      if (used) {
+        return NextResponse.json({ valid: false, used: true, error: "Este código já foi utilizado" });
+      }
+    } catch {
+      // KV not configured yet — skip used check
     }
 
     return NextResponse.json({

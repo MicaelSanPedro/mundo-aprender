@@ -3145,23 +3145,26 @@ export default function Home() {
                       ))}
                     </div>
 
-                    <button
+                    <Button
                       onClick={() => {
                         setActivateStep("input");
                         setActivateCode("");
                         setActivateError("");
                       }}
-                      className="text-xs text-kid-blue font-semibold hover:text-kid-blue/70 transition-colors"
+                      variant="outline"
+                      className="w-full h-11 rounded-2xl border-2 border-dashed border-kid-blue/30 text-kid-blue hover:bg-kid-blue/5 hover:border-kid-blue/50 font-bold text-sm transition-all"
                     >
-                      + Ativar outro produto
-                    </button>
+                      <Plus className="h-4 w-4 mr-1.5" />
+                      Ativar outro produto
+                    </Button>
 
-                    <button
+                    <Button
                       onClick={closeActivate}
-                      className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors"
+                      variant="ghost"
+                      className="w-full h-10 rounded-2xl text-foreground/40 hover:text-foreground/60 text-xs"
                     >
                       Fechar
-                    </button>
+                    </Button>
                   </motion.div>
                 )}
               </div>
