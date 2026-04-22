@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import AcceptanceModal, { hasAcceptedTerms } from "@/components/acceptance-modal";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -803,26 +802,9 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
   const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
-  // Terms acceptance gate
-  const [showAcceptModal, setShowAcceptModal] = useState(false);
-  const pendingActionRef = useRef<(() => void) | null>(null);
-
-  const requireTermsAcceptance = useCallback((action: () => void) => {
-    if (hasAcceptedTerms()) {
-      action();
-    } else {
-      pendingActionRef.current = action;
-      setShowAcceptModal(true);
-    }
-  }, []);
-
-  const handleTermsAccepted = useCallback(() => {
-    setShowAcceptModal(false);
-    if (pendingActionRef.current) {
-      pendingActionRef.current();
-      pendingActionRef.current = null;
-    }
-  }, []);
+  // Terms checkbox for checkout
+  const [checkoutTermsAccepted, setCheckoutTermsAccepted] = useState(false);
+  const [activateTermsAccepted, setActivateTermsAccepted] = useState(false);
 
   // Activation code state
   const [activateOpen, setActivateOpen] = useState(false);
@@ -930,15 +912,14 @@ export default function Home() {
 
   // Open checkout from cart
   const openCheckout = () => {
-    requireTermsAcceptance(() => {
-      setCheckoutStep(1);
-      setCustomer({ name: "", email: "", phone: "" });
-      setCompletedOrder(null);
-      setPaymentResult(null);
-      setPaymentResultOrder(null);
-      setCartOpen(false);
-      setTimeout(() => setCheckoutOpen(true), 200);
-    });
+    setCheckoutStep(1);
+    setCustomer({ name: "", email: "", phone: "" });
+    setCompletedOrder(null);
+    setPaymentResult(null);
+    setPaymentResultOrder(null);
+    setCheckoutTermsAccepted(false);
+    setCartOpen(false);
+    setTimeout(() => setCheckoutOpen(true), 200);
   };
 
   // Submit order — manual PIX payment
@@ -1024,17 +1005,16 @@ export default function Home() {
 
   // When opening the modal, show activated products if any
   const openActivate = () => {
-    requireTermsAcceptance(() => {
-      setActivateOpen(true);
-      if (activatedProducts.length > 0) {
-        setActivateStep("activated");
-        setActivateProduct(activatedProducts[0]);
-      } else {
-        setActivateStep("input");
-        setActivateCode("");
-        setActivateError("");
-      }
-    });
+    setActivateOpen(true);
+    setActivateTermsAccepted(false);
+    if (activatedProducts.length > 0) {
+      setActivateStep("activated");
+      setActivateProduct(activatedProducts[0]);
+    } else {
+      setActivateStep("input");
+      setActivateCode("");
+      setActivateError("");
+    }
   };
 
   const sendConfirmationEmailJS = useCallback(async (order: Order) => {
@@ -2911,10 +2891,29 @@ export default function Home() {
                   <p className="text-white/70 text-xs mt-1">Download imediato após pagamento 📥</p>
                 </div>
 
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={checkoutTermsAccepted}
+                    onChange={(e) => setCheckoutTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-kid-green focus:ring-kid-green accent-[#69DB7C]"
+                  />
+                  <span className="text-xs text-foreground/60 leading-relaxed">
+                    Li e concordo com os{" "}
+                    <Link href="/termos-de-uso" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                      Termos de Uso
+                    </Link>{" "}
+                    e a{" "}
+                    <Link href="/politica-de-privacidade" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                      Politica de Privacidade
+                    </Link>
+                  </span>
+                </label>
+
                 <Button
                   className="w-full rounded-2xl bg-gradient-to-r from-kid-green to-[#2f9e5a] hover:from-[#2f9e5a] hover:to-[#228b4d] text-white font-bold text-lg py-6 shadow-kid-green/30"
                   onClick={handleCheckout}
-                  disabled={checkoutLoading}
+                  disabled={checkoutLoading || !checkoutTermsAccepted}
                 >
                   {checkoutLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -2927,6 +2926,9 @@ export default function Home() {
                     </span>
                   )}
                 </Button>
+                {!checkoutTermsAccepted && (
+                  <p className="text-center text-[10px] text-kid-orange">Aceite os termos acima para continuar</p>
+                )}
               </motion.div>
             )}
 
@@ -3130,10 +3132,29 @@ export default function Home() {
                       </motion.p>
                     )}
 
+                    <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={activateTermsAccepted}
+                        onChange={(e) => setActivateTermsAccepted(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 rounded border-gray-300 text-kid-green focus:ring-kid-green accent-[#69DB7C]"
+                      />
+                      <span className="text-xs text-foreground/60 leading-relaxed">
+                        Li e concordo com os{" "}
+                        <Link href="/termos-de-uso" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                          Termos de Uso
+                        </Link>{" "}
+                        e a{" "}
+                        <Link href="/politica-de-privacidade" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                          Politica de Privacidade
+                        </Link>
+                      </span>
+                    </label>
+
                     <Button
                       onClick={handleActivateCode}
                       className="w-full h-13 rounded-2xl bg-gradient-to-r from-kid-purple to-kid-blue text-white font-bold text-sm shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98]"
-                      disabled={activateCode.replace(/-/g, "").length < 16}
+                      disabled={activateCode.replace(/-/g, "").length < 16 || !activateTermsAccepted}
                     >
                       Ativar
                     </Button>
@@ -3307,9 +3328,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Terms Acceptance Modal */}
-      <AcceptanceModal isOpen={showAcceptModal} onClose={handleTermsAccepted} />
     </div>
   );
 }
