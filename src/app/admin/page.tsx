@@ -145,14 +145,22 @@ export default function AdminPage() {
             </div>
             <h1 className="text-sm font-bold text-foreground">Gerar Códigos</h1>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => { setAuthenticated(false); setPassword(""); setLastCode(null); }}
-            className="rounded-xl text-xs text-foreground/40"
-          >
-            Sair
-          </Button>
+          <div className="flex items-center gap-1">
+            <a
+              href="/"
+              className="rounded-xl text-xs text-kid-blue hover:text-kid-blue/70 bg-kid-blue/10 hover:bg-kid-blue/15 px-2.5 py-1.5 transition-colors"
+            >
+              ← Voltar ao site
+            </a>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setAuthenticated(false); setPassword(""); setLastCode(null); }}
+              className="rounded-xl text-xs text-foreground/40"
+            >
+              Sair
+            </Button>
+          </div>
         </div>
       </div>
 
