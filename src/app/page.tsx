@@ -601,9 +601,9 @@ function InteractiveBook() {
         <button
           onClick={() => flip("prev")}
           disabled={spread === 0 || isAnimating}
-          className="flex items-center gap-1.5 text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium px-3 py-1.5 rounded-xl hover:bg-white/10 active:scale-95"
+          className="flex items-center gap-1.5 text-white/90 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all duration-200 text-sm font-semibold px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 shadow-md backdrop-blur-sm"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
           <span className="hidden sm:inline">Anterior</span>
         </button>
 
@@ -632,10 +632,10 @@ function InteractiveBook() {
         <button
           onClick={() => flip("next")}
           disabled={spread >= totalSpreads - 1 || isAnimating}
-          className="flex items-center gap-1.5 text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium px-3 py-1.5 rounded-xl hover:bg-white/10 active:scale-95"
+          className="flex items-center gap-1.5 text-white/90 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all duration-200 text-sm font-semibold px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 shadow-md backdrop-blur-sm"
         >
           <span className="hidden sm:inline">Próximo</span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
 
