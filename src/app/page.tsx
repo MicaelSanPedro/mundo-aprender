@@ -762,7 +762,13 @@ const ProductCard = memo(function ProductCard({
 /* ─── Component ─────────────────────────────────────────── */
 
 export default function Home() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("mundo-carrinho");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -793,7 +799,6 @@ export default function Home() {
   const [paymentResultLoading, setPaymentResultLoading] = useState(false);
 
   // Order history state
-  const [ordersOpen, setOrdersOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -826,6 +831,13 @@ export default function Home() {
       localStorage.setItem("mundo-ativados", JSON.stringify(activatedProducts));
     }
   }, [activatedProducts]);
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("mundo-carrinho", JSON.stringify(cartItems));
+    } catch {}
+  }, [cartItems]);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1272,208 +1284,6 @@ export default function Home() {
                 )}
               </Button>
 
-              {/* Orders history - desktop only (mobile: inside ☰ menu) */}
-              <Sheet open={ordersOpen} onOpenChange={setOrdersOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:inline-flex rounded-2xl hover:bg-kid-green/20 h-9 w-9 sm:h-10 sm:w-10"
-                    onClick={openOrders}
-                  >
-                    <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
-                  <SheetTitle className="sr-only">Meus Pedidos</SheetTitle>
-                  <div className="bg-gradient-to-r from-kid-green to-kid-teal p-6 text-white">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <ClipboardList className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">Meus Pedidos</h2>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-xl hover:bg-white/20 text-white"
-                        onClick={fetchOrders}
-                        disabled={ordersLoading}
-                      >
-                        <RefreshCw className={`h-4 w-4 ${ordersLoading ? "animate-spin" : ""}`} />
-                      </Button>
-                    </div>
-                    <p className="text-white/80 text-sm mt-1">Acompanhe seus pedidos</p>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
-                    {ordersLoading ? (
-                      <div className="flex flex-col items-center justify-center py-12">
-                        <Loader2 className="h-8 w-8 text-kid-green animate-spin mb-3" />
-                        <p className="text-sm text-foreground/50">Carregando pedidos...</p>
-                      </div>
-                    ) : orders.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <span className="text-6xl mb-4">📥</span>
-                        <p className="text-lg font-semibold text-foreground/60">Nenhum pedido ainda</p>
-                        <p className="text-sm text-foreground/40 mt-1">Faça sua primeira compra!</p>
-                        <Button
-                          className="mt-4 rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-semibold"
-                          onClick={() => setOrdersOpen(false)}
-                        >
-                          Ver Produtos
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {orders.map((order) => {
-                          const sc = statusConfig[order.status] || statusConfig["em processamento"];
-                          const StatusIcon = sc.icon;
-                          const isExpanded = expandedOrderId === order.id;
-                          const isCancelable = order.status === "em processamento";
-                          return (
-                            <motion.div
-                              key={order.id}
-                              layout
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="bg-white rounded-2xl border-2 border-kid-green/20 overflow-hidden shadow-sm"
-                            >
-                              {/* Order header */}
-                              <button
-                                className="w-full text-left p-4"
-                                onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-bold text-sm text-kid-green">{order.orderNumber}</span>
-                                  <ChevronDown className={`h-4 w-4 text-foreground/40 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-foreground/50">{formatDate(order.createdAt)}</span>
-                                  <Badge className={`${sc.bgColor} ${sc.color} border text-[10px] font-bold rounded-full px-2 py-0.5`}>
-                                    <StatusIcon className="h-2.5 w-2.5 mr-1" />
-                                    {sc.label}
-                                  </Badge>
-                                </div>
-                                <p className="text-lg font-black text-kid-orange mt-1">R$ {order.total.toFixed(2)}</p>
-                              </button>
-
-                              {/* Expanded details */}
-                              <AnimatePresence>
-                                {isExpanded && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="overflow-hidden"
-                                  >
-                                    <div className="px-4 pb-4 border-t border-kid-green/10 pt-3">
-                                      <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido (Digital PDF):</p>
-                                      <div className="space-y-2">
-                                        {order.items.map((item) => {
-                                          const prod = products.find((p) => p.id === item.id);
-                                          return (
-                                            <div key={item.id} className="flex items-center gap-2 bg-kid-green/5 rounded-xl p-2">
-                                              <span className="text-xl">{item.emoji}</span>
-                                              <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold truncate">{item.name}</p>
-                                                <div className="flex items-center gap-1 mt-0.5">
-                                                  <FileText className="h-2.5 w-2.5 text-kid-blue" />
-                                                  <p className="text-[10px] text-kid-blue font-medium">PDF Digital</p>
-                                                  <p className="text-[10px] text-foreground/30">• Qtd: {item.quantity}</p>
-                                                </div>
-                                              </div>
-                                              <span className="text-xs font-bold text-kid-orange">R$ {(item.price * item.quantity).toFixed(2)}</span>
-                                              {(order.status === "enviado" || order.status === "entregue") && prod?.link && (
-                                                <a
-                                                  href={prod.link}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="flex-shrink-0 w-7 h-7 rounded-lg bg-kid-blue/10 hover:bg-kid-blue/20 flex items-center justify-center transition-colors"
-                                                  title="Baixar PDF"
-                                                >
-                                                  <Download className="h-3.5 w-3.5 text-kid-blue" />
-                                                </a>
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-
-                                      <div className="mt-3 pt-3 border-t border-kid-green/10">
-                                        <p className="text-xs text-foreground/50 mb-1">
-                                          👤 {order.customer.name} — {order.customer.email}
-                                        </p>
-                                      </div>
-
-                                      {/* Status update buttons */}
-                                      <div className="mt-3 flex flex-wrap gap-2">
-                                        {order.status !== "entregue" && order.status !== "cancelado" && (
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="text-[10px] rounded-xl border-kid-blue/30 text-kid-blue hover:bg-kid-blue/10"
-                                            onClick={() => updateOrderStatus(order.id, "enviado")}
-                                          >
-                                            <Download className="h-3 w-3 mr-1" /> Liberar Download
-                                          </Button>
-                                        )}
-                                        {order.status === "enviado" && (
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="text-[10px] rounded-xl border-kid-green/30 text-kid-green hover:bg-kid-green/10"
-                                            onClick={() => updateOrderStatus(order.id, "entregue")}
-                                          >
-                                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar Concluído
-                                          </Button>
-                                        )}
-                                        {isCancelable && (
-                                          <>
-                                            {cancelConfirmId === order.id ? (
-                                              <div className="flex gap-1">
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  className="text-[10px] rounded-xl border-kid-red/30 text-kid-red hover:bg-kid-red/10"
-                                                  onClick={() => cancelOrder(order.id)}
-                                                >
-                                                  Confirmar
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  className="text-[10px] rounded-xl"
-                                                  onClick={() => setCancelConfirmId(null)}
-                                                >
-                                                  Voltar
-                                                </Button>
-                                              </div>
-                                            ) : (
-                                              <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="text-[10px] rounded-xl border-kid-red/30 text-kid-red hover:bg-kid-red/10"
-                                                onClick={() => setCancelConfirmId(order.id)}
-                                              >
-                                                <Trash2 className="h-3 w-3 mr-1" /> Cancelar Pedido
-                                              </Button>
-                                            )}
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
 
               {/* Activate code - desktop only (mobile: inside ☰ menu) */}
               <Button
@@ -1705,17 +1515,6 @@ export default function Home() {
                           )}
                         </div>
                         <span className="text-[11px] font-semibold text-foreground/60">Carrinho</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setTimeout(() => openOrders(), 250);
-                        }}
-                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-green/5 hover:bg-kid-green/10 border border-kid-green/10 transition-all"
-                      >
-                        <ClipboardList className="h-5 w-5 text-foreground/40" />
-                        <span className="text-[11px] font-semibold text-foreground/60">Pedidos</span>
                       </button>
 
                       <button
@@ -2913,8 +2712,19 @@ export default function Home() {
                   </div>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckoutOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-foreground/50 hover:text-foreground/70 transition-colors py-2 mt-4 cursor-pointer"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Voltar para a loja
+                </button>
+
                 <Button
-                  className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink text-white font-bold text-lg py-6 shadow-kid-orange mt-6"
+                  className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink text-white font-bold text-lg py-6 shadow-kid-orange mt-2"
                   onClick={saveCustomerAndAdvance}
                   disabled={!customer.name || !customer.email}
                 >
