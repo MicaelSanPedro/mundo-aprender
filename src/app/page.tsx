@@ -901,12 +901,12 @@ export default function Home() {
   const [pixCopied, setPixCopied] = useState(false);
   const copyPixCode = async () => {
     try {
-      await navigator.clipboard.writeText("00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362.");
+      await navigator.clipboard.writeText("00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362");
       setPixCopied(true);
       setTimeout(() => setPixCopied(false), 2500);
     } catch {
       const ta = document.createElement("textarea");
-      ta.value = "00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362.";
+      ta.value = "00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362";
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
