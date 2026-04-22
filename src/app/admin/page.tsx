@@ -1,38 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   KeyRound,
   Plus,
   Copy,
-  Trash2,
   Check,
-  X,
   Shield,
   Loader2,
-  RefreshCw,
-  ExternalLink,
 } from "lucide-react";
 
-interface ActivationCode {
-  id: string;
-  code: string;
-  productId: number;
-  productName: string;
-  productEmoji: string;
-  productLink: string;
-  productPrice: number;
-  createdAt: string;
-  usedAt: string | null;
-  activatedBy: string | null;
-}
-
-// Products available for code generation
 const productOptions = [
-  { id: 1, name: "O Código Secreto do Mundo", emoji: "🔢", price: 4.99, link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk" },
+  { id: 1, name: "O Código Secreto do Mundo", emoji: "🔢", price: 4.99 },
 ];
 
 export default function AdminPage() {
@@ -41,30 +23,11 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
 
-  const [codes, setCodes] = useState<ActivationCode[]>([]);
-  const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(0);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [lastCode, setLastCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [createError, setCreateError] = useState("");
-
-  const fetchCodes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/codes?password=${encodeURIComponent(password)}`);
-      if (res.status === 401) {
-        setAuthenticated(false);
-        return;
-      }
-      const data = await res.json();
-      setCodes(data);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, [password]);
 
   const handleLogin = async () => {
     setLoginLoading(true);
@@ -75,8 +38,6 @@ export default function AdminPage() {
         setLoginError("Senha incorreta");
         return;
       }
-      const data = await res.json();
-      setCodes(data);
       setAuthenticated(true);
     } catch {
       setLoginError("Erro de conexão");
@@ -90,26 +51,18 @@ export default function AdminPage() {
     if (!product) return;
     setCreating(true);
     setCreateError("");
+    setCopied(false);
     try {
       const res = await fetch("/api/codes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password,
-          productId: product.id,
-          productName: product.name,
-          productEmoji: product.emoji,
-          productLink: product.link,
-          productPrice: product.price,
-        }),
+        body: JSON.stringify({ password, productId: product.id }),
       });
       const data = await res.json();
       if (res.status === 201) {
-        setCodes((prev) => [data, ...prev]);
-        setCopiedId(data.id);
-        setTimeout(() => setCopiedId(null), 3000);
+        setLastCode(data.code);
       } else {
-        setCreateError(data.error || "Erro ao criar código");
+        setCreateError(data.error || "Erro ao criar");
       }
     } catch {
       setCreateError("Erro de conexão");
@@ -118,44 +71,22 @@ export default function AdminPage() {
     }
   };
 
-  const deleteCode = async (codeId: string) => {
-    try {
-      const res = await fetch("/api/codes", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, codeId }),
-      });
-      if (res.ok) {
-        setCodes((prev) => prev.filter((c) => c.id !== codeId));
-        setDeleteConfirmId(null);
-      }
-    } catch {
-      // silent
-    }
-  };
-
-  const copyCode = (code: string, id: string) => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
+  const copyCode = () => {
+    if (!lastCode) return;
+    navigator.clipboard.writeText(lastCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
       const ta = document.createElement("textarea");
-      ta.value = code;
+      ta.value = lastCode;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     });
   };
-
-  useEffect(() => {
-    if (authenticated) fetchCodes();
-  }, [authenticated, fetchCodes]);
-
-  const activeCodes = codes.filter((c) => !c.usedAt);
-  const usedCodes = codes.filter((c) => c.usedAt);
 
   // ─── Login Screen ──────────────────────────────────
   if (!authenticated) {
@@ -207,52 +138,37 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-kid-purple/10 flex items-center justify-center">
               <KeyRound className="h-4.5 w-4.5 text-kid-purple" />
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-foreground">Códigos de Ativação</h1>
-              <p className="text-[10px] text-foreground/40">{activeCodes.length} disponíveis · {usedCodes.length} usados</p>
-            </div>
+            <h1 className="text-sm font-bold text-foreground">Gerar Códigos</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={fetchCodes}
-              disabled={loading}
-              className="rounded-xl text-xs"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} />
-              Atualizar
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setAuthenticated(false); setPassword(""); }}
-              className="rounded-xl text-xs text-foreground/40"
-            >
-              Sair
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setAuthenticated(false); setPassword(""); setLastCode(null); }}
+            className="rounded-xl text-xs text-foreground/40"
+          >
+            Sair
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
-        {/* Create new code */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4">
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+        {/* Generate */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5">
           <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <Plus className="h-4 w-4 text-kid-green" />
-            Gerar Novo Código
+            Novo Código
           </h2>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="space-y-3">
             <select
               value={selectedProduct}
               onChange={(e) => setSelectedProduct(Number(e.target.value))}
-              className="flex-1 h-10 rounded-xl border border-gray-200 px-3 text-sm bg-gray-50 focus:outline-none focus:border-kid-purple/50"
+              className="w-full h-11 rounded-xl border border-gray-200 px-3 text-sm bg-gray-50 focus:outline-none focus:border-kid-purple/50"
             >
               {productOptions.map((p, i) => (
                 <option key={p.id} value={i}>{p.emoji} {p.name} — R$ {p.price.toFixed(2)}</option>
@@ -262,121 +178,62 @@ export default function AdminPage() {
             <Button
               onClick={createCode}
               disabled={creating}
-              className="h-10 rounded-xl bg-kid-green hover:bg-kid-green/90 text-white font-bold text-sm"
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-kid-purple to-kid-blue text-white font-bold text-sm"
             >
               {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                 <>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Gerar
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  Gerar Código
                 </>
               )}
             </Button>
-          </div>
 
-          {createError && (
-            <p className="text-xs font-semibold text-red-500 mt-2">{createError}</p>
-          )}
+            {createError && (
+              <p className="text-xs font-semibold text-red-500">{createError}</p>
+            )}
+          </div>
         </div>
 
-        {/* Active codes */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-kid-green" />
-              Códigos Disponíveis ({activeCodes.length})
-            </h2>
-          </div>
+        {/* Generated code display */}
+        {lastCode && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl border-2 border-kid-green/30 p-5 text-center"
+          >
+            <p className="text-xs text-foreground/50 font-medium mb-2">Código gerado com sucesso!</p>
 
-          {activeCodes.length === 0 ? (
-            <p className="text-xs text-foreground/40 text-center py-6">Nenhum código disponível</p>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {activeCodes.map((code) => (
-                <div key={code.id} className="px-4 py-3 flex items-center gap-3">
-                  <span className="text-lg">{code.productEmoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground truncate">{code.productName}</p>
-                    <p className="text-[10px] text-foreground/40 font-mono">{code.code}</p>
-                    <p className="text-[10px] text-foreground/30">{new Date(code.createdAt).toLocaleString("pt-BR")}</p>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {copiedId === code.id ? (
-                      <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs text-kid-green bg-kid-green/10">
-                        <Check className="h-3 w-3 mr-1" />
-                        Copiado!
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyCode(code.code, code.id)}
-                        className="h-8 rounded-lg text-xs bg-kid-blue/10 text-kid-blue hover:bg-kid-blue/20"
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copiar
-                      </Button>
-                    )}
-                    {deleteConfirmId === code.id ? (
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteCode(code.id)}
-                          className="h-8 rounded-lg text-xs text-red-600 bg-red-50 hover:bg-red-100"
-                        >
-                          Confirmar
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteConfirmId(null)}
-                          className="h-8 rounded-lg text-xs"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteConfirmId(code.id)}
-                        className="h-8 w-8 rounded-lg text-foreground/30 hover:text-red-500 hover:bg-red-50 p-0"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Used codes */}
-        {usedCodes.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gray-300" />
-                Códigos Utilizados ({usedCodes.length})
-              </h2>
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+              <p className="text-2xl sm:text-3xl font-mono font-bold tracking-[0.15em] text-foreground select-all">
+                {lastCode}
+              </p>
             </div>
 
-            <div className="divide-y divide-gray-50">
-              {usedCodes.map((code) => (
-                <div key={code.id} className="px-4 py-3 flex items-center gap-3 opacity-60">
-                  <span className="text-lg">{code.productEmoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground truncate">{code.productName}</p>
-                    <p className="text-[10px] text-foreground/40 font-mono line-through">{code.code}</p>
-                    <p className="text-[10px] text-foreground/30">
-                      Usado em {code.usedAt ? new Date(code.usedAt).toLocaleString("pt-BR") : "—"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+            <Button
+              onClick={copyCode}
+              className={`w-full h-11 rounded-xl font-bold text-sm transition-all ${
+                copied
+                  ? "bg-kid-green text-white"
+                  : "bg-kid-blue hover:bg-kid-blue/90 text-white"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-1.5" />
+                  Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-1.5" />
+                  Copiar Código
+                </>
+              )}
+            </Button>
+
+            <p className="text-[10px] text-foreground/30 mt-3">
+              Envie este código ao cliente pelo WhatsApp após confirmar o pagamento
+            </p>
+          </motion.div>
         )}
       </div>
     </div>

@@ -1,150 +1,140 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import crypto from "crypto";
 
-const CODES_FILE = path.join(process.cwd(), "data", "codes.json");
+const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
 
-// Admin password — in production use env variable
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "mundo2024";
+// Products catalog — mirrors page.tsx
+const PRODUCTS: Record<number, { name: string; emoji: string; link: string; price: number }> = {
+  1: {
+    name: "O Código Secreto do Mundo",
+    emoji: "🔢",
+    price: 4.99,
+    link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
+  },
+};
 
-interface ActivationCode {
-  id: string;
-  code: string;
-  productId: number;
-  productName: string;
-  productEmoji: string;
-  productLink: string;
-  productPrice: number;
-  createdAt: string;
-  usedAt: string | null;
-  activatedBy: string | null;
+/**
+ * Code format: XXXX-XXXX-XXXX-XXXX (16 chars)
+ *   2 chars = product ID (base-36)
+ *   6 chars = random nonce (hex)
+ *   8 chars = HMAC-SHA256 signature (hex)
+ *
+ * Verification only needs the secret + code — no database required!
+ */
+function generateSignedCode(productId: number): string {
+  if (!PRODUCTS[productId]) throw new Error("Produto não encontrado");
+
+  const nonce = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 hex chars
+  const prod = productId.toString(36).toUpperCase().padStart(2, "0"); // 2 chars
+
+  const payload = `${prod}${nonce}`;
+  const signature = crypto
+    .createHmac("sha256", SECRET)
+    .update(payload)
+    .digest("hex")
+    .toUpperCase()
+    .slice(0, 8); // 8 hex chars
+
+  const code = `${prod}${nonce}${signature}`; // 16 chars
+  return code.match(/.{1,4}/g).join("-");
 }
 
-async function readCodes(): Promise<ActivationCode[]> {
-  try {
-    const data = await fs.readFile(CODES_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    const dir = path.dirname(CODES_FILE);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(CODES_FILE, "[]", "utf-8");
-    return [];
+function verifySignedCode(
+  code: string
+):
+  | { valid: true; productId: number; product: (typeof PRODUCTS)[number] }
+  | { valid: false; error: string } {
+  const clean = code.replace(/-/g, "").toUpperCase();
+
+  if (clean.length !== 16) {
+    return { valid: false, error: "Formato inválido" };
   }
-}
 
-async function writeCodes(codes: ActivationCode[]): Promise<void> {
-  const dir = path.dirname(CODES_FILE);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(CODES_FILE, JSON.stringify(codes, null, 2), "utf-8");
-}
+  const prod = clean.slice(0, 2);
+  const nonce = clean.slice(2, 8);
+  const providedSig = clean.slice(8, 16);
 
-function generateCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const segments: string[] = [];
-  for (let s = 0; s < 3; s++) {
-    let segment = "";
-    for (let i = 0; i < 4; i++) {
-      segment += chars[Math.floor(Math.random() * chars.length)];
-    }
-    segments.push(segment);
+  const expectedSig = crypto
+    .createHmac("sha256", SECRET)
+    .update(`${prod}${nonce}`)
+    .digest("hex")
+    .toUpperCase()
+    .slice(0, 8);
+
+  if (providedSig !== expectedSig) {
+    return { valid: false, error: "Código inválido" };
   }
-  return segments.join("-");
+
+  const productId = parseInt(prod, 36);
+  const product = PRODUCTS[productId];
+
+  if (!product) {
+    return { valid: false, error: "Produto não encontrado" };
+  }
+
+  return { valid: true, productId, product };
 }
 
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-}
-
-// GET — list all codes (admin, requires password)
+// GET — verify a code (public, no auth needed)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const password = searchParams.get("password");
 
-  if (password !== ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
+  // If ?password= is present, this is an admin listing request
+  const password = searchParams.get("password");
+  const codeParam = searchParams.get("code");
+
+  if (password) {
+    // Admin auth check
+    if (password !== SECRET) {
+      return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
+    }
+    return NextResponse.json({ products: PRODUCTS, message: "Authenticated" });
   }
 
-  const codes = await readCodes();
-  const sorted = codes.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  return NextResponse.json(sorted);
+  if (!codeParam) {
+    return NextResponse.json({ error: "Código não informado" }, { status: 400 });
+  }
+
+  const result = verifySignedCode(codeParam.trim());
+  if (!result.valid) {
+    return NextResponse.json(result, { status: 404 });
+  }
+
+  return NextResponse.json({
+    valid: true,
+    productName: result.product.name,
+    productEmoji: result.product.emoji,
+    productPrice: result.product.price,
+  });
 }
 
-// POST — create new code (admin)
+// POST — generate a new code (admin)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { password, productId, productName, productEmoji, productLink, productPrice } = body;
+    const { password, productId } = body;
 
-    if (password !== ADMIN_PASSWORD) {
+    if (password !== SECRET) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
     }
 
-    if (!productId || !productName || !productLink) {
+    if (!productId || !PRODUCTS[productId]) {
       return NextResponse.json(
-        { error: "productId, productName e productLink são obrigatórios" },
+        { error: "Produto inválido" },
         { status: 400 }
       );
     }
 
-    // Generate unique code (avoid collisions)
-    const existingCodes = await readCodes();
-    let code: string;
-    let attempts = 0;
-    do {
-      code = generateCode();
-      attempts++;
-    } while (existingCodes.some((c) => c.code === code) && attempts < 10);
+    const code = generateSignedCode(productId);
+    const product = PRODUCTS[productId];
 
-    const newCode: ActivationCode = {
-      id: generateId(),
+    return NextResponse.json({
       code,
       productId,
-      productName,
-      productEmoji: productEmoji || "📦",
-      productLink,
-      productPrice: productPrice || 0,
-      createdAt: new Date().toISOString(),
-      usedAt: null,
-      activatedBy: null,
-    };
-
-    existingCodes.push(newCode);
-    await writeCodes(existingCodes);
-
-    return NextResponse.json(newCode, { status: 201 });
-  } catch {
-    return NextResponse.json(
-      { error: "Requisição inválida" },
-      { status: 400 }
-    );
-  }
-}
-
-// DELETE — delete a code (admin)
-export async function DELETE(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { password, codeId } = body;
-
-    if (password !== ADMIN_PASSWORD) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
-    }
-
-    if (!codeId) {
-      return NextResponse.json({ error: "codeId é obrigatório" }, { status: 400 });
-    }
-
-    const codes = await readCodes();
-    const filtered = codes.filter((c) => c.id !== codeId);
-
-    if (filtered.length === codes.length) {
-      return NextResponse.json({ error: "Código não encontrado" }, { status: 404 });
-    }
-
-    await writeCodes(filtered);
-    return NextResponse.json({ success: true });
+      productName: product.name,
+      productEmoji: product.emoji,
+      productPrice: product.price,
+    }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Requisição inválida" }, { status: 400 });
   }
