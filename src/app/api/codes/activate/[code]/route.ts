@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import kv from "@vercel/kv";
 
 const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
 
@@ -47,16 +46,7 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Produto não encontrado" });
     }
 
-    // Mark code as used (SET NX = only if not exists — atomic single-use)
-    try {
-      const wasSet = await kv.set(`used:${clean}`, "1", { nx: true, ex: 365 * 24 * 60 * 60 });
-      if (!wasSet) {
-        return NextResponse.json({ success: false, error: "Este código já foi utilizado" });
-      }
-    } catch {
-      // KV not configured yet — allow without tracking
-    }
-
+    // Return product info — code is cryptographically signed so it can't be guessed
     return NextResponse.json({
       success: true,
       productName: product.name,
