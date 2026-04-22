@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, FileText, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,17 @@ import { Button } from "@/components/ui/button";
 const STORAGE_KEY = "mundo-aprender-termos-aceitos";
 const ACCEPTANCE_VERSION = "2025-04-23";
 
+const HIDDEN_PATHS = ["/termos-de-uso", "/politica-de-privacidade", "/admin"];
+
 export default function AcceptanceModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    if (HIDDEN_PATHS.some((p) => pathname?.startsWith(p))) return;
     setMounted(true);
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
