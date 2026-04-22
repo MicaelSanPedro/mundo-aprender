@@ -1,22 +1,26 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Migrar integração de pagamento de AbacatePay/Mercado Pago Direct para Mercado Pago Checkout Pro
+Task: Clonar repositorio e adicionar Termos de Uso, Politica de Privacidade e Modal de Aceite
 
 Work Log:
-- Lidos todos os arquivos relevantes: .env, api/payment/create, check, webhook, page.tsx
-- Adicionadas credenciais do Mercado Pago ao .env (ACCESS_TOKEN e PUBLIC_KEY)
-- Reescrito /api/payment/create para criar Preference do Checkout Pro (em vez de Payment direto)
-- Criado /api/payment/callback/route.ts para receber redirect do Mercado Pago após pagamento
-- Mantidos /api/payment/check e /api/payment/webhook (compatíveis com MP)
-- Atualizado page.tsx: handleCheckout agora redireciona pro checkout do MP
-- Substituída tela de QR Code PIX por telas de resultado (approved, pending, rejected, error)
-- Removidos: polling de PIX, cópia de código PIX, estado pixData/pixPolling/pixCopied
-- Removido import QrCode (não mais necessário)
-- Build passou sem erros
+- Clonou repositorio MicaelSanPedro/mundo-aprender do GitHub
+- Analisou estrutura do projeto Next.js 16 com Tailwind CSS e shadcn/ui
+- Criou pagina de Termos de Uso em /src/app/termos-de-uso/page.tsx (8 secoes completas)
+- Criou pagina de Politica de Privacidade em /src/app/politica-de-privacidade/page.tsx (10 secoes completas, LGPD compliant)
+- Criou componente AcceptanceModal em /src/components/acceptance-modal.tsx com:
+  - Verificacao de versao via localStorage
+  - Dois checkboxes obrigatorios (Termos + Privacidade)
+  - Links para as paginas em novas abas
+  - Nao permite fechar sem aceitar
+  - Animacao com framer-motion
+  - Design consistente com o tema kid-friendly do projeto
+- Atualizou layout.tsx para incluir o AcceptanceModal globalmente
+- Adicionou links de Termos de Uso e Politica de Privacidade no footer da pagina principal
+- Build concluido com sucesso (14 rotas geradas, 0 erros)
 
 Stage Summary:
-- Checkout Pro implementado com sucesso
-- Fluxo: Cliente preenche dados → Revisa pedido → Clica "Ir para o Pagamento" → Redirecionado ao MP → Paga → MP redireciona de volta → Tela de resultado
-- Suporta: pagamento aprovado (com download), pendente, recusado, erro
-- Webhook ainda funciona para notificações assíncronas do MP
+- Produzidos: termos-de-uso/page.tsx, politica-de-privacidade/page.tsx, acceptance-modal.tsx
+- Layout atualizado com modal global
+- Footer atualizado com links legais
+- Build validado com sucesso

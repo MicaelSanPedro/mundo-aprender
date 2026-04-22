@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, memo } from "react";
 import emailjs from "@emailjs/browser";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -2584,18 +2585,29 @@ export default function Home() {
             <p className="text-xs text-white/30">
               © 2026 Mundo Aprender - Todos os direitos reservados. Feito com 💛 no Brasil
             </p>
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              {[
-                { label: "Visa", emoji: "💳", color: "bg-[#1A1F71]/30 border-[#1A1F71]/20" },
-                { label: "Mastercard", emoji: "💳", color: "bg-[#EB001B]/20 border-[#EB001B]/20" },
-                { label: "Pix", emoji: "📱", color: "bg-[#32BCAD]/20 border-[#32BCAD]/20" },
-                { label: "Boleto", emoji: "🏦", color: "bg-[#FF6600]/20 border-[#FF6600]/20" },
-              ].map((payment) => (
-                <div key={payment.label} className={`flex items-center gap-1 rounded-lg border px-2 py-1 ${payment.color}`}>
-                  <span className="text-xs">{payment.emoji}</span>
-                  <span className="text-[10px] text-white/40 font-medium">{payment.label}</span>
-                </div>
-              ))}
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                {[
+                  { label: "Visa", emoji: "💳", color: "bg-[#1A1F71]/30 border-[#1A1F71]/20" },
+                  { label: "Mastercard", emoji: "💳", color: "bg-[#EB001B]/20 border-[#EB001B]/20" },
+                  { label: "Pix", emoji: "📱", color: "bg-[#32BCAD]/20 border-[#32BCAD]/20" },
+                  { label: "Boleto", emoji: "🏦", color: "bg-[#FF6600]/20 border-[#FF6600]/20" },
+                ].map((payment) => (
+                  <div key={payment.label} className={`flex items-center gap-1 rounded-lg border px-2 py-1 ${payment.color}`}>
+                    <span className="text-xs">{payment.emoji}</span>
+                    <span className="text-[10px] text-white/40 font-medium">{payment.label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 text-[11px] text-white/40">
+                <Link href="/termos-de-uso" className="hover:text-white/60 transition-colors underline decoration-white/20 hover:decoration-white/40">
+                  Termos de Uso
+                </Link>
+                <span className="text-white/20">|</span>
+                <Link href="/politica-de-privacidade" className="hover:text-white/60 transition-colors underline decoration-white/20 hover:decoration-white/40">
+                  Politica de Privacidade
+                </Link>
+              </div>
             </div>
           </div>
         </div>
