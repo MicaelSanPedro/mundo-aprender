@@ -12,89 +12,47 @@ const PRODUCTS: Record<number, { name: string; emoji: string; link: string; pric
   },
 };
 
-function verifySignedCode(
-  code: string
-):
-  | { valid: true; productId: number; product: (typeof PRODUCTS)[number] }
-  | { valid: false; error: string } {
-  const clean = code.replace(/-/g, "").toUpperCase();
-
-  if (clean.length !== 16) {
-    return { valid: false, error: "Formato inválido" };
-  }
-
-  const prod = clean.slice(0, 2);
-  const nonce = clean.slice(2, 8);
-  const providedSig = clean.slice(8, 16);
-
-  const expectedSig = crypto
-    .createHmac("sha256", SECRET)
-    .update(`${prod}${nonce}`)
-    .digest("hex")
-    .toUpperCase()
-    .slice(0, 8);
-
-  if (providedSig !== expectedSig) {
-    return { valid: false, error: "Código inválido" };
-  }
-
-  const productId = parseInt(prod, 36);
-  const product = PRODUCTS[productId];
-
-  if (!product) {
-    return { valid: false, error: "Produto não encontrado" };
-  }
-
-  return { valid: true, productId, product };
-}
-
-// GET — verify code (public)
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ code: string }> }
-) {
-  const { code } = await params;
-  const normalized = code.trim().toUpperCase();
-
-  if (!normalized) {
-    return NextResponse.json({ error: "Código não informado" }, { status: 400 });
-  }
-
-  const result = verifySignedCode(normalized);
-  if (!result.valid) {
-    return NextResponse.json(result, { status: 404 });
-  }
-
-  return NextResponse.json({
-    valid: true,
-    productName: result.product.name,
-    productEmoji: result.product.emoji,
-    productPrice: result.product.price,
-  });
-}
-
-// POST — activate code (return download link)
-export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
-  const { code } = await params;
-  const normalized = code.trim().toUpperCase();
+  try {
+    const { code } = await params;
+    const clean = decodeURIComponent(code).replace(/-/g, "").toUpperCase();
 
-  if (!normalized) {
-    return NextResponse.json({ error: "Código não informado" }, { status: 400 });
+    if (clean.length !== 16) {
+      return NextResponse.json({ valid: false, error: "Formato inválido" });
+    }
+
+    const prod = clean.slice(0, 2);
+    const nonce = clean.slice(2, 8);
+    const providedSig = clean.slice(8, 16);
+
+    const expectedSig = crypto
+      .createHmac("sha256", SECRET)
+      .update(`${prod}${nonce}`)
+      .digest("hex")
+      .toUpperCase()
+      .slice(0, 8);
+
+    if (providedSig !== expectedSig) {
+      return NextResponse.json({ valid: false, error: "Código inválido" });
+    }
+
+    const productId = parseInt(prod, 36);
+    const product = PRODUCTS[productId];
+
+    if (!product) {
+      return NextResponse.json({ valid: false, error: "Produto não encontrado" });
+    }
+
+    return NextResponse.json({
+      valid: true,
+      productName: product.name,
+      productEmoji: product.emoji,
+      productPrice: product.price,
+    });
+  } catch {
+    return NextResponse.json({ valid: false, error: "Erro ao verificar código" });
   }
-
-  const result = verifySignedCode(normalized);
-  if (!result.valid) {
-    return NextResponse.json({ error: result.error }, { status: 404 });
-  }
-
-  // Code is valid — return the product download link
-  return NextResponse.json({
-    success: true,
-    productName: result.product.name,
-    productEmoji: result.product.emoji,
-    productLink: result.product.link,
-  });
 }
