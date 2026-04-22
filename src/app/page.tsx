@@ -891,29 +891,28 @@ export default function Home() {
     setTimeout(() => setCheckoutOpen(true), 200);
   };
 
-  // Submit order — creates Mercado Pago Checkout Pro Preference
-  const handleCheckout = async () => {
-    setCheckoutLoading(true);
+  // Submit order — manual PIX payment
+  const handleCheckout = () => {
+    setCheckoutStep(3);
+    setCheckoutLoading(false);
+  };
+
+  // Copy PIX code to clipboard
+  const [pixCopied, setPixCopied] = useState(false);
+  const copyPixCode = async () => {
     try {
-      const res = await fetch("/api/payment/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cartItems,
-          customer,
-          total: totalPrice,
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Erro ao criar pagamento");
-      }
-      const data = await res.json();
-      // Redirect to Mercado Pago checkout
-      window.location.href = data.initPoint;
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao processar pedido. Tente novamente.");
-      setCheckoutLoading(false);
+      await navigator.clipboard.writeText("00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362.");
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 2500);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = "00020126580014BR.GOV.BCB.PIX01361ad6a146-8d7e-4521-a96a-fde7ccd602ac52040000530398654044.995802BR5925Micael San Pedro Aquino d6009SAO PAULO62140510fKnpm0P5q56304B362.";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 2500);
     }
   };
 
@@ -2760,19 +2759,18 @@ export default function Home() {
                 </div>
 
                 <Button
-                  className="w-full rounded-2xl bg-gradient-to-r from-kid-blue to-[#0096c7] hover:from-[#0096c7] hover:to-[#0077b6] text-white font-bold text-lg py-6 shadow-[#00b4d8]/30"
+                  className="w-full rounded-2xl bg-gradient-to-r from-kid-green to-[#2f9e5a] hover:from-[#2f9e5a] hover:to-[#228b4d] text-white font-bold text-lg py-6 shadow-kid-green/30"
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
                 >
                   {checkoutLoading ? (
                     <span className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Preparando pagamento...
+                      Preparando...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Ir para o Pagamento
+                      💳 Pagar com PIX
                     </span>
                   )}
                 </Button>
@@ -2781,247 +2779,104 @@ export default function Home() {
 
             {/* Step 3: Payment Result (Checkout Pro callback) */}
             {checkoutStep === 3 && (
-              <>
-                {/* Loading state */}
-                {paymentResultLoading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-16 space-y-4"
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-center py-4"
+              >
+                <span className="text-6xl block mb-3">💳</span>
+                <h3 className="text-xl font-black text-foreground">Pagamento via PIX</h3>
+                <p className="text-foreground/60 mt-1 text-sm">
+                  Efetue o pagamento e envie o comprovante
+                </p>
+
+                {/* Order total */}
+                <div className="mt-4 bg-gradient-to-r from-kid-orange to-kid-pink rounded-2xl p-4 text-white">
+                  <p className="text-xs text-white/70">Valor a pagar</p>
+                  <p className="text-3xl font-black">R$ {totalPrice.toFixed(2)}</p>
+                </div>
+
+                {/* Copy PIX code */}
+                <div className="mt-5 bg-kid-green/10 rounded-2xl p-5 border-2 border-kid-green/20">
+                  <p className="text-xs font-semibold text-foreground/50 mb-3">Copia e cola o código PIX:</p>
+                  <button
+                    onClick={copyPixCode}
+                    className="w-full flex items-center gap-3 bg-white rounded-xl p-3 border-2 border-kid-green/30 hover:border-kid-green/60 transition-all active:scale-[0.98] shadow-sm"
                   >
-                    <Loader2 className="h-10 w-10 text-kid-blue animate-spin" />
-                    <p className="text-sm text-foreground/60">Verificando pagamento...</p>
-                  </motion.div>
-                )}
-
-                {/* Success — payment approved */}
-                {!paymentResultLoading && paymentResult?.status === "approved" && paymentResultOrder && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-4"
-                  >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                    >
-                      <span className="text-7xl block mb-4">🎉</span>
-                    </motion.div>
-                    <h3 className="text-2xl font-black text-foreground">Pagamento Confirmado!</h3>
-                    <p className="text-foreground/60 mt-2">
-                      Seu pedido foi realizado com sucesso!
-                    </p>
-
-                    <div className="mt-4 bg-kid-green/10 rounded-2xl p-4 border-2 border-kid-green/20 inline-block">
-                      <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
-                      <p className="text-2xl font-black text-kid-green">{paymentResultOrder.orderNumber}</p>
-                    </div>
-
-                    <div className="mt-4 text-left bg-kid-green/5 rounded-2xl p-4 border-2 border-kid-green/20">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Download className="h-5 w-5 text-kid-green" />
-                        <p className="text-sm font-bold text-kid-green">Seu material está pronto!</p>
-                      </div>
-                      <div className="space-y-3">
-                        {paymentResultOrder.items.map((item) => {
-                          const prod = products.find((p) => p.id === item.id);
-                          const link = prod?.link || "";
-                          return (
-                            <div key={item.id} className="bg-white rounded-xl p-3 border border-kid-green/10 shadow-sm">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-lg">{item.emoji}</span>
-                                <p className="text-sm font-bold truncate flex-1">{item.name}</p>
-                              </div>
-                              <a
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full p-3 bg-kid-green hover:bg-kid-green/90 text-white rounded-xl font-bold transition-colors text-sm"
-                              >
-                                <Download className="h-4 w-4" />
-                                Baixar Material (PDF)
-                              </a>
-                              {link && (
-                                <button
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      await navigator.clipboard.writeText(link);
-                                      const el = document.getElementById(`copy-link-${item.id}`);
-                                      if (el) el.classList.replace("opacity-0", "opacity-100");
-                                      setTimeout(() => {
-                                        const el2 = document.getElementById(`copy-link-${item.id}`);
-                                        if (el2) el2.classList.replace("opacity-100", "opacity-0");
-                                      }, 2000);
-                                    } catch {
-                                      const ta = document.createElement("textarea");
-                                      ta.value = link;
-                                      document.body.appendChild(ta);
-                                      ta.select();
-                                      document.execCommand("copy");
-                                      document.body.removeChild(ta);
-                                    }
-                                  }}
-                                  className="flex items-center justify-center gap-1.5 w-full mt-2 p-2 rounded-xl text-xs text-foreground/50 hover:text-kid-blue hover:bg-kid-blue/5 transition-colors"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                  Copiar link do material
-                                  <Check className="h-3 w-3 text-kid-green opacity-0" id={`copy-link-${item.id}`} style={{ transition: "opacity 0.2s" }} />
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="mt-5 space-y-3">
-                      <Button
-                        className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-6"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                          setTimeout(() => openOrders(), 300);
-                        }}
-                      >
-                        <ClipboardList className="h-5 w-5 mr-2" />
-                        Ver Meus Pedidos
-                      </Button>
-                      <Button
-                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Continuar Comprando
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Pending — payment processing */}
-                {!paymentResultLoading && paymentResult?.status === "pending" && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
-                  >
-                    <span className="text-7xl block mb-4">⏳</span>
-                    <h3 className="text-xl font-black text-foreground">Pagamento Pendente</h3>
-                    <p className="text-foreground/60 mt-2">
-                      Seu pagamento está sendo processado. Você receberá o material assim que for confirmado!
-                    </p>
-                    {paymentResultOrder && (
-                      <div className="mt-4 bg-amber-50 rounded-2xl p-4 border border-amber-200 inline-block">
-                        <p className="text-xs text-foreground/50 mb-1">Número do Pedido</p>
-                        <p className="text-xl font-black text-amber-600">{paymentResultOrder.orderNumber}</p>
-                      </div>
+                    {pixCopied ? (
+                      <>
+                        <div className="w-10 h-10 rounded-full bg-kid-green/20 flex items-center justify-center shrink-0">
+                          <Check className="h-5 w-5 text-kid-green" />
+                        </div>
+                        <span className="text-sm font-bold text-kid-green flex-1 text-left">Código copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-full bg-kid-green/10 flex items-center justify-center shrink-0">
+                          <Copy className="h-5 w-5 text-kid-green" />
+                        </div>
+                        <span className="text-sm font-bold text-foreground flex-1 text-left">Copiar código PIX</span>
+                      </>
                     )}
-                    <div className="mt-6 space-y-3">
-                      <Button
-                        className="w-full rounded-2xl bg-kid-blue hover:bg-kid-blue/90 text-white font-bold py-6"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                          setTimeout(() => openOrders(), 300);
-                        }}
-                      >
-                        <ClipboardList className="h-5 w-5 mr-2" />
-                        Ver Meus Pedidos
-                      </Button>
-                      <Button
-                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Continuar Comprando
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
+                  </button>
+                </div>
 
-                {/* Rejected / Failed */}
-                {!paymentResultLoading && paymentResult?.status === "rejected" && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
+                {/* WhatsApp instruction */}
+                <div className="mt-4 bg-[#25D366]/10 rounded-2xl p-4 border-2 border-[#25D366]/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">📱</span>
+                    <p className="text-sm font-bold text-foreground">Envie o comprovante</p>
+                  </div>
+                  <p className="text-xs text-foreground/60 mb-3">
+                    Após pagar, envie o comprovante pelo WhatsApp para liberar seu material:
+                  </p>
+                  <a
+                    href="https://wa.me/5566981220410?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full p-3 bg-[#25D366] hover:bg-[#1da851] text-white rounded-xl font-bold transition-colors text-sm shadow-md"
                   >
-                    <span className="text-7xl block mb-4">😔</span>
-                    <h3 className="text-xl font-black text-foreground">Pagamento Recusado</h3>
-                    <p className="text-foreground/60 mt-2">
-                      O pagamento não foi aprovado. Tente novamente com outro método de pagamento.
-                    </p>
-                    <div className="mt-6 space-y-3">
-                      <Button
-                        className="w-full rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold py-6"
-                        onClick={() => {
-                          setCheckoutStep(2);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Tentar Novamente
-                      </Button>
-                      <Button
-                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Continuar Comprando
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Enviar Comprovante
+                  </a>
+                  <p className="text-[10px] text-foreground/40 mt-2">(66) 98122-0410</p>
+                </div>
 
-                {/* Error */}
-                {!paymentResultLoading && paymentResult?.status === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
-                  >
-                    <span className="text-7xl block mb-4">❌</span>
-                    <h3 className="text-xl font-black text-foreground">Erro ao Processar</h3>
-                    <p className="text-foreground/60 mt-2">
-                      Ocorreu um erro ao verificar o pagamento. Tente novamente.
-                    </p>
-                    <div className="mt-6 space-y-3">
-                      <Button
-                        className="w-full rounded-2xl bg-kid-orange hover:bg-kid-orange/90 text-white font-bold py-6"
-                        onClick={() => {
-                          setCheckoutStep(2);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Tentar Novamente
-                      </Button>
-                      <Button
-                        className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10"
-                        onClick={() => {
-                          setCheckoutOpen(false);
-                          setPaymentResult(null);
-                          setPaymentResultOrder(null);
-                        }}
-                      >
-                        Voltar à Loja
-                      </Button>
+                {/* Items reminder */}
+                <div className="mt-4 text-left bg-kid-blue/5 rounded-2xl p-4 border border-kid-blue/10">
+                  <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido:</p>
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-2 mb-1.5 last:mb-0">
+                      <span className="text-base">{item.emoji}</span>
+                      <span className="text-xs text-foreground/70 flex-1 truncate">{item.name}</span>
+                      <span className="text-xs font-bold">R$ {(item.price * item.quantity).toFixed(2)}</span>
                     </div>
-                  </motion.div>
-                )}
-              </>
+                  ))}
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  <Button
+                    className="w-full rounded-2xl bg-transparent text-foreground/50 hover:text-foreground hover:bg-kid-yellow/10 font-semibold"
+                    onClick={() => {
+                      setCheckoutStep(2);
+                    }}
+                  >
+                    ← Voltar ao Resumo
+                  </Button>
+                  <Button
+                    className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-5"
+                    onClick={() => {
+                      setCheckoutOpen(false);
+                      setCheckoutStep(1);
+                      setCartItems([]);
+                    }}
+                  >
+                    ✅ Já paguei, finalizei
+                  </Button>
+                </div>
+              </motion.div>
             )}
           </div>
         </SheetContent>
