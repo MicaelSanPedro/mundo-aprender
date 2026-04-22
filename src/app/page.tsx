@@ -930,8 +930,8 @@ export default function Home() {
   // Verify and activate code
   const handleActivateCode = async () => {
     const code = activateCode.trim().toUpperCase();
-    if (code.length < 8) {
-      setActivateError("Digite o código completo");
+    if (code.replace(/-/g, "").length < 16) {
+      setActivateError("Digite o código completo (16 caracteres)");
       return;
     }
 
@@ -3034,13 +3034,16 @@ export default function Home() {
                       <Input
                         value={activateCode}
                         onChange={(e) => {
-                          const val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
-                          setActivateCode(val);
+                          let raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+                          // Auto-insert dashes: XXXX-XXXX-XXXX-XXXX
+                          const parts = raw.match(/.{1,4}/g);
+                          const formatted = parts ? parts.join("-") : "";
+                          setActivateCode(formatted);
                           setActivateError("");
                         }}
-                        placeholder="XXXX-XXXX-XXXX"
+                        placeholder="XXXX-XXXX-XXXX-XXXX"
                         className="text-center text-lg font-mono tracking-[0.2em] h-14 rounded-2xl border-2 border-foreground/10 focus:border-kid-purple/50"
-                        maxLength={14}
+                        maxLength={19}
                         autoFocus
                         onKeyDown={(e) => e.key === "Enter" && handleActivateCode()}
                       />
@@ -3059,7 +3062,7 @@ export default function Home() {
                     <Button
                       onClick={handleActivateCode}
                       className="w-full h-13 rounded-2xl bg-gradient-to-r from-kid-purple to-kid-blue text-white font-bold text-sm shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98]"
-                      disabled={activateCode.trim().length < 8}
+                      disabled={activateCode.replace(/-/g, "").length < 16}
                     >
                       Ativar
                     </Button>
