@@ -273,200 +273,403 @@ function FAQItem({ question, answer, emoji, index }: { question: string; answer:
 const bookPages = [
   {
     left: {
-      bg: "bg-gradient-to-br from-kid-orange/10 to-kid-yellow/10",
       emoji: "🎒",
       title: "Mundo Aprender",
-      content: "Seja bem-vindo ao mundo da aprendizagem divertida! Aqui, cada página é uma nova aventura cheia de descobertas.",
-      footer: "Passe as páginas para explorar!",
+      content: "Seja bem-vindo ao mundo da aprendizagem divertida!\n\nAqui, cada página é uma nova aventura cheia de descobertas. Vamos aprender brincando!",
+      footer: "Passe as páginas para explorar! ➡️",
     },
     right: {
-      bg: "bg-gradient-to-bl from-kid-blue/10 to-kid-purple/10",
       emoji: "🔢",
       title: "Matemática",
       content: "Descubra os números e suas mágicas!\n\n2 + 3 = 5\n4 × 3 = 12\n15 ÷ 5 = 3\n\nOs números estão em tudo: nas flores, nas estrelas, na música!",
-      footer: "✨ A Matemática é a linguagem do universo!",
+      footer: "A Matemática é a linguagem do universo!",
     },
   },
   {
     left: {
-      bg: "bg-gradient-to-br from-kid-green/10 to-kid-teal/10",
       emoji: "✏️",
       title: "Atividades",
-      content: "Complete a sequência:\n\n2, 4, 6, __, __\n5, 10, 15, __, __\n1, 3, 5, __, __\n\nQue padrões você descobriu?",
-      footer: "Respostas: 8,10 | 20,25 | 7,9",
+      content: "Complete a sequência:\n\n2, 4, 6, ___ , ___\n5, 10, 15, ___ , ___\n1, 3, 5, ___ , ___\n\nQue padrões você descobriu?",
+      footer: "Respostas: 8, 10  |  20, 25  |  7, 9",
     },
     right: {
-      bg: "bg-gradient-to-bl from-kid-pink/10 to-kid-orange/10",
       emoji: "📝",
       title: "Português",
-      content: "As vogais são:\nA - E - I - O - U\n\nSem elas não dá pra falar nem uma única palavra! Experimente falar 'O L' sem as vogais... não dá! 😄",
-      footer: "📖 As vogais são a alma das palavras!",
+      content: "As vogais são:\n\nA  •  E  •  I  •  O  •  U\n\nSem elas não dá pra falar nem uma única palavra! Experimente falar \"O L\" sem as vogais...",
+      footer: "As vogais são a alma das palavras!",
     },
   },
   {
     left: {
-      bg: "bg-gradient-to-br from-kid-purple/10 to-kid-blue/10",
       emoji: "📚",
       title: "Histórias Educativas",
-      content: "Era uma vez um número Zero que se achava sozinho...\n\n'Ninguém me nota!' — suspirava o Zero.\n\nMas quando o 1 chegou, juntos formaram o 10 — o maior número que o Zero já tinha visto!\n\nMoral: Juntos somos mais fortes.",
-      footer: "⭐ Cada um importa!",
+      content: "Era uma vez um Zero que se achava sozinho...\n\n\"Ninguém me nota!\" — suspirava o Zero.\n\nMas quando o 1 chegou, juntos formaram o 10 — o maior número que o Zero já tinha visto!\n\nMoral: Juntos somos mais fortes.",
+      footer: "Cada um importa!",
     },
     right: {
-      bg: "bg-gradient-to-bl from-kid-yellow/10 to-kid-green/10",
       emoji: "🎲",
       title: "Jogos Matemáticos",
-      content: "Jogo dos Dobros:\n\nSe 2 é o dobro de 1\nE 4 é o dobro de 2\nQual é o dobro de 3? → 6\nQual é o dobro de 5? → 10\nQual é o dobro de 7? → 14\n\nVocê acertou todos? Parabéns!",
-      footer: "🏆 Continua assim, pequeno gênio!",
+      content: "Jogo dos Dobros:\n\nSe 2 é o dobro de 1\nE 4 é o dobro de 2\n\nQual é o dobro de 3? → 6\nQual é o dobro de 5? → 10\nQual é o dobro de 7? → 14",
+      footer: "Continua assim, pequeno gênio!",
     },
   },
   {
     left: {
-      bg: "bg-gradient-to-br from-kid-blue/10 to-kid-green/10",
       emoji: "📖",
       title: "Sílabas Mágicas",
-      content: "Vamos separar as sílabas:\n\nCA-CHOR-ro\nBO-NI-TO\nLA-PIZ\nES-TRE-LA\nA-LE-GRI-A\n\nQuantas sílabas tem cada palavra? Conte com os dedos!",
-      footer: "✍️ Sílabas são os tijolinhos das palavras!",
+      content: "Vamos separar as sílabas:\n\nCA-CHOR-ro  (3 sílabas)\nBO-NI-TO  (3 sílabas)\nLA-PIZ  (2 sílabas)\nES-TRE-LA  (3 sílabas)\nA-LE-GRI-A  (4 sílabas)",
+      footer: "Sílabas são os tijolinhos das palavras!",
     },
     right: {
-      bg: "bg-gradient-to-bl from-kid-orange/10 to-kid-pink/10",
       emoji: "✍️",
       title: "Letramento",
-      content: "Complete as palavras:\n\nG___TO (gato)\nC___XA (caixa)\nB___LA (bola)\nS___L (sol)\nP___O (pão)\n\nE agora invente uma frase usando uma dessas palavras!",
-      footer: "🌟 Quanto mais se lê, mais se aprende!",
+      content: "Complete as palavras:\n\nG___TO  → gato\nC___XA  → caixa\nB___LA  → bola\nS___L   → sol\nP___O   → pão\n\nE agora invente uma frase usando uma dessas palavras!",
+      footer: "Quanto mais se lê, mais se aprende!",
     },
   },
 ];
 
+type PageContent = { emoji: string; title: string; content: string; footer: string };
+
+function PageFace({ page, side }: { page: PageContent; side: "left" | "right" }) {
+  return (
+    <div className="absolute inset-0 paper-texture overflow-hidden" data-page-inner>
+      {/* Spine shadow */}
+      <div className={`absolute top-0 bottom-0 w-5 z-[2] pointer-events-none ${
+        side === "left"
+          ? "right-0 bg-gradient-to-l from-black/[0.07] to-transparent"
+          : "left-0 bg-gradient-to-r from-black/[0.07] to-transparent"
+      }`} />
+      {/* Content */}
+      <div className="relative h-full p-4 sm:p-5 md:p-6 flex flex-col z-[1]">
+        <span className="text-2xl sm:text-3xl md:text-4xl mb-2 drop-shadow-sm">{page.emoji}</span>
+        <h4 className="text-[#4A3728] font-bold text-[11px] sm:text-sm md:text-base mb-2 leading-snug">{page.title}</h4>
+        <div className="text-[#5C4A3A] text-[9px] sm:text-[11px] md:text-xs leading-[1.7] whitespace-pre-line flex-1">{page.content}</div>
+        <div className="border-t border-[#D8CCBA] pt-1.5 mt-2">
+          <p className="text-[#A89878] text-[7px] sm:text-[9px] italic">{page.footer}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InteractiveBook() {
-  const [currentSpread, setCurrentSpread] = useState(0);
-  const [flippingDir, setFlippingDir] = useState<"next" | "prev" | null>(null);
+  const [spread, setSpread] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const goNext = () => {
-    if (currentSpread < bookPages.length - 1) {
-      setFlippingDir("next");
-      setTimeout(() => {
-        setCurrentSpread((p) => p + 1);
-        setFlippingDir(null);
-      }, 350);
+  const bookRef = useRef<HTMLDivElement>(null);
+  const nextFlipRef = useRef<HTMLDivElement>(null);
+  const prevFlipRef = useRef<HTMLDivElement>(null);
+  const nextShadowRef = useRef<HTMLDivElement>(null);
+  const prevShadowRef = useRef<HTMLDivElement>(null);
+
+  const drag = useRef({
+    active: false,
+    dir: null as "next" | "prev" | null,
+    progress: 0,
+  });
+
+  const totalSpreads = bookPages.length;
+  const current = bookPages[spread];
+  const next = bookPages[spread + 1];
+  const prev = bookPages[spread - 1];
+
+  const getAngle = (clientX: number): number => {
+    const rect = bookRef.current!.getBoundingClientRect();
+    const spine = rect.left + rect.width / 2;
+    const half = rect.width / 2;
+    const dir = drag.current.dir!;
+
+    if (dir === "next") {
+      return -Math.max(0, Math.min(1, (spine - clientX) / half)) * 180;
+    } else {
+      return Math.max(0, Math.min(1, (clientX - spine) / half)) * 180;
     }
   };
 
-  const goPrev = () => {
-    if (currentSpread > 0) {
-      setFlippingDir("prev");
-      setTimeout(() => {
-        setCurrentSpread((p) => p - 1);
-        setFlippingDir(null);
-      }, 350);
+  const applyAngle = (angle: number) => {
+    const dir = drag.current.dir;
+    const progress = Math.abs(angle) / 180;
+
+    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
+
+    if (flipEl) {
+      flipEl.style.transform = `rotateY(${angle}deg)`;
     }
+    if (shadowEl) {
+      shadowEl.style.opacity = String(progress * 0.35);
+      if (dir === "next") {
+        shadowEl.style.transform = `translateX(${-progress * 20}px)`;
+      } else {
+        shadowEl.style.transform = `translateX(${progress * 20}px)`;
+      }
+    }
+    drag.current.progress = progress;
   };
 
-  const spread = bookPages[currentSpread];
-  const totalPages = bookPages.length;
-  const currentPageNum = currentSpread * 2 + 1;
+  const completeFlip = (dir: "next" | "prev") => {
+    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
+    const targetAngle = dir === "next" ? -180 : 180;
+
+    if (flipEl) {
+      flipEl.style.transition = "transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
+      flipEl.style.transform = `rotateY(${targetAngle}deg)`;
+    }
+    if (shadowEl) {
+      shadowEl.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+      shadowEl.style.opacity = "0";
+    }
+
+    setIsAnimating(true);
+    setTimeout(() => {
+      setSpread((s) => (dir === "next" ? s + 1 : s - 1));
+      if (flipEl) {
+        flipEl.style.transition = "none";
+        flipEl.style.transform = "rotateY(0deg)";
+      }
+      if (shadowEl) {
+        shadowEl.style.transition = "none";
+      }
+      setIsAnimating(false);
+    }, 520);
+  };
+
+  const cancelFlip = (dir: "next" | "prev") => {
+    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
+
+    if (flipEl) {
+      flipEl.style.transition = "transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1)";
+      flipEl.style.transform = "rotateY(0deg)";
+    }
+    if (shadowEl) {
+      shadowEl.style.transition = "opacity 0.35s ease";
+      shadowEl.style.opacity = "0";
+    }
+
+    setIsAnimating(true);
+    setTimeout(() => {
+      if (flipEl) flipEl.style.transition = "none";
+      if (shadowEl) shadowEl.style.transition = "none";
+      setIsAnimating(false);
+    }, 370);
+  };
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (!bookRef.current || isAnimating) return;
+    const rect = bookRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const half = rect.width / 2;
+    const dir: "next" | "prev" = x > half ? "next" : "prev";
+    const canFlip = dir === "next" ? spread < totalSpreads - 1 : spread > 0;
+    if (!canFlip) return;
+
+    e.preventDefault();
+    bookRef.current.setPointerCapture(e.pointerId);
+
+    drag.current = { active: true, dir, progress: 0 };
+
+    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
+    if (flipEl) {
+      flipEl.style.transition = "none";
+      flipEl.style.transform = "rotateY(0deg)";
+    }
+  }, [spread, totalSpreads, isAnimating]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!drag.current.active) return;
+    const angle = getAngle(e.clientX);
+    applyAngle(angle);
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (!drag.current.active) return;
+    const { dir, progress } = drag.current;
+    drag.current.active = false;
+
+    if (progress > 0.2) {
+      completeFlip(dir!);
+    } else {
+      cancelFlip(dir!);
+    }
+  }, []);
+
+  // Programmatic navigation (for dots)
+  const goToSpread = (target: number) => {
+    if (isAnimating || target === spread) return;
+    const dir: "next" | "prev" = target > spread ? "next" : "prev";
+    setIsAnimating(true);
+
+    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const targetAngle = dir === "next" ? -180 : 180;
+
+    if (flipEl) {
+      flipEl.style.transition = "transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
+      flipEl.style.transform = `rotateY(${targetAngle}deg)`;
+    }
+
+    setTimeout(() => {
+      setSpread(target);
+      if (flipEl) {
+        flipEl.style.transition = "none";
+        flipEl.style.transform = "rotateY(0deg)";
+      }
+      setIsAnimating(false);
+    }, 520);
+  };
 
   return (
-    <div className="relative w-full max-w-[420px] mx-auto lg:mx-0 select-none">
-      {/* Soft glow behind book */}
-      <div className="absolute inset-0 bg-gradient-to-t from-kid-yellow/15 via-kid-pink/8 to-transparent rounded-3xl blur-2xl" />
+    <div className="relative w-full max-w-[440px] mx-auto lg:mx-0 select-none">
+      {/* Book shadow */}
+      <div className="absolute -bottom-3 left-[8%] right-[8%] h-5 bg-black/12 blur-xl rounded-[50%]" />
 
-      <div className="relative book-container">
-        <div className="relative flex" style={{ transform: 'rotateX(8deg)' }}>
-          {/* Left page */}
-          <div className="flex-1 book-page book-page-shadow">
-            <div className={`relative h-full min-h-[180px] sm:min-h-[230px] md:min-h-[270px] rounded-l-2xl sm:rounded-l-3xl border border-white/25 backdrop-blur-sm overflow-hidden
-              ${flippingDir === "next" ? "opacity-0 translate-x-[-20px] transition-all duration-300" : flippingDir === null ? "book-content-enter" : ""}
-              ${spread.left.bg}`}
-            >
-              <div className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
-                <span className="text-3xl sm:text-4xl md:text-5xl mb-2">{spread.left.emoji}</span>
-                <h4 className="text-white font-bold text-sm sm:text-base md:text-lg mb-2">{spread.left.title}</h4>
-                <p className="text-white/75 text-[10px] sm:text-xs md:text-sm leading-relaxed whitespace-pre-line flex-1">{spread.left.content}</p>
-                <p className="text-white/40 text-[8px] sm:text-[10px] mt-2 italic">{spread.left.footer}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right page */}
-          <div className="flex-1 book-page-right book-page-shadow-right">
-            <div className={`relative h-full min-h-[180px] sm:min-h-[230px] md:min-h-[270px] rounded-r-2xl sm:rounded-r-3xl border border-white/25 backdrop-blur-sm overflow-hidden
-              ${flippingDir === "next" ? "opacity-0 translate-x-[20px] transition-all duration-300 delay-100" : flippingDir === "prev" ? "opacity-0 translate-x-[20px] transition-all duration-300" : ""}
-              ${spread.right.bg}`}
-            >
-              <div className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
-                <span className="text-3xl sm:text-4xl md:text-5xl mb-2">{spread.right.emoji}</span>
-                <h4 className="text-white font-bold text-sm sm:text-base md:text-lg mb-2">{spread.right.title}</h4>
-                <p className="text-white/75 text-[10px] sm:text-xs md:text-sm leading-relaxed whitespace-pre-line flex-1">{spread.right.content}</p>
-                <p className="text-white/40 text-[8px] sm:text-[10px] mt-2 italic">{spread.right.footer}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Book spine */}
-          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[6px] z-10">
-            <div className="h-full w-full bg-gradient-to-r from-black/15 via-black/5 to-black/15 rounded-full" />
-          </div>
-        </div>
-
-        {/* Navigation controls */}
-        <div className="flex items-center justify-between mt-4 px-2">
-          {/* Prev button */}
-          <button
-            onClick={goPrev}
-            disabled={currentSpread === 0}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold transition-all duration-200
-              ${currentSpread === 0
-                ? "text-white/20 cursor-not-allowed"
-                : "glass text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
-              }`}
+      {/* Book */}
+      <div
+        ref={bookRef}
+        className="realistic-book relative cursor-grab active:cursor-grabbing"
+        style={{ touchAction: "none" }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+        <div
+          className="relative flex"
+          style={{ transform: "rotateX(4deg)", transformStyle: "preserve-3d" }}
+        >
+          {/* === LEFT PAGE === */}
+          <div
+            className="flex-1 relative min-h-[210px] sm:min-h-[260px] md:min-h-[310px] overflow-hidden"
+            data-page="left"
           >
-            <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            Anterior
-          </button>
+            <PageFace page={current.left} side="left" />
+          </div>
 
-          {/* Page indicator dots */}
-          <div className="flex items-center gap-1.5">
-            {bookPages.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  if (i !== currentSpread) {
-                    setFlippingDir(i > currentSpread ? "next" : "prev");
-                    setTimeout(() => {
-                      setCurrentSpread(i);
-                      setFlippingDir(null);
-                    }, 350);
-                  }
-                }}
-                className={`rounded-full transition-all duration-300
-                  ${i === currentSpread
-                    ? "w-6 h-2 bg-white/80 shadow-sm"
-                    : "w-2 h-2 bg-white/25 hover:bg-white/40"
-                  }`}
-              />
+          {/* === RIGHT PAGE === */}
+          <div
+            className="flex-1 relative min-h-[210px] sm:min-h-[260px] md:min-h-[310px] overflow-hidden"
+            data-page="right"
+          >
+            <PageFace page={current.right} side="right" />
+          </div>
+
+          {/* Spine */}
+          <div className="absolute top-[-2px] bottom-[-2px] left-1/2 -translate-x-1/2 w-[7px] z-[20] book-spine rounded-[1px] shadow-inner" />
+
+          {/* Page stack edges — right (unturned) */}
+          <div className="absolute top-[2px] right-[-1px] bottom-[2px] flex gap-px z-[15] pointer-events-none">
+            {Array.from({ length: Math.min(Math.max(0, totalSpreads - 1 - spread), 5) }).map((_, i) => (
+              <div key={i} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
             ))}
           </div>
 
-          {/* Next button */}
-          <button
-            onClick={goNext}
-            disabled={currentSpread === totalPages - 1}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold transition-all duration-200
-              ${currentSpread === totalPages - 1
-                ? "text-white/20 cursor-not-allowed"
-                : "glass text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
-              }`}
-          >
-            Próximo
-            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </button>
-        </div>
+          {/* Page stack edges — left (turned) */}
+          <div className="absolute top-[2px] left-[-1px] bottom-[2px] flex gap-px z-[15] pointer-events-none">
+            {Array.from({ length: Math.min(spread, 5) }).map((_, i) => (
+              <div key={i} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
+            ))}
+          </div>
 
-        {/* Page number */}
-        <p className="text-center text-white/30 text-[9px] sm:text-[10px] mt-1.5 font-mono">
-          {currentPageNum}–{currentPageNum + 1} de {totalPages * 2}
-        </p>
+          {/* Book cover edges (top/bottom) */}
+          <div className="absolute top-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-b from-[#C4B494] to-transparent z-[25] rounded-t-xl pointer-events-none" />
+          <div className="absolute bottom-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-t from-[#A89878] to-transparent z-[25] rounded-b-xl pointer-events-none" />
+
+          {/* === FLIP OVERLAY: NEXT (right → left) === */}
+          <div
+            ref={nextFlipRef}
+            data-flip="next"
+            style={{ display: "none", zIndex: 30 }}
+          >
+            {/* Front face: current right page */}
+            <div data-face="front">
+              <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
+                <PageFace page={current.right} side="right" />
+              </div>
+            </div>
+            {/* Back face: next left page */}
+            {next && (
+              <div data-face="back">
+                <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
+                  <PageFace page={next.left} side="left" />
+                </div>
+              </div>
+            )}
+            {/* Curl shadow on the page */}
+            <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
+              background: "linear-gradient(to left, rgba(0,0,0,0) 60%, rgba(0,0,0,0.1) 100%)",
+              opacity: 0,
+              transition: "none",
+            }} />
+          </div>
+
+          {/* === FLIP OVERLAY: PREV (left → right) === */}
+          <div
+            ref={prevFlipRef}
+            data-flip="prev"
+            style={{ display: "none", zIndex: 30 }}
+          >
+            {/* Front face: current left page */}
+            <div data-face="front">
+              <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
+                <PageFace page={current.left} side="left" />
+              </div>
+            </div>
+            {/* Back face: prev right page */}
+            {prev && (
+              <div data-face="back">
+                <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
+                  <PageFace page={prev.right} side="right" />
+                </div>
+              </div>
+            )}
+            <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
+              background: "linear-gradient(to right, rgba(0,0,0,0) 60%, rgba(0,0,0,0.1) 100%)",
+              opacity: 0,
+              transition: "none",
+            }} />
+          </div>
+
+          {/* Dynamic shadow on pages during flip */}
+          <div
+            ref={nextShadowRef}
+            className="absolute top-0 left-0 w-1/2 h-full pointer-events-none z-[25] rounded-l-lg"
+            style={{ opacity: 0, background: "rgba(0,0,0,0.12)", transition: "none" }}
+          />
+          <div
+            ref={prevShadowRef}
+            className="absolute top-0 right-0 w-1/2 h-full pointer-events-none z-[25] rounded-r-lg"
+            style={{ opacity: 0, background: "rgba(0,0,0,0.12)", transition: "none" }}
+          />
+        </div>
       </div>
+
+      {/* Page navigation dots */}
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {bookPages.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goToSpread(i)}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === spread
+                ? "w-6 bg-[#D4A854] shadow-sm"
+                : "w-2 bg-[#B8A898]/60 hover:bg-[#B8A898]"
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-center text-white/35 text-[10px] mt-1.5 font-mono tracking-wide">
+        {spread * 2 + 1}–{spread * 2 + 2} de {totalSpreads * 2}
+      </p>
+
+      {/* Drag hint */}
+      <p className="text-center text-white/30 text-[10px] mt-2 hidden sm:flex items-center justify-center gap-1">
+        <span>Arraste as páginas</span>
+        <span className="inline-flex items-center">
+          <ChevronLeft className="h-3 w-3" />⟷<ChevronRight className="h-3 w-3" />
+        </span>
+      </p>
     </div>
   );
 }
