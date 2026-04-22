@@ -241,6 +241,7 @@
   width: 50%;
   height: 100%;
   transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .realistic-book [data-flip="next"] {

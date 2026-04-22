@@ -356,190 +356,98 @@ function PageFace({ page, side }: { page: PageContent; side: "left" | "right" })
 function InteractiveBook() {
   const [spread, setSpread] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [activeFlip, setActiveFlip] = useState<"next" | "prev" | null>(null);
 
-  const bookRef = useRef<HTMLDivElement>(null);
   const nextFlipRef = useRef<HTMLDivElement>(null);
   const prevFlipRef = useRef<HTMLDivElement>(null);
   const nextShadowRef = useRef<HTMLDivElement>(null);
   const prevShadowRef = useRef<HTMLDivElement>(null);
-
-  const drag = useRef({
-    active: false,
-    dir: null as "next" | "prev" | null,
-    progress: 0,
-  });
 
   const totalSpreads = bookPages.length;
   const current = bookPages[spread];
   const next = bookPages[spread + 1];
   const prev = bookPages[spread - 1];
 
-  const getAngle = (clientX: number): number => {
-    const rect = bookRef.current!.getBoundingClientRect();
-    const spine = rect.left + rect.width / 2;
-    const half = rect.width / 2;
-    const dir = drag.current.dir!;
-
-    if (dir === "next") {
-      return -Math.max(0, Math.min(1, (spine - clientX) / half)) * 180;
-    } else {
-      return Math.max(0, Math.min(1, (clientX - spine) / half)) * 180;
-    }
-  };
-
-  const applyAngle = (angle: number) => {
-    const dir = drag.current.dir;
-    const progress = Math.abs(angle) / 180;
-
-    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
-    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
-
-    if (flipEl) {
-      flipEl.style.transform = `rotateY(${angle}deg)`;
-    }
-    if (shadowEl) {
-      shadowEl.style.opacity = String(progress * 0.35);
-      if (dir === "next") {
-        shadowEl.style.transform = `translateX(${-progress * 20}px)`;
-      } else {
-        shadowEl.style.transform = `translateX(${progress * 20}px)`;
-      }
-    }
-    drag.current.progress = progress;
-  };
-
-  const completeFlip = (dir: "next" | "prev") => {
-    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
-    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
-    const targetAngle = dir === "next" ? -180 : 180;
-
-    if (flipEl) {
-      flipEl.style.transition = "transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
-      flipEl.style.transform = `rotateY(${targetAngle}deg)`;
-    }
-    if (shadowEl) {
-      shadowEl.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-      shadowEl.style.opacity = "0";
-    }
-
-    setIsAnimating(true);
-    setTimeout(() => {
-      setSpread((s) => (dir === "next" ? s + 1 : s - 1));
-      if (flipEl) {
-        flipEl.style.transition = "none";
-        flipEl.style.transform = "rotateY(0deg)";
-      }
-      if (shadowEl) {
-        shadowEl.style.transition = "none";
-      }
-      setIsAnimating(false);
-    }, 520);
-  };
-
-  const cancelFlip = (dir: "next" | "prev") => {
-    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
-    const shadowEl = dir === "next" ? nextShadowRef.current : prevShadowRef.current;
-
-    if (flipEl) {
-      flipEl.style.transition = "transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1)";
-      flipEl.style.transform = "rotateY(0deg)";
-    }
-    if (shadowEl) {
-      shadowEl.style.transition = "opacity 0.35s ease";
-      shadowEl.style.opacity = "0";
-    }
-
-    setIsAnimating(true);
-    setTimeout(() => {
-      if (flipEl) flipEl.style.transition = "none";
-      if (shadowEl) shadowEl.style.transition = "none";
-      setIsAnimating(false);
-    }, 370);
-  };
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (!bookRef.current || isAnimating) return;
-    const rect = bookRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const half = rect.width / 2;
-    const dir: "next" | "prev" = x > half ? "next" : "prev";
+  const flip = useCallback((dir: "next" | "prev") => {
+    if (isAnimating) return;
     const canFlip = dir === "next" ? spread < totalSpreads - 1 : spread > 0;
     if (!canFlip) return;
+    setIsAnimating(true);
+    setActiveFlip(dir);
+  }, [isAnimating, spread, totalSpreads]);
 
-    e.preventDefault();
-    bookRef.current.setPointerCapture(e.pointerId);
+  // Trigger the CSS 3D page-flip animation after React renders the overlay
+  useEffect(() => {
+    if (!activeFlip) return;
 
-    drag.current = { active: true, dir, progress: 0 };
+    const flipEl = activeFlip === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const shadowEl = activeFlip === "next" ? nextShadowRef.current : prevShadowRef.current;
 
-    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
-    if (flipEl) {
+    if (!flipEl) {
+      setSpread((s) => (activeFlip === "next" ? s + 1 : s - 1));
+      setIsAnimating(false);
+      setActiveFlip(null);
+      return;
+    }
+
+    const targetAngle = activeFlip === "next" ? -180 : 180;
+
+    // Prepare: show overlay at starting position
+    flipEl.style.transition = "none";
+    flipEl.style.transform = "rotateY(0deg)";
+    if (shadowEl) {
+      shadowEl.style.transition = "none";
+      shadowEl.style.opacity = "0";
+    }
+
+    // Force reflow so the browser registers the starting state
+    void flipEl.offsetHeight;
+
+    // Animate: realistic page flip with momentum easing
+    flipEl.style.transition = "transform 0.65s cubic-bezier(0.0, 0.0, 0.2, 1)";
+    flipEl.style.transform = `rotateY(${targetAngle}deg)`;
+
+    // Shadow on the page beneath
+    if (shadowEl) {
+      shadowEl.style.transition = "opacity 0.65s ease";
+      shadowEl.style.opacity = "1";
+    }
+
+    const timer = setTimeout(() => {
+      setSpread((s) => (activeFlip === "next" ? s + 1 : s - 1));
       flipEl.style.transition = "none";
       flipEl.style.transform = "rotateY(0deg)";
-    }
-  }, [spread, totalSpreads, isAnimating]);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!drag.current.active) return;
-    const angle = getAngle(e.clientX);
-    applyAngle(angle);
-  }, []);
-
-  const handlePointerUp = useCallback(() => {
-    if (!drag.current.active) return;
-    const { dir, progress } = drag.current;
-    drag.current.active = false;
-
-    if (progress > 0.2) {
-      completeFlip(dir!);
-    } else {
-      cancelFlip(dir!);
-    }
-  }, []);
-
-  // Programmatic navigation (for dots)
-  const goToSpread = (target: number) => {
-    if (isAnimating || target === spread) return;
-    const dir: "next" | "prev" = target > spread ? "next" : "prev";
-    setIsAnimating(true);
-
-    const flipEl = dir === "next" ? nextFlipRef.current : prevFlipRef.current;
-    const targetAngle = dir === "next" ? -180 : 180;
-
-    if (flipEl) {
-      flipEl.style.transition = "transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
-      flipEl.style.transform = `rotateY(${targetAngle}deg)`;
-    }
-
-    setTimeout(() => {
-      setSpread(target);
-      if (flipEl) {
-        flipEl.style.transition = "none";
-        flipEl.style.transform = "rotateY(0deg)";
+      if (shadowEl) {
+        shadowEl.style.transition = "none";
+        shadowEl.style.opacity = "0";
       }
+      setActiveFlip(null);
       setIsAnimating(false);
-    }, 520);
-  };
+    }, 700);
+
+    return () => {
+      clearTimeout(timer);
+      flipEl.style.transition = "none";
+      flipEl.style.transform = "rotateY(0deg)";
+      if (shadowEl) {
+        shadowEl.style.transition = "none";
+        shadowEl.style.opacity = "0";
+      }
+    };
+  }, [activeFlip]);
 
   return (
     <div className="relative w-full max-w-[440px] mx-auto lg:mx-0 select-none">
-      {/* Book shadow */}
+      {/* Book shadow on surface */}
       <div className="absolute -bottom-3 left-[8%] right-[8%] h-5 bg-black/12 blur-xl rounded-[50%]" />
 
       {/* Book */}
-      <div
-        ref={bookRef}
-        className="realistic-book relative cursor-grab active:cursor-grabbing"
-        style={{ touchAction: "none" }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
+      <div className="realistic-book relative">
         <div
           className="relative flex"
           style={{ transform: "rotateX(4deg)", transformStyle: "preserve-3d" }}
         >
-          {/* === LEFT PAGE === */}
+          {/* LEFT PAGE */}
           <div
             className="flex-1 relative min-h-[210px] sm:min-h-[260px] md:min-h-[310px] overflow-hidden"
             data-page="left"
@@ -547,7 +455,7 @@ function InteractiveBook() {
             <PageFace page={current.left} side="left" />
           </div>
 
-          {/* === RIGHT PAGE === */}
+          {/* RIGHT PAGE */}
           <div
             className="flex-1 relative min-h-[210px] sm:min-h-[260px] md:min-h-[310px] overflow-hidden"
             data-page="right"
@@ -558,121 +466,155 @@ function InteractiveBook() {
           {/* Spine */}
           <div className="absolute top-[-2px] bottom-[-2px] left-1/2 -translate-x-1/2 w-[7px] z-[20] book-spine rounded-[1px] shadow-inner" />
 
-          {/* Page stack edges — right (unturned) */}
+          {/* Page stack edges — right side (unturned pages) */}
           <div className="absolute top-[2px] right-[-1px] bottom-[2px] flex gap-px z-[15] pointer-events-none">
             {Array.from({ length: Math.min(Math.max(0, totalSpreads - 1 - spread), 5) }).map((_, i) => (
-              <div key={i} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
+              <div key={`r-${i}`} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
             ))}
           </div>
 
-          {/* Page stack edges — left (turned) */}
+          {/* Page stack edges — left side (turned pages) */}
           <div className="absolute top-[2px] left-[-1px] bottom-[2px] flex gap-px z-[15] pointer-events-none">
             {Array.from({ length: Math.min(spread, 5) }).map((_, i) => (
-              <div key={i} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
+              <div key={`l-${i}`} className="w-[2px] h-full bg-gradient-to-b from-[#E8DCC8] via-[#E0D4BE] to-[#D8CCBA]" />
             ))}
           </div>
 
-          {/* Book cover edges (top/bottom) */}
+          {/* Book cover edges (top & bottom) */}
           <div className="absolute top-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-b from-[#C4B494] to-transparent z-[25] rounded-t-xl pointer-events-none" />
           <div className="absolute bottom-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-t from-[#A89878] to-transparent z-[25] rounded-b-xl pointer-events-none" />
 
-          {/* === FLIP OVERLAY: NEXT (right → left) === */}
+          {/* FLIP OVERLAY: NEXT (right page flips left) */}
           <div
             ref={nextFlipRef}
             data-flip="next"
-            style={{ display: "none", zIndex: 30 }}
+            style={{ display: activeFlip === "next" ? "block" : "none", zIndex: 30 }}
           >
-            {/* Front face: current right page */}
+            {/* Front: current right page content */}
             <div data-face="front">
               <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
                 <PageFace page={current.right} side="right" />
               </div>
+              {/* Fold highlight */}
+              <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
+                background: "linear-gradient(to left, rgba(255,255,255,0.1) 0%, transparent 40%)",
+              }} />
             </div>
-            {/* Back face: next left page */}
+            {/* Back: next left page content */}
             {next && (
               <div data-face="back">
                 <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
                   <PageFace page={next.left} side="left" />
                 </div>
+                <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
+                  background: "linear-gradient(to right, rgba(255,255,255,0.1) 0%, transparent 40%)",
+                }} />
               </div>
             )}
-            {/* Curl shadow on the page */}
-            <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
-              background: "linear-gradient(to left, rgba(0,0,0,0) 60%, rgba(0,0,0,0.1) 100%)",
-              opacity: 0,
-              transition: "none",
-            }} />
           </div>
 
-          {/* === FLIP OVERLAY: PREV (left → right) === */}
+          {/* FLIP OVERLAY: PREV (left page flips right) */}
           <div
             ref={prevFlipRef}
             data-flip="prev"
-            style={{ display: "none", zIndex: 30 }}
+            style={{ display: activeFlip === "prev" ? "block" : "none", zIndex: 30 }}
           >
-            {/* Front face: current left page */}
+            {/* Front: current left page content */}
             <div data-face="front">
               <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
                 <PageFace page={current.left} side="left" />
               </div>
+              <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
+                background: "linear-gradient(to right, rgba(255,255,255,0.1) 0%, transparent 40%)",
+              }} />
             </div>
-            {/* Back face: prev right page */}
+            {/* Back: prev right page content */}
             {prev && (
               <div data-face="back">
                 <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
                   <PageFace page={prev.right} side="right" />
                 </div>
+                <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
+                  background: "linear-gradient(to left, rgba(255,255,255,0.1) 0%, transparent 40%)",
+                }} />
               </div>
             )}
-            <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
-              background: "linear-gradient(to right, rgba(0,0,0,0) 60%, rgba(0,0,0,0.1) 100%)",
-              opacity: 0,
-              transition: "none",
-            }} />
           </div>
 
-          {/* Dynamic shadow on pages during flip */}
+          {/* Shadow cast on underlying page during flip */}
           <div
             ref={nextShadowRef}
             className="absolute top-0 left-0 w-1/2 h-full pointer-events-none z-[25] rounded-l-lg"
-            style={{ opacity: 0, background: "rgba(0,0,0,0.12)", transition: "none" }}
+            style={{
+              opacity: 0,
+              background: "linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.05) 60%, transparent)",
+              transition: "none",
+            }}
           />
           <div
             ref={prevShadowRef}
             className="absolute top-0 right-0 w-1/2 h-full pointer-events-none z-[25] rounded-r-lg"
-            style={{ opacity: 0, background: "rgba(0,0,0,0.12)", transition: "none" }}
+            style={{
+              opacity: 0,
+              background: "linear-gradient(to left, rgba(0,0,0,0.2), rgba(0,0,0,0.05) 60%, transparent)",
+              transition: "none",
+            }}
           />
         </div>
       </div>
 
-      {/* Page navigation dots */}
-      <div className="flex items-center justify-center gap-2 mt-4">
-        {bookPages.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goToSpread(i)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === spread
-                ? "w-6 bg-[#D4A854] shadow-sm"
-                : "w-2 bg-[#B8A898]/60 hover:bg-[#B8A898]"
-            }`}
-          />
-        ))}
+      {/* Navigation controls */}
+      <div className="flex items-center justify-between mt-4 px-1">
+        {/* Previous button */}
+        <button
+          onClick={() => flip("prev")}
+          disabled={spread === 0 || isAnimating}
+          className="flex items-center gap-1.5 text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium px-3 py-1.5 rounded-xl hover:bg-white/10 active:scale-95"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Anterior</span>
+        </button>
+
+        {/* Page dots */}
+        <div className="flex items-center gap-2">
+          {bookPages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                if (i === spread || isAnimating) return;
+                if (i === spread + 1) flip("next");
+                else if (i === spread - 1) flip("prev");
+                else setSpread(i);
+              }}
+              disabled={isAnimating}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === spread
+                  ? "w-6 bg-[#D4A854] shadow-sm"
+                  : "w-2 bg-[#B8A898]/60 hover:bg-[#B8A898]"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Next button */}
+        <button
+          onClick={() => flip("next")}
+          disabled={spread >= totalSpreads - 1 || isAnimating}
+          className="flex items-center gap-1.5 text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200 text-xs font-medium px-3 py-1.5 rounded-xl hover:bg-white/10 active:scale-95"
+        >
+          <span className="hidden sm:inline">Próximo</span>
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
+
+      {/* Page indicator */}
       <p className="text-center text-white/35 text-[10px] mt-1.5 font-mono tracking-wide">
         {spread * 2 + 1}–{spread * 2 + 2} de {totalSpreads * 2}
-      </p>
-
-      {/* Drag hint */}
-      <p className="text-center text-white/30 text-[10px] mt-2 hidden sm:flex items-center justify-center gap-1">
-        <span>Arraste as páginas</span>
-        <span className="inline-flex items-center">
-          <ChevronLeft className="h-3 w-3" />⟷<ChevronRight className="h-3 w-3" />
-        </span>
       </p>
     </div>
   );
 }
+
 
 /* ─── Product Card (memoized) ──────────────────────────── */
 
