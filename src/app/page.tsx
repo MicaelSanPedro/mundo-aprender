@@ -38,6 +38,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   Clock,
   Loader2,
@@ -264,6 +265,209 @@ function FAQItem({ question, answer, emoji, index }: { question: string; answer:
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+/* ─── Interactive Book Component ──────────────────────────── */
+
+const bookPages = [
+  {
+    left: {
+      bg: "bg-gradient-to-br from-kid-orange/10 to-kid-yellow/10",
+      emoji: "🎒",
+      title: "Mundo Aprender",
+      content: "Seja bem-vindo ao mundo da aprendizagem divertida! Aqui, cada página é uma nova aventura cheia de descobertas.",
+      footer: "Passe as páginas para explorar!",
+    },
+    right: {
+      bg: "bg-gradient-to-bl from-kid-blue/10 to-kid-purple/10",
+      emoji: "🔢",
+      title: "Matemática",
+      content: "Descubra os números e suas mágicas!\n\n2 + 3 = 5\n4 × 3 = 12\n15 ÷ 5 = 3\n\nOs números estão em tudo: nas flores, nas estrelas, na música!",
+      footer: "✨ A Matemática é a linguagem do universo!",
+    },
+  },
+  {
+    left: {
+      bg: "bg-gradient-to-br from-kid-green/10 to-kid-teal/10",
+      emoji: "✏️",
+      title: "Atividades",
+      content: "Complete a sequência:\n\n2, 4, 6, __, __\n5, 10, 15, __, __\n1, 3, 5, __, __\n\nQue padrões você descobriu?",
+      footer: "Respostas: 8,10 | 20,25 | 7,9",
+    },
+    right: {
+      bg: "bg-gradient-to-bl from-kid-pink/10 to-kid-orange/10",
+      emoji: "📝",
+      title: "Português",
+      content: "As vogais são:\nA - E - I - O - U\n\nSem elas não dá pra falar nem uma única palavra! Experimente falar 'O L' sem as vogais... não dá! 😄",
+      footer: "📖 As vogais são a alma das palavras!",
+    },
+  },
+  {
+    left: {
+      bg: "bg-gradient-to-br from-kid-purple/10 to-kid-blue/10",
+      emoji: "📚",
+      title: "Histórias Educativas",
+      content: "Era uma vez um número Zero que se achava sozinho...\n\n'Ninguém me nota!' — suspirava o Zero.\n\nMas quando o 1 chegou, juntos formaram o 10 — o maior número que o Zero já tinha visto!\n\nMoral: Juntos somos mais fortes.",
+      footer: "⭐ Cada um importa!",
+    },
+    right: {
+      bg: "bg-gradient-to-bl from-kid-yellow/10 to-kid-green/10",
+      emoji: "🎲",
+      title: "Jogos Matemáticos",
+      content: "Jogo dos Dobros:\n\nSe 2 é o dobro de 1\nE 4 é o dobro de 2\nQual é o dobro de 3? → 6\nQual é o dobro de 5? → 10\nQual é o dobro de 7? → 14\n\nVocê acertou todos? Parabéns!",
+      footer: "🏆 Continua assim, pequeno gênio!",
+    },
+  },
+  {
+    left: {
+      bg: "bg-gradient-to-br from-kid-blue/10 to-kid-green/10",
+      emoji: "📖",
+      title: "Sílabas Mágicas",
+      content: "Vamos separar as sílabas:\n\nCA-CHOR-ro\nBO-NI-TO\nLA-PIZ\nES-TRE-LA\nA-LE-GRI-A\n\nQuantas sílabas tem cada palavra? Conte com os dedos!",
+      footer: "✍️ Sílabas são os tijolinhos das palavras!",
+    },
+    right: {
+      bg: "bg-gradient-to-bl from-kid-orange/10 to-kid-pink/10",
+      emoji: "✍️",
+      title: "Letramento",
+      content: "Complete as palavras:\n\nG___TO (gato)\nC___XA (caixa)\nB___LA (bola)\nS___L (sol)\nP___O (pão)\n\nE agora invente uma frase usando uma dessas palavras!",
+      footer: "🌟 Quanto mais se lê, mais se aprende!",
+    },
+  },
+];
+
+function InteractiveBook() {
+  const [currentSpread, setCurrentSpread] = useState(0);
+  const [flippingDir, setFlippingDir] = useState<"next" | "prev" | null>(null);
+
+  const goNext = () => {
+    if (currentSpread < bookPages.length - 1) {
+      setFlippingDir("next");
+      setTimeout(() => {
+        setCurrentSpread((p) => p + 1);
+        setFlippingDir(null);
+      }, 350);
+    }
+  };
+
+  const goPrev = () => {
+    if (currentSpread > 0) {
+      setFlippingDir("prev");
+      setTimeout(() => {
+        setCurrentSpread((p) => p - 1);
+        setFlippingDir(null);
+      }, 350);
+    }
+  };
+
+  const spread = bookPages[currentSpread];
+  const totalPages = bookPages.length;
+  const currentPageNum = currentSpread * 2 + 1;
+
+  return (
+    <div className="relative w-full max-w-[420px] mx-auto lg:mx-0 select-none">
+      {/* Soft glow behind book */}
+      <div className="absolute inset-0 bg-gradient-to-t from-kid-yellow/15 via-kid-pink/8 to-transparent rounded-3xl blur-2xl" />
+
+      <div className="relative book-container">
+        <div className="relative flex" style={{ transform: 'rotateX(8deg)' }}>
+          {/* Left page */}
+          <div className="flex-1 book-page book-page-shadow">
+            <div className={`relative h-full min-h-[180px] sm:min-h-[230px] md:min-h-[270px] rounded-l-2xl sm:rounded-l-3xl border border-white/25 backdrop-blur-sm overflow-hidden
+              ${flippingDir === "next" ? "opacity-0 translate-x-[-20px] transition-all duration-300" : flippingDir === null ? "book-content-enter" : ""}
+              ${spread.left.bg}`}
+            >
+              <div className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
+                <span className="text-3xl sm:text-4xl md:text-5xl mb-2">{spread.left.emoji}</span>
+                <h4 className="text-white font-bold text-sm sm:text-base md:text-lg mb-2">{spread.left.title}</h4>
+                <p className="text-white/75 text-[10px] sm:text-xs md:text-sm leading-relaxed whitespace-pre-line flex-1">{spread.left.content}</p>
+                <p className="text-white/40 text-[8px] sm:text-[10px] mt-2 italic">{spread.left.footer}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right page */}
+          <div className="flex-1 book-page-right book-page-shadow-right">
+            <div className={`relative h-full min-h-[180px] sm:min-h-[230px] md:min-h-[270px] rounded-r-2xl sm:rounded-r-3xl border border-white/25 backdrop-blur-sm overflow-hidden
+              ${flippingDir === "next" ? "opacity-0 translate-x-[20px] transition-all duration-300 delay-100" : flippingDir === "prev" ? "opacity-0 translate-x-[20px] transition-all duration-300" : ""}
+              ${spread.right.bg}`}
+            >
+              <div className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
+                <span className="text-3xl sm:text-4xl md:text-5xl mb-2">{spread.right.emoji}</span>
+                <h4 className="text-white font-bold text-sm sm:text-base md:text-lg mb-2">{spread.right.title}</h4>
+                <p className="text-white/75 text-[10px] sm:text-xs md:text-sm leading-relaxed whitespace-pre-line flex-1">{spread.right.content}</p>
+                <p className="text-white/40 text-[8px] sm:text-[10px] mt-2 italic">{spread.right.footer}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Book spine */}
+          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[6px] z-10">
+            <div className="h-full w-full bg-gradient-to-r from-black/15 via-black/5 to-black/15 rounded-full" />
+          </div>
+        </div>
+
+        {/* Navigation controls */}
+        <div className="flex items-center justify-between mt-4 px-2">
+          {/* Prev button */}
+          <button
+            onClick={goPrev}
+            disabled={currentSpread === 0}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold transition-all duration-200
+              ${currentSpread === 0
+                ? "text-white/20 cursor-not-allowed"
+                : "glass text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
+              }`}
+          >
+            <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            Anterior
+          </button>
+
+          {/* Page indicator dots */}
+          <div className="flex items-center gap-1.5">
+            {bookPages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  if (i !== currentSpread) {
+                    setFlippingDir(i > currentSpread ? "next" : "prev");
+                    setTimeout(() => {
+                      setCurrentSpread(i);
+                      setFlippingDir(null);
+                    }, 350);
+                  }
+                }}
+                className={`rounded-full transition-all duration-300
+                  ${i === currentSpread
+                    ? "w-6 h-2 bg-white/80 shadow-sm"
+                    : "w-2 h-2 bg-white/25 hover:bg-white/40"
+                  }`}
+              />
+            ))}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={goNext}
+            disabled={currentSpread === totalPages - 1}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold transition-all duration-200
+              ${currentSpread === totalPages - 1
+                ? "text-white/20 cursor-not-allowed"
+                : "glass text-white/80 hover:text-white hover:bg-white/20 active:scale-95"
+              }`}
+          >
+            Próximo
+            <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          </button>
+        </div>
+
+        {/* Page number */}
+        <p className="text-center text-white/30 text-[9px] sm:text-[10px] mt-1.5 font-mono">
+          {currentPageNum}–{currentPageNum + 1} de {totalPages * 2}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -1352,149 +1556,13 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Illustration area — Magic Open Book */}
+            {/* Interactive Book */}
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="relative flex items-end justify-center"
+              transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="relative w-full max-w-[420px] aspect-[4/5] mx-auto lg:mx-0">
-
-                {/* Soft radial glow from book */}
-                <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[70%] h-[50%] bg-gradient-to-t from-kid-yellow/25 via-kid-pink/10 to-transparent rounded-full blur-2xl" />
-
-                {/* Knowledge beam — light rays going up */}
-                <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-[2px] h-[35%] bg-gradient-to-t from-white/30 via-kid-yellow/15 to-transparent" />
-                <div className="absolute bottom-[30%] left-1/2 -translate-x-1/2 w-[40%] h-[25%] bg-gradient-to-t from-white/5 to-transparent rounded-full blur-md" />
-
-                {/* ═══ OPEN BOOK ═══ */}
-                <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[80%]" style={{ perspective: '800px' }}>
-                  <div className="relative flex" style={{ transform: 'rotateX(15deg)', transformStyle: 'preserve-3d' }}>
-                    {/* Left page */}
-                    <motion.div
-                      initial={{ opacity: 0, rotateY: 60 }}
-                      animate={{ opacity: 1, rotateY: 0 }}
-                      transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                      className="flex-1 glass rounded-l-2xl sm:rounded-l-3xl border border-white/20 shadow-xl overflow-hidden"
-                      style={{ transformOrigin: 'right center' }}
-                    >
-                      <div className="bg-gradient-to-br from-kid-blue/15 to-kid-purple/10 p-3 sm:p-4 md:p-5 h-full min-h-[100px] sm:min-h-[130px] md:min-h-[160px] flex flex-col items-center justify-center gap-1">
-                        <span className="text-2xl sm:text-3xl md:text-4xl">🔢</span>
-                        <div className="flex gap-0.5">
-                          {[1,2,3].map(i => (
-                            <span key={i} className="text-[8px] sm:text-[10px] md:text-xs text-white/50 font-mono">{3 + i}×{i + 1}={((3+i)*(i+1))}</span>
-                          ))}
-                        </div>
-                        <div className="w-8 h-[1px] bg-white/20 mt-1" />
-                        <span className="text-[7px] sm:text-[9px] text-white/40">Matemática</span>
-                      </div>
-                    </motion.div>
-                    {/* Right page */}
-                    <motion.div
-                      initial={{ opacity: 0, rotateY: -60 }}
-                      animate={{ opacity: 1, rotateY: 0 }}
-                      transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-                      className="flex-1 glass rounded-r-2xl sm:rounded-r-3xl border border-white/20 shadow-xl overflow-hidden"
-                      style={{ transformOrigin: 'left center' }}
-                    >
-                      <div className="bg-gradient-to-bl from-kid-pink/15 to-kid-orange/10 p-3 sm:p-4 md:p-5 h-full min-h-[100px] sm:min-h-[130px] md:min-h-[160px] flex flex-col items-center justify-center gap-1">
-                        <span className="text-2xl sm:text-3xl md:text-4xl">📝</span>
-                        <p className="text-[9px] sm:text-[11px] md:text-xs text-white/60 leading-tight text-center italic">
-                          "A, B, C...<br/>Aprender<br/>é mágico!"
-                        </p>
-                        <div className="w-8 h-[1px] bg-white/20 mt-1" />
-                        <span className="text-[7px] sm:text-[9px] text-white/40">Português</span>
-                      </div>
-                    </motion.div>
-                    {/* Book spine shadow */}
-                    <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-black/10 rounded-full shadow-inner" />
-                  </div>
-                </div>
-
-                {/* ═══ FLOATING ELEMENTS — rising from book ═══ */}
-                {/* Element 1: Star — rises top-left */}
-                <motion.span
-                  initial={{ opacity: 0, y: 60, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.0, duration: 1, type: "spring" }}
-                  className="absolute top-[5%] left-[10%] text-3xl sm:text-4xl md:text-5xl"
-                  style={{ animation: 'float-bounce 3.5s ease-in-out infinite', animationDelay: '0s' }}
-                >⭐</motion.span>
-
-                {/* Element 2: Pencil — rises top-right */}
-                <motion.span
-                  initial={{ opacity: 0, y: 60, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.2, duration: 1, type: "spring" }}
-                  className="absolute top-[8%] right-[8%] text-2xl sm:text-3xl md:text-4xl"
-                  style={{ animation: 'float-bounce 4s ease-in-out infinite', animationDelay: '0.8s' }}
-                >✏️</motion.span>
-
-                {/* Element 3: Palette — mid-left */}
-                <motion.span
-                  initial={{ opacity: 0, y: 50, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.4, duration: 1, type: "spring" }}
-                  className="absolute top-[25%] left-[3%] text-2xl sm:text-3xl"
-                  style={{ animation: 'float-bounce 3.2s ease-in-out infinite', animationDelay: '1.5s' }}
-                >🎨</motion.span>
-
-                {/* Element 4: Dice — mid-right */}
-                <motion.span
-                  initial={{ opacity: 0, y: 50, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.6, duration: 1, type: "spring" }}
-                  className="absolute top-[22%] right-[2%] text-2xl sm:text-3xl"
-                  style={{ animation: 'float-bounce 4.5s ease-in-out infinite', animationDelay: '0.3s' }}
-                >🎲</motion.span>
-
-                {/* Element 5: Lightbulb — upper-center */}
-                <motion.span
-                  initial={{ opacity: 0, y: 40, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.8, duration: 1, type: "spring" }}
-                  className="absolute top-[0%] left-1/2 -translate-x-1/2 text-3xl sm:text-4xl md:text-5xl"
-                  style={{ animation: 'float-bounce 2.8s ease-in-out infinite', animationDelay: '1s' }}
-                >💡</motion.span>
-
-                {/* Element 6: Music — lower-left */}
-                <motion.span
-                  initial={{ opacity: 0, y: 30, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 2.0, duration: 0.8, type: "spring" }}
-                  className="absolute top-[42%] left-[5%] text-xl sm:text-2xl"
-                  style={{ animation: 'float-bounce 3.8s ease-in-out infinite', animationDelay: '2s' }}
-                >🎵</motion.span>
-
-                {/* Element 7: Globe — lower-right */}
-                <motion.span
-                  initial={{ opacity: 0, y: 30, scale: 0 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 2.2, duration: 0.8, type: "spring" }}
-                  className="absolute top-[40%] right-[5%] text-xl sm:text-2xl"
-                  style={{ animation: 'float-bounce 4.2s ease-in-out infinite', animationDelay: '1.2s' }}
-                >🌍</motion.span>
-
-                {/* Element 8: Rocket — shoots up from book */}
-                <motion.span
-                  initial={{ opacity: 0, y: 80, scale: 0.5 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.1, duration: 1.2, type: "spring" }}
-                  className="absolute top-[12%] right-[25%] text-2xl sm:text-3xl"
-                  style={{ animation: 'float-bounce 3s ease-in-out infinite', animationDelay: '0.5s' }}
-                >🚀</motion.span>
-
-                {/* Scattered sparkle dots — asymmetric positions */}
-                <div className="absolute top-[15%] left-[30%] w-2 h-2 bg-kid-yellow/80 rounded-full animate-sparkle" />
-                <div className="absolute top-[32%] left-[42%] w-1.5 h-1.5 bg-white/60 rounded-full animate-sparkle" style={{ animationDelay: '0.5s' }} />
-                <div className="absolute top-[18%] right-[35%] w-2 h-2 bg-kid-pink/70 rounded-full animate-sparkle" style={{ animationDelay: '1s' }} />
-                <div className="absolute top-[38%] left-[22%] w-1.5 h-1.5 bg-kid-blue/60 rounded-full animate-sparkle" style={{ animationDelay: '1.5s' }} />
-                <div className="absolute top-[45%] right-[30%] w-2 h-2 bg-kid-green/60 rounded-full animate-sparkle" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-[8%] left-[55%] w-1.5 h-1.5 bg-kid-purple/60 rounded-full animate-sparkle" style={{ animationDelay: '0.8s' }} />
-                <div className="absolute top-[28%] right-[15%] w-2 h-2 bg-kid-yellow/60 rounded-full animate-sparkle" style={{ animationDelay: '1.3s' }} />
-
-              </div>
+              <InteractiveBook />
             </motion.div>
           </div>
         </div>
