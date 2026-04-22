@@ -40,7 +40,11 @@ async function writeOrders(orders: Order[]): Promise<void> {
 async function sendConfirmationEmail(order: Order) {
   if (order.emailSent) return;
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      console.error("[WEBHOOK EMAIL] NEXT_PUBLIC_BASE_URL não configurada");
+      return false;
+    }
     const res = await fetch(`${baseUrl}/api/payment/send-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -36,7 +36,11 @@ async function writeOrders(orders: Order[]): Promise<void> {
 async function sendConfirmationEmail(order: Order) {
   if (order.emailSent) return;
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      console.error("[CALLBACK EMAIL] NEXT_PUBLIC_BASE_URL não configurada");
+      return false;
+    }
     const res = await fetch(`${baseUrl}/api/payment/send-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -55,6 +59,14 @@ async function sendConfirmationEmail(order: Order) {
   }
 }
 
+function getBaseUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_BASE_URL;
+  if (!configured) {
+    console.error("[CALLBACK] NEXT_PUBLIC_BASE_URL não configurada!");
+  }
+  return configured || "https://mundoaprender.vercel.app";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -63,13 +75,12 @@ export async function GET(request: NextRequest) {
     const paymentId = searchParams.get("payment_id");
     const collectionId = searchParams.get("collection_id");
 
+    const baseUrl = getBaseUrl();
+
     // Se não tem external_reference, redirect pra home
     if (!externalReference) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
       return NextResponse.redirect(`${baseUrl}/`);
     }
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     // Se o pagamento foi aprovado, atualizar o pedido
     if (status === "approved") {
@@ -107,9 +118,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/?${params.toString()}`);
   } catch (error) {
     console.error("[MP CALLBACK] Erro:", error);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     return NextResponse.redirect(
-      `${baseUrl}/?payment_status=error`
+      `${getBaseUrl()}/?payment_status=error`
     );
   }
 }
