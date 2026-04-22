@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, FileText, CheckCircle2, ExternalLink, ArrowLeft } from "lucide-react";
@@ -29,6 +30,12 @@ interface AcceptanceModalProps {
 export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProps) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const portalRef = useRef<HTMLDivElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const canAccept = acceptedTerms && acceptedPrivacy;
 
@@ -55,31 +62,46 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop - z-[1] */}
+  const content = (
+    <div
+      ref={portalRef}
+      style={{ position: "fixed", inset: 0, zIndex: 99999 }}
+    >
+      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 z-[1] bg-black/60 backdrop-blur-sm"
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(4px)",
+        }}
         onClick={handleBack}
       />
 
-      {/* Modal - z-[2] sits above backdrop */}
+      {/* Modal */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 30 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative z-[2] bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar"
+        style={{
+          position: "relative",
+          zIndex: 100000,
+          maxWidth: "32rem",
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl mx-4 custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header gradient */}
         <div className="gradient-hero p-6 sm:p-8 rounded-t-2xl sm:rounded-t-3xl relative overflow-hidden">
-          {/* Decorative elements */}
           <div className="absolute top-2 right-4 text-4xl opacity-20 animate-float">
             <Shield className="h-10 w-10 text-white" />
           </div>
@@ -112,25 +134,21 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
           </p>
 
           {/* Terms checkbox */}
-          <label
-            className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+          <button
+            type="button"
+            onClick={() => setAcceptedTerms(!acceptedTerms)}
+            className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left ${
               acceptedTerms
                 ? "border-kid-green bg-kid-green/5"
                 : "border-kid-orange/20 bg-kid-orange/5 hover:border-kid-orange/40"
             }`}
           >
             <div className="pt-0.5">
-              <input
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="sr-only peer"
-              />
               <div
                 className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
                   acceptedTerms
                     ? "bg-kid-green border-kid-green"
-                    : "border-gray-300 peer-hover:border-kid-orange"
+                    : "border-gray-300"
                 }`}
               >
                 {acceptedTerms && <CheckCircle2 className="h-5 w-5 text-white" />}
@@ -154,28 +172,24 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
                 Regras de utilizacao, compra, propriedade intelectual e limitacoes.
               </p>
             </div>
-          </label>
+          </button>
 
           {/* Privacy checkbox */}
-          <label
-            className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+          <button
+            type="button"
+            onClick={() => setAcceptedPrivacy(!acceptedPrivacy)}
+            className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left ${
               acceptedPrivacy
                 ? "border-kid-green bg-kid-green/5"
                 : "border-kid-blue/20 bg-kid-blue/5 hover:border-kid-blue/40"
             }`}
           >
             <div className="pt-0.5">
-              <input
-                type="checkbox"
-                checked={acceptedPrivacy}
-                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                className="sr-only peer"
-              />
               <div
                 className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
                   acceptedPrivacy
                     ? "bg-kid-green border-kid-green"
-                    : "border-gray-300 peer-hover:border-kid-blue"
+                    : "border-gray-300"
                 }`}
               >
                 {acceptedPrivacy && <CheckCircle2 className="h-5 w-5 text-white" />}
@@ -199,38 +213,37 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
                 Coleta, uso, armazenamento e protecao dos seus dados pessoais.
               </p>
             </div>
-          </label>
+          </button>
 
           {/* Buttons */}
           <div className="space-y-3">
-            <Button
+            <button
+              type="button"
               onClick={handleAccept}
               disabled={!canAccept}
-              className={`w-full rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base py-3.5 sm:py-4 transition-all duration-300 ${
+              className={`w-full rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base py-3.5 sm:py-4 transition-all duration-300 flex items-center justify-center gap-2 ${
                 canAccept
-                  ? "bg-kid-green hover:bg-kid-green/90 text-white shadow-kid-green hover:shadow-lg active:scale-[0.98]"
+                  ? "bg-kid-green hover:bg-kid-green/90 text-white shadow-kid-green hover:shadow-lg active:scale-[0.98] cursor-pointer"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
-              <span className="flex items-center justify-center gap-2">
-                <CheckCircle2 className="h-5 w-5" />
-                Aceitar e Continuar
-              </span>
-            </Button>
+              <CheckCircle2 className="h-5 w-5" />
+              Aceitar e Continuar
+            </button>
 
-            <Button
-              variant="ghost"
+            <button
+              type="button"
               onClick={handleBack}
-              className="w-full rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base py-3 text-foreground/50 hover:text-foreground/80 hover:bg-foreground/5 transition-all duration-200"
+              className="w-full rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base py-3 text-foreground/50 hover:text-foreground/80 hover:bg-foreground/5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span className="flex items-center justify-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar para a loja
-              </span>
-            </Button>
+              <ArrowLeft className="h-4 w-4" />
+              Voltar para a loja
+            </button>
           </div>
         </div>
       </motion.div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
