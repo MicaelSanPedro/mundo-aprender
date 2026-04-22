@@ -261,14 +261,6 @@
   overflow: hidden;
 }
 
-.realistic-book [data-face="back"] {
-  transform: rotateY(180deg);
-}
-
-.realistic-book [data-face="back"] [data-page-inner] {
-  transform: rotateY(180deg); /* un-mirror text */
-}
-
 .paper-texture {
   background-color: #FFF9F0;
   background-image:

@@ -358,77 +358,104 @@ function InteractiveBook() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [activeFlip, setActiveFlip] = useState<"next" | "prev" | null>(null);
 
+  // Freeze "from" content so overlays show the old pages while base shows new pages
+  const frozenRef = useRef<{ left: PageContent; right: PageContent } | null>(null);
+
   const nextFlipRef = useRef<HTMLDivElement>(null);
+  const nextFadeRef = useRef<HTMLDivElement>(null);
   const prevFlipRef = useRef<HTMLDivElement>(null);
+  const prevFadeRef = useRef<HTMLDivElement>(null);
   const nextShadowRef = useRef<HTMLDivElement>(null);
   const prevShadowRef = useRef<HTMLDivElement>(null);
 
   const totalSpreads = bookPages.length;
   const current = bookPages[spread];
-  const next = bookPages[spread + 1];
-  const prev = bookPages[spread - 1];
+  const frozen = frozenRef.current;
 
   const flip = useCallback((dir: "next" | "prev") => {
     if (isAnimating) return;
     const canFlip = dir === "next" ? spread < totalSpreads - 1 : spread > 0;
     if (!canFlip) return;
+
+    // Freeze the "from" spread content BEFORE updating state
+    frozenRef.current = bookPages[spread];
+
+    // Update spread immediately so base renders new content
+    setSpread((s) => (dir === "next" ? s + 1 : s - 1));
     setIsAnimating(true);
     setActiveFlip(dir);
   }, [isAnimating, spread, totalSpreads]);
 
-  // Trigger the CSS 3D page-flip animation after React renders the overlay
+  // Animate the flip overlay and fade the static overlay
   useEffect(() => {
     if (!activeFlip) return;
 
     const flipEl = activeFlip === "next" ? nextFlipRef.current : prevFlipRef.current;
+    const fadeEl = activeFlip === "next" ? nextFadeRef.current : prevFadeRef.current;
     const shadowEl = activeFlip === "next" ? nextShadowRef.current : prevShadowRef.current;
 
     if (!flipEl) {
-      setSpread((s) => (activeFlip === "next" ? s + 1 : s - 1));
-      setIsAnimating(false);
       setActiveFlip(null);
+      setIsAnimating(false);
       return;
     }
 
     const targetAngle = activeFlip === "next" ? -180 : 180;
 
-    // Prepare: show overlay at starting position
+    // Reset to starting state
     flipEl.style.transition = "none";
     flipEl.style.transform = "rotateY(0deg)";
+    if (fadeEl) {
+      fadeEl.style.transition = "none";
+      fadeEl.style.opacity = "1";
+    }
     if (shadowEl) {
       shadowEl.style.transition = "none";
       shadowEl.style.opacity = "0";
     }
 
-    // Force reflow so the browser registers the starting state
+    // Force reflow
     void flipEl.offsetHeight;
 
-    // Animate: realistic page flip with momentum easing
-    flipEl.style.transition = "transform 0.65s cubic-bezier(0.0, 0.0, 0.2, 1)";
+    // Animate the page flip (front face only — disappears past 90 deg via backface-visibility)
+    flipEl.style.transition = "transform 0.7s cubic-bezier(0.0, 0.0, 0.2, 1)";
     flipEl.style.transform = `rotateY(${targetAngle}deg)`;
 
-    // Shadow on the page beneath
+    // Fade the static overlay to reveal the new page underneath
+    if (fadeEl) {
+      fadeEl.style.transition = "opacity 0.45s ease 0.18s";
+      fadeEl.style.opacity = "0";
+    }
+
+    // Reveal shadow on the page being uncovered
     if (shadowEl) {
-      shadowEl.style.transition = "opacity 0.65s ease";
+      shadowEl.style.transition = "opacity 0.7s ease";
       shadowEl.style.opacity = "1";
     }
 
     const timer = setTimeout(() => {
-      setSpread((s) => (activeFlip === "next" ? s + 1 : s - 1));
       flipEl.style.transition = "none";
       flipEl.style.transform = "rotateY(0deg)";
+      if (fadeEl) {
+        fadeEl.style.transition = "none";
+        fadeEl.style.opacity = "0";
+      }
       if (shadowEl) {
         shadowEl.style.transition = "none";
         shadowEl.style.opacity = "0";
       }
       setActiveFlip(null);
       setIsAnimating(false);
-    }, 700);
+      frozenRef.current = null;
+    }, 780);
 
     return () => {
       clearTimeout(timer);
       flipEl.style.transition = "none";
       flipEl.style.transform = "rotateY(0deg)";
+      if (fadeEl) {
+        fadeEl.style.transition = "none";
+      }
       if (shadowEl) {
         shadowEl.style.transition = "none";
         shadowEl.style.opacity = "0";
@@ -484,79 +511,84 @@ function InteractiveBook() {
           <div className="absolute top-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-b from-[#C4B494] to-transparent z-[25] rounded-t-xl pointer-events-none" />
           <div className="absolute bottom-[-2px] left-[-2px] right-[-2px] h-[4px] bg-gradient-to-t from-[#A89878] to-transparent z-[25] rounded-b-xl pointer-events-none" />
 
-          {/* FLIP OVERLAY: NEXT (right page flips left) */}
+          {/* === NEXT FLIP: right page turns left (front face only) === */}
           <div
             ref={nextFlipRef}
             data-flip="next"
             style={{ display: activeFlip === "next" ? "block" : "none", zIndex: 30 }}
           >
-            {/* Front: current right page content */}
             <div data-face="front">
               <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
-                <PageFace page={current.right} side="right" />
+                {frozen && <PageFace page={frozen.right} side="right" />}
               </div>
-              {/* Fold highlight */}
               <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
-                background: "linear-gradient(to left, rgba(255,255,255,0.1) 0%, transparent 40%)",
+                background: "linear-gradient(to left, rgba(255,255,255,0.08) 0%, transparent 35%)",
               }} />
             </div>
-            {/* Back: next left page content */}
-            {next && (
-              <div data-face="back">
-                <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
-                  <PageFace page={next.left} side="left" />
-                </div>
-                <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
-                  background: "linear-gradient(to right, rgba(255,255,255,0.1) 0%, transparent 40%)",
-                }} />
-              </div>
-            )}
           </div>
 
-          {/* FLIP OVERLAY: PREV (left page flips right) */}
+          {/* NEXT FADE: left page fades out to reveal new content */}
+          <div
+            ref={nextFadeRef}
+            style={{
+              display: activeFlip === "next" ? "block" : "none",
+              position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+              zIndex: 28,
+            }}
+          >
+            <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
+              {frozen && <PageFace page={frozen.left} side="left" />}
+            </div>
+          </div>
+
+          {/* Shadow on revealed left page during next flip */}
+          <div
+            ref={nextShadowRef}
+            className="absolute top-0 left-0 w-1/2 h-full pointer-events-none z-[27] rounded-l-lg"
+            style={{
+              opacity: 0,
+              background: "linear-gradient(to right, rgba(0,0,0,0.12), transparent 60%)",
+              transition: "none",
+            }}
+          />
+
+          {/* === PREV FLIP: left page turns right (front face only) === */}
           <div
             ref={prevFlipRef}
             data-flip="prev"
             style={{ display: activeFlip === "prev" ? "block" : "none", zIndex: 30 }}
           >
-            {/* Front: current left page content */}
             <div data-face="front">
               <div className="absolute inset-0 paper-texture overflow-hidden rounded-l-lg shadow-[inset_-2px_0_6px_rgba(0,0,0,0.08),_4px_4px_15px_rgba(0,0,0,0.12)]">
-                <PageFace page={current.left} side="left" />
+                {frozen && <PageFace page={frozen.left} side="left" />}
               </div>
               <div className="absolute inset-0 pointer-events-none rounded-l-lg" style={{
-                background: "linear-gradient(to right, rgba(255,255,255,0.1) 0%, transparent 40%)",
+                background: "linear-gradient(to right, rgba(255,255,255,0.08) 0%, transparent 35%)",
               }} />
             </div>
-            {/* Back: prev right page content */}
-            {prev && (
-              <div data-face="back">
-                <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
-                  <PageFace page={prev.right} side="right" />
-                </div>
-                <div className="absolute inset-0 pointer-events-none rounded-r-lg" style={{
-                  background: "linear-gradient(to left, rgba(255,255,255,0.1) 0%, transparent 40%)",
-                }} />
-              </div>
-            )}
           </div>
 
-          {/* Shadow cast on underlying page during flip */}
+          {/* PREV FADE: right page fades out to reveal new content */}
           <div
-            ref={nextShadowRef}
-            className="absolute top-0 left-0 w-1/2 h-full pointer-events-none z-[25] rounded-l-lg"
+            ref={prevFadeRef}
             style={{
-              opacity: 0,
-              background: "linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.05) 60%, transparent)",
-              transition: "none",
+              display: activeFlip === "prev" ? "block" : "none",
+              position: "absolute", top: 0, right: 0, width: "50%", height: "100%",
+              zIndex: 28,
             }}
-          />
+          >
+            <div className="absolute inset-0 paper-texture overflow-hidden rounded-r-lg shadow-[inset_2px_0_6px_rgba(0,0,0,0.08),_-4px_4px_15px_rgba(0,0,0,0.12)]">
+              {frozen && <PageFace page={frozen.right} side="right" />}
+            </div>
+          </div>
+
+          {/* Shadow on revealed right page during prev flip */}
           <div
             ref={prevShadowRef}
-            className="absolute top-0 right-0 w-1/2 h-full pointer-events-none z-[25] rounded-r-lg"
+            className="absolute top-0 right-0 w-1/2 h-full pointer-events-none z-[27] rounded-r-lg"
             style={{
               opacity: 0,
-              background: "linear-gradient(to left, rgba(0,0,0,0.2), rgba(0,0,0,0.05) 60%, transparent)",
+              background: "linear-gradient(to left, rgba(0,0,0,0.12), transparent 60%)",
               transition: "none",
             }}
           />
