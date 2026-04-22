@@ -155,11 +155,19 @@ export async function POST(request: NextRequest) {
     // ─── Validate access token ───────────────────────────
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
     if (!accessToken) {
+      console.error("[MP] MERCADO_PAGO_ACCESS_TOKEN não configurada no Vercel");
       return NextResponse.json(
-        { error: "Mercado Pago access token não configurado" },
+        { error: "Pagamento não configurado. Contate o suporte." },
         { status: 500 }
       );
     }
+
+    // Detect test token (should use prod token for live site)
+    if (accessToken.startsWith("TEST-")) {
+      console.warn("[MP] ATENÇÃO: Usando token de TESTE (sandbox). Em produção, use o token de produção (APP_USR-...).");
+    }
+
+    console.log("[MP] Token prefix:", accessToken.substring(0, 12) + "...");
 
     // ─── Validate BASE_URL (must be HTTPS, public, valid) ─
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -260,18 +268,26 @@ export async function POST(request: NextRequest) {
       const errorText = await mpRes.text();
       console.error("Mercado Pago API error:", mpRes.status, errorText);
 
-      // Detect common MP validation errors
       let userMessage = "Erro ao criar pagamento. Tente novamente.";
-      try {
-        const errJson = JSON.parse(errorText);
-        if (errJson.cause?.length) {
-          const causes = errJson.cause.map((c: { description?: string }) => c.description).filter(Boolean);
-          if (causes.length) userMessage = `Pagamento inválido: ${causes.join("; ")}`;
-        } else if (errJson.message) {
-          userMessage = errJson.message;
+
+      if (mpRes.status === 401 || mpRes.status === 403) {
+        userMessage = "Token do Mercado Pago inválido ou expirado. Verifique as credenciais no painel do Vercel.";
+        console.error("[MP] Erro de autenticação! Verifique se MERCADO_PAGO_ACCESS_TOKEN está correto e é um token de PRODUÇÃO (APP_USR-...), não de teste (TEST-...).");
+      } else {
+        try {
+          const errJson = JSON.parse(errorText);
+          if (errJson.cause?.length) {
+            const causes = errJson.cause.map((c: { description?: string; code?: string }) => c.description || c.code).filter(Boolean);
+            if (causes.length) userMessage = `Pagamento inválido: ${causes.join("; ")}`;
+          } else if (errJson.message) {
+            userMessage = errJson.message;
+          }
+        } catch {
+          // response was not JSON (e.g. HTML page from MP)
+          if (mpRes.status === 404) {
+            userMessage = "Endpoint do Mercado Pago não encontrado. O token pode ser inválido.";
+          }
         }
-      } catch {
-        // keep default message
       }
 
       return NextResponse.json({ error: userMessage }, { status: 502 });
