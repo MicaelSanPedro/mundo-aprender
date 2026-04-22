@@ -911,15 +911,53 @@ export default function Home() {
   };
 
   // Open checkout from cart
+  const [savedCustomer, setSavedCustomer] = useState<Customer | null>(null);
+  const [showSavedPrompt, setShowSavedPrompt] = useState(false);
+
   const openCheckout = () => {
     setCheckoutStep(1);
-    setCustomer({ name: "", email: "", phone: "" });
     setCompletedOrder(null);
     setPaymentResult(null);
     setPaymentResultOrder(null);
     setCheckoutTermsAccepted(false);
     setCartOpen(false);
+    // Check localStorage for saved data
+    try {
+      const saved = localStorage.getItem("mundo-ultimo-checkout");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Customer;
+        if (parsed.name || parsed.email) {
+          setSavedCustomer(parsed);
+          setCustomer({ name: "", email: "", phone: "" });
+          setShowSavedPrompt(true);
+          setTimeout(() => setCheckoutOpen(true), 200);
+          return;
+        }
+      }
+    } catch {}
+    setSavedCustomer(null);
+    setCustomer({ name: "", email: "", phone: "" });
+    setShowSavedPrompt(false);
     setTimeout(() => setCheckoutOpen(true), 200);
+  };
+
+  const fillFromSaved = () => {
+    if (savedCustomer) {
+      setCustomer({ ...savedCustomer });
+    }
+    setShowSavedPrompt(false);
+  };
+
+  const fillManually = () => {
+    setShowSavedPrompt(false);
+  };
+
+  const saveCustomerAndAdvance = () => {
+    // Save current data to localStorage
+    try {
+      localStorage.setItem("mundo-ultimo-checkout", JSON.stringify(customer));
+    } catch {}
+    setCheckoutStep(2);
   };
 
   // Submit order — manual PIX payment
@@ -2806,6 +2844,44 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-3">
+                  {/* Saved data prompt */}
+                  {showSavedPrompt && savedCustomer && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-kid-blue/10 rounded-2xl p-4 border-2 border-kid-blue/20"
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-lg">💡</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-foreground/80">
+                            Usar dados da ultima compra?
+                          </p>
+                          <p className="text-xs text-foreground/50 mt-1 mb-3">
+                            {savedCustomer.name} — {savedCustomer.email}
+                            {savedCustomer.phone ? ` — ${savedCustomer.phone}` : ""}
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={fillFromSaved}
+                              className="flex-1 rounded-xl bg-kid-blue text-white font-semibold text-xs py-2 hover:bg-kid-blue/90 transition-colors active:scale-[0.97]"
+                            >
+                              Sim, preencher
+                            </button>
+                            <button
+                              type="button"
+                              onClick={fillManually}
+                              className="flex-1 rounded-xl bg-foreground/5 text-foreground/60 font-semibold text-xs py-2 hover:bg-foreground/10 transition-colors active:scale-[0.97]"
+                            >
+                              Preencher manual
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
                   <div>
                     <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Nome Completo *</Label>
                     <Input
@@ -2839,7 +2915,7 @@ export default function Home() {
 
                 <Button
                   className="w-full rounded-2xl bg-gradient-to-r from-kid-orange to-kid-pink text-white font-bold text-lg py-6 shadow-kid-orange mt-6"
-                  onClick={() => setCheckoutStep(2)}
+                  onClick={saveCustomerAndAdvance}
                   disabled={!customer.name || !customer.email}
                 >
                   Revisar Pedido ➡️
