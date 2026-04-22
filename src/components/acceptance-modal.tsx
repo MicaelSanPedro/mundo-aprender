@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { Shield, FileText, CheckCircle2, ExternalLink, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "mundo-aprender-termos-aceitos";
 const ACCEPTANCE_VERSION = "2025-04-23";
@@ -28,106 +26,112 @@ interface AcceptanceModalProps {
 }
 
 export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProps) {
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const portalRef = useRef<HTMLDivElement | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [privacy, setPrivacy] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setReady(true);
   }, []);
 
-  const canAccept = acceptedTerms && acceptedPrivacy;
+  if (!isOpen || !ready) return null;
 
-  const handleAccept = () => {
-    if (!acceptedTerms || !acceptedPrivacy) return;
+  const canAccept = terms && privacy;
+
+  function accept() {
+    if (!terms || !privacy) return;
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          accepted: true,
-          version: ACCEPTANCE_VERSION,
-          acceptedAt: new Date().toISOString(),
-        })
-      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        accepted: true,
+        version: ACCEPTANCE_VERSION,
+        acceptedAt: new Date().toISOString(),
+      }));
     } catch {}
-    setAcceptedTerms(false);
-    setAcceptedPrivacy(false);
+    setTerms(false);
+    setPrivacy(false);
     onClose();
-  };
+  }
 
-  const handleBack = () => {
-    setAcceptedTerms(false);
-    setAcceptedPrivacy(false);
+  function back() {
+    setTerms(false);
+    setPrivacy(false);
     onClose();
-  };
+  }
 
-  if (!isOpen || !mounted) return null;
-
-  const content = (
+  return createPortal(
     <div
-      ref={portalRef}
-      style={{ position: "fixed", inset: 0, zIndex: 99999 }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 2147483647,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+      }}
     >
       {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
+        onClick={back}
         style={{
           position: "absolute",
           inset: 0,
           backgroundColor: "rgba(0,0,0,0.6)",
           backdropFilter: "blur(4px)",
         }}
-        onClick={handleBack}
       />
 
       {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 30 }}
-        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+      <div
         style={{
           position: "relative",
-          zIndex: 100000,
+          background: "white",
+          borderRadius: "1.5rem",
           maxWidth: "32rem",
           width: "100%",
           maxHeight: "90vh",
           overflowY: "auto",
+          boxShadow: "0 25px 50px rgba(0,0,0,0.25)",
         }}
-        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl mx-4 custom-scrollbar"
-        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header gradient */}
-        <div className="gradient-hero p-6 sm:p-8 rounded-t-2xl sm:rounded-t-3xl relative overflow-hidden">
-          <div className="absolute top-2 right-4 text-4xl opacity-20 animate-float">
-            <Shield className="h-10 w-10 text-white" />
-          </div>
-          <div className="absolute bottom-3 left-6 text-3xl opacity-15 animate-float-delay-1">
-            <FileText className="h-8 w-8 text-white" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm">
-                <Shield className="h-6 w-6 text-white" />
+        {/* Header */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #FFD43B 0%, #FF922B 25%, #F783AC 50%, #B197FC 75%, #4DABF7 100%)",
+            backgroundSize: "300% 300%",
+            animation: "gradient-shift 12s ease infinite",
+            padding: "1.5rem",
+            borderTopLeftRadius: "1.5rem",
+            borderTopRightRadius: "1.5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <div style={{
+              width: "3rem",
+              height: "3rem",
+              borderRadius: "0.75rem",
+              background: "rgba(255,255,255,0.2)",
+              backdropFilter: "blur(8px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              <Shield style={{ width: "1.5rem", height: "1.5rem", color: "white" }} />
+            </div>
+            <div>
+              <div style={{ fontSize: "1.25rem", fontWeight: 900, color: "white" }}>
+                Aceite os Termos
               </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">
-                  Aceite os Termos
-                </h2>
-                <p className="text-white/80 text-xs sm:text-sm">
-                  Necessario para continuar
-                </p>
+              <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>
+                Necessario para continuar
               </div>
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-6 sm:p-8 space-y-5">
-          <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
+        <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          <p style={{ fontSize: "0.875rem", color: "rgba(26,26,46,0.7)", lineHeight: 1.6 }}>
             Para prosseguir com a compra ou ativacao de produto, e necessario que
             voce leia e aceite nossos Termos de Uso e Politica de Privacidade,
             em conformidade com a LGPD (Lei 13.709/2018).
@@ -136,39 +140,48 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
           {/* Terms checkbox */}
           <button
             type="button"
-            onClick={() => setAcceptedTerms(!acceptedTerms)}
-            className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left ${
-              acceptedTerms
-                ? "border-kid-green bg-kid-green/5"
-                : "border-kid-orange/20 bg-kid-orange/5 hover:border-kid-orange/40"
-            }`}
+            onClick={() => setTerms(!terms)}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "0.75rem",
+              padding: "1rem",
+              borderRadius: "0.75rem",
+              border: `2px solid ${terms ? "#69DB7C" : "rgba(255,146,43,0.2)"}`,
+              background: terms ? "rgba(105,219,124,0.05)" : "rgba(255,146,43,0.05)",
+              cursor: "pointer",
+              textAlign: "left",
+            }}
           >
-            <div className="pt-0.5">
-              <div
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                  acceptedTerms
-                    ? "bg-kid-green border-kid-green"
-                    : "border-gray-300"
-                }`}
-              >
-                {acceptedTerms && <CheckCircle2 className="h-5 w-5 text-white" />}
+            <div style={{ marginTop: "2px" }}>
+              <div style={{
+                width: "1.25rem",
+                height: "1.25rem",
+                borderRadius: "0.375rem",
+                border: `2px solid ${terms ? "#69DB7C" : "#d1d5db"}`,
+                background: terms ? "#69DB7C" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                {terms && <CheckCircle2 style={{ width: "1.25rem", height: "1.25rem", color: "white" }} />}
               </div>
             </div>
-            <div className="flex-1">
-              <span className="text-sm font-semibold text-foreground">
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#1a1a2e" }}>
                 Li e aceito os{" "}
-                <Link
+                <a
                   href="/termos-de-uso"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-0.5 text-kid-blue hover:text-kid-blue/70 underline decoration-kid-blue/30 hover:decoration-kid-blue transition-colors"
                   onClick={(e) => e.stopPropagation()}
+                  style={{ color: "#4DABF7", textDecoration: "underline" }}
                 >
-                  Termos de Uso
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
+                  Termos de Uso ↗
+                </a>
               </span>
-              <p className="text-xs text-foreground/50 mt-1">
+              <p style={{ fontSize: "0.75rem", color: "rgba(26,26,46,0.5)", marginTop: "0.25rem" }}>
                 Regras de utilizacao, compra, propriedade intelectual e limitacoes.
               </p>
             </div>
@@ -177,73 +190,105 @@ export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProp
           {/* Privacy checkbox */}
           <button
             type="button"
-            onClick={() => setAcceptedPrivacy(!acceptedPrivacy)}
-            className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left ${
-              acceptedPrivacy
-                ? "border-kid-green bg-kid-green/5"
-                : "border-kid-blue/20 bg-kid-blue/5 hover:border-kid-blue/40"
-            }`}
+            onClick={() => setPrivacy(!privacy)}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "0.75rem",
+              padding: "1rem",
+              borderRadius: "0.75rem",
+              border: `2px solid ${privacy ? "#69DB7C" : "rgba(77,171,247,0.2)"}`,
+              background: privacy ? "rgba(105,219,124,0.05)" : "rgba(77,171,247,0.05)",
+              cursor: "pointer",
+              textAlign: "left",
+            }}
           >
-            <div className="pt-0.5">
-              <div
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                  acceptedPrivacy
-                    ? "bg-kid-green border-kid-green"
-                    : "border-gray-300"
-                }`}
-              >
-                {acceptedPrivacy && <CheckCircle2 className="h-5 w-5 text-white" />}
+            <div style={{ marginTop: "2px" }}>
+              <div style={{
+                width: "1.25rem",
+                height: "1.25rem",
+                borderRadius: "0.375rem",
+                border: `2px solid ${privacy ? "#69DB7C" : "#d1d5db"}`,
+                background: privacy ? "#69DB7C" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                {privacy && <CheckCircle2 style={{ width: "1.25rem", height: "1.25rem", color: "white" }} />}
               </div>
             </div>
-            <div className="flex-1">
-              <span className="text-sm font-semibold text-foreground">
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#1a1a2e" }}>
                 Li e aceito a{" "}
-                <Link
+                <a
                   href="/politica-de-privacidade"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-0.5 text-kid-blue hover:text-kid-blue/70 underline decoration-kid-blue/30 hover:decoration-kid-blue transition-colors"
                   onClick={(e) => e.stopPropagation()}
+                  style={{ color: "#4DABF7", textDecoration: "underline" }}
                 >
-                  Politica de Privacidade
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
+                  Politica de Privacidade ↗
+                </a>
               </span>
-              <p className="text-xs text-foreground/50 mt-1">
+              <p style={{ fontSize: "0.75rem", color: "rgba(26,26,46,0.5)", marginTop: "0.25rem" }}>
                 Coleta, uso, armazenamento e protecao dos seus dados pessoais.
               </p>
             </div>
           </button>
 
-          {/* Buttons */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={handleAccept}
-              disabled={!canAccept}
-              className={`w-full rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base py-3.5 sm:py-4 transition-all duration-300 flex items-center justify-center gap-2 ${
-                canAccept
-                  ? "bg-kid-green hover:bg-kid-green/90 text-white shadow-kid-green hover:shadow-lg active:scale-[0.98] cursor-pointer"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}
-            >
-              <CheckCircle2 className="h-5 w-5" />
-              Aceitar e Continuar
-            </button>
+          {/* Accept button */}
+          <button
+            type="button"
+            onClick={accept}
+            disabled={!canAccept}
+            style={{
+              width: "100%",
+              borderRadius: "0.75rem",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              padding: "0.875rem",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+              cursor: canAccept ? "pointer" : "not-allowed",
+              background: canAccept ? "#69DB7C" : "#e5e7eb",
+              color: canAccept ? "white" : "#9ca3af",
+              boxShadow: canAccept ? "0 8px 30px rgba(105,219,124,0.3)" : "none",
+            }}
+          >
+            <CheckCircle2 style={{ width: "1.25rem", height: "1.25rem" }} />
+            Aceitar e Continuar
+          </button>
 
-            <button
-              type="button"
-              onClick={handleBack}
-              className="w-full rounded-xl sm:rounded-2xl font-semibold text-sm sm:text-base py-3 text-foreground/50 hover:text-foreground/80 hover:bg-foreground/5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para a loja
-            </button>
-          </div>
+          {/* Back button */}
+          <button
+            type="button"
+            onClick={back}
+            style={{
+              width: "100%",
+              borderRadius: "0.75rem",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              padding: "0.75rem",
+              border: "none",
+              background: "transparent",
+              color: "rgba(26,26,46,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
+            <ArrowLeft style={{ width: "1rem", height: "1rem" }} />
+            Voltar para a loja
+          </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </div>,
+    document.body
   );
-
-  return createPortal(content, document.body);
 }
