@@ -804,9 +804,23 @@ export default function Home() {
   // Activation code state
   const [activateOpen, setActivateOpen] = useState(false);
   const [activateCode, setActivateCode] = useState("");
-  const [activateStep, setActivateStep] = useState<"input" | "loading" | "success" | "activated">("input");
+  const [activateStep, setActivateStep] = useState<"input" | "loading" | "activated">("input");
   const [activateError, setActivateError] = useState("");
   const [activateProduct, setActivateProduct] = useState<{ name: string; emoji: string; link: string } | null>(null);
+  const [activatedProducts, setActivatedProducts] = useState<{ name: string; emoji: string; link: string }[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("mundo-ativados");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Persist activated products to localStorage
+  useEffect(() => {
+    if (activatedProducts.length > 0) {
+      localStorage.setItem("mundo-ativados", JSON.stringify(activatedProducts));
+    }
+  }, [activatedProducts]);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -957,8 +971,14 @@ export default function Home() {
       const actData = await actRes.json();
 
       if (actData.success) {
+        const product = { name: actData.productName, emoji: actData.productEmoji, link: actData.productLink };
+        setActivateProduct(product);
         setActivateStep("activated");
-        setActivateProduct({ name: actData.productName, emoji: actData.productEmoji, link: actData.productLink });
+        // Save to localStorage so it persists forever
+        setActivatedProducts((prev) => {
+          const already = prev.some((p) => p.name === product.name);
+          return already ? prev : [...prev, product];
+        });
       } else {
         setActivateStep("input");
         setActivateError(actData.error || "Erro ao ativar");
@@ -971,10 +991,23 @@ export default function Home() {
 
   const closeActivate = () => {
     setActivateOpen(false);
-    setActivateStep("input");
+    setActivateStep(activatedProducts.length > 0 ? "activated" : "input");
     setActivateCode("");
     setActivateError("");
-    setActivateProduct(null);
+    setActivateProduct(activatedProducts.length > 0 ? activatedProducts[0] : null);
+  };
+
+  // When opening the modal, show activated products if any
+  const openActivate = () => {
+    setActivateOpen(true);
+    if (activatedProducts.length > 0) {
+      setActivateStep("activated");
+      setActivateProduct(activatedProducts[0]);
+    } else {
+      setActivateStep("input");
+      setActivateCode("");
+      setActivateError("");
+    }
   };
 
   const sendConfirmationEmailJS = useCallback(async (order: Order) => {
@@ -1402,7 +1435,7 @@ export default function Home() {
                 variant="ghost"
                 size="icon"
                 className="hidden sm:inline-flex rounded-2xl hover:bg-kid-purple/20 h-9 w-9 sm:h-10 sm:w-10"
-                onClick={() => setActivateOpen(true)}
+                onClick={() => openActivate()}
               >
                 <KeyRound className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
@@ -1643,7 +1676,7 @@ export default function Home() {
                       <button
                         onClick={() => {
                           setMobileMenuOpen(false);
-                          setTimeout(() => setActivateOpen(true), 250);
+                          setTimeout(() => openActivate(), 250);
                         }}
                         className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-purple/5 hover:bg-kid-purple/10 border border-kid-purple/10 transition-all"
                       >
@@ -3080,7 +3113,7 @@ export default function Home() {
                   </div>
                 )}
 
-                {activateStep === "activated" && activateProduct && (
+                {activateStep === "activated" && activatedProducts.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -3090,18 +3123,39 @@ export default function Home() {
                       <CheckCircle2 className="h-8 w-8 text-kid-green" />
                     </div>
                     <div>
-                      <p className="text-xs text-foreground/50 font-medium">Produto Liberado!</p>
-                      <p className="text-base font-bold text-foreground mt-1">{activateProduct.emoji} {activateProduct.name}</p>
+                      <p className="text-xs text-foreground/50 font-medium">Seus Produtos Liberados</p>
                     </div>
-                    <a
-                      href={activateProduct.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full h-13 rounded-2xl bg-gradient-to-r from-kid-green to-kid-teal text-white font-bold text-sm shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98]"
+
+                    <div className="space-y-2">
+                      {activatedProducts.map((prod, idx) => (
+                        <a
+                          key={idx}
+                          href={prod.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 w-full p-3 rounded-2xl bg-kid-green/5 border border-kid-green/20 hover:bg-kid-green/10 transition-colors text-left"
+                        >
+                          <span className="text-2xl">{prod.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-foreground truncate">{prod.name}</p>
+                            <p className="text-[10px] text-kid-green font-semibold">Liberado</p>
+                          </div>
+                          <Download className="h-5 w-5 text-kid-green shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setActivateStep("input");
+                        setActivateCode("");
+                        setActivateError("");
+                      }}
+                      className="text-xs text-kid-blue font-semibold hover:text-kid-blue/70 transition-colors"
                     >
-                      <Download className="h-4 w-4" />
-                      Baixar Produto
-                    </a>
+                      + Ativar outro produto
+                    </button>
+
                     <button
                       onClick={closeActivate}
                       className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors"
