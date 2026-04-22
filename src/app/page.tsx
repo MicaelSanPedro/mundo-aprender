@@ -798,6 +798,7 @@ export default function Home() {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [expandedDescId, setExpandedDescId] = useState<number | null>(null);
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
+  const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -829,6 +830,8 @@ export default function Home() {
     });
     setJustAdded(product.id);
     setTimeout(() => setJustAdded(null), 1500);
+    setCartToast({ name: product.name, emoji: product.emoji });
+    setTimeout(() => setCartToast(null), 3000);
   }, []);
 
   const updateQuantity = useCallback((id: number, delta: number) => {
@@ -2911,6 +2914,36 @@ export default function Home() {
           >
             <ChevronUp className="h-5 w-5" />
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════ CART TOAST NOTIFICATION ═══════════════ */}
+      <AnimatePresence>
+        {cartToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 80, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white border-2 border-kid-green/30 rounded-2xl shadow-lg shadow-kid-green/10 px-4 py-3 sm:px-5 sm:py-3.5 max-w-[90vw]"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-kid-green/15 text-lg sm:text-xl shrink-0">
+                {cartToast.emoji}
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-foreground leading-tight">{cartToast.name}</p>
+                <p className="text-[11px] sm:text-xs text-foreground/50 font-medium">Adicionado ao carrinho!</p>
+              </div>
+            </div>
+            <button
+              onClick={() => { setCartToast(null); setCartOpen(true); }}
+              className="shrink-0 flex items-center gap-1.5 text-xs sm:text-sm font-bold text-kid-blue hover:text-kid-blue/70 bg-kid-blue/10 hover:bg-kid-blue/15 rounded-xl px-3 py-2 transition-colors active:scale-95"
+            >
+              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Ver
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 
