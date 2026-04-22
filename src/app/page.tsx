@@ -46,6 +46,7 @@ import {
   FileText,
   Copy,
   Check,
+  KeyRound,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -800,6 +801,13 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
   const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
+  // Activation code state
+  const [activateOpen, setActivateOpen] = useState(false);
+  const [activateCode, setActivateCode] = useState("");
+  const [activateStep, setActivateStep] = useState<"input" | "loading" | "success" | "activated">("input");
+  const [activateError, setActivateError] = useState("");
+  const [activateProduct, setActivateProduct] = useState<{ name: string; emoji: string; link: string } | null>(null);
+
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -917,6 +925,56 @@ export default function Home() {
       setPixCopied(true);
       setTimeout(() => setPixCopied(false), 2500);
     }
+  };
+
+  // Verify and activate code
+  const handleActivateCode = async () => {
+    const code = activateCode.trim().toUpperCase();
+    if (code.length < 8) {
+      setActivateError("Digite o código completo");
+      return;
+    }
+
+    setActivateStep("loading");
+    setActivateError("");
+
+    try {
+      const res = await fetch(`/api/codes/verify/${encodeURIComponent(code)}`);
+      const data = await res.json();
+
+      if (!data.valid) {
+        setActivateStep("input");
+        setActivateError(data.used ? "Este código já foi utilizado" : "Código inválido");
+        return;
+      }
+
+      // Code is valid — now activate it
+      const actRes = await fetch(`/api/codes/activate/${encodeURIComponent(code)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const actData = await actRes.json();
+
+      if (actData.success) {
+        setActivateStep("activated");
+        setActivateProduct({ name: actData.productName, emoji: actData.productEmoji, link: actData.productLink });
+      } else {
+        setActivateStep("input");
+        setActivateError(actData.error || "Erro ao ativar");
+      }
+    } catch {
+      setActivateStep("input");
+      setActivateError("Erro de conexão. Tente novamente.");
+    }
+  };
+
+  const closeActivate = () => {
+    setActivateOpen(false);
+    setActivateStep("input");
+    setActivateCode("");
+    setActivateError("");
+    setActivateProduct(null);
   };
 
   const sendConfirmationEmailJS = useCallback(async (order: Order) => {
@@ -1339,6 +1397,16 @@ export default function Home() {
                 </SheetContent>
               </Sheet>
 
+              {/* Activate code - desktop only (mobile: inside ☰ menu) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden sm:inline-flex rounded-2xl hover:bg-kid-purple/20 h-9 w-9 sm:h-10 sm:w-10"
+                onClick={() => setActivateOpen(true)}
+              >
+                <KeyRound className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+              </Button>
+
               {/* Cart - desktop only (mobile: inside ☰ menu) */}
               <Sheet open={cartOpen} onOpenChange={setCartOpen}>
                 <SheetTrigger asChild>
@@ -1570,6 +1638,17 @@ export default function Home() {
                       >
                         <ClipboardList className="h-5 w-5 text-foreground/40" />
                         <span className="text-[11px] font-semibold text-foreground/60">Pedidos</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setTimeout(() => setActivateOpen(true), 250);
+                        }}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-purple/5 hover:bg-kid-purple/10 border border-kid-purple/10 transition-all"
+                      >
+                        <KeyRound className="h-5 w-5 text-foreground/40" />
+                        <span className="text-[11px] font-semibold text-foreground/60">Ativar</span>
                       </button>
                     </div>
                   </div>
@@ -2914,6 +2993,131 @@ export default function Home() {
           >
             <ChevronUp className="h-5 w-5" />
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════ ACTIVATE CODE MODAL ═══════════════ */}
+      <AnimatePresence>
+        {activateOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeActivate} />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative z-10 w-full sm:max-w-md mx-3 mb-3 sm:mb-0 bg-white rounded-3xl shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-kid-purple to-kid-blue p-6 text-white text-center">
+                <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 0.5, delay: 0.2 }}>
+                  <KeyRound className="h-8 w-8 mx-auto mb-2" />
+                </motion.div>
+                <h3 className="text-lg font-bold">Ativar Produto</h3>
+                <p className="text-white/80 text-xs mt-1">Digite o código que recebeu para liberar seu produto</p>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 sm:p-6">
+                {activateStep === "input" && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-semibold text-foreground/80 mb-2 block">Código de Ativação</Label>
+                      <Input
+                        value={activateCode}
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+                          setActivateCode(val);
+                          setActivateError("");
+                        }}
+                        placeholder="XXXX-XXXX-XXXX"
+                        className="text-center text-lg font-mono tracking-[0.2em] h-14 rounded-2xl border-2 border-foreground/10 focus:border-kid-purple/50"
+                        maxLength={14}
+                        autoFocus
+                        onKeyDown={(e) => e.key === "Enter" && handleActivateCode()}
+                      />
+                    </div>
+
+                    {activateError && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs font-semibold text-red-500 text-center bg-red-50 rounded-xl px-3 py-2"
+                      >
+                        {activateError}
+                      </motion.p>
+                    )}
+
+                    <Button
+                      onClick={handleActivateCode}
+                      className="w-full h-13 rounded-2xl bg-gradient-to-r from-kid-purple to-kid-blue text-white font-bold text-sm shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98]"
+                      disabled={activateCode.trim().length < 8}
+                    >
+                      Ativar
+                    </Button>
+
+                    <p className="text-[10px] text-foreground/30 text-center">
+                      Recebeu o código no WhatsApp após enviar o comprovante PIX
+                    </p>
+                  </div>
+                )}
+
+                {activateStep === "loading" && (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 text-kid-purple animate-spin" />
+                    <p className="text-sm font-semibold text-foreground/60 mt-3">Verificando código...</p>
+                  </div>
+                )}
+
+                {activateStep === "activated" && activateProduct && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center space-y-4"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-kid-green/10 flex items-center justify-center mx-auto">
+                      <CheckCircle2 className="h-8 w-8 text-kid-green" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-foreground/50 font-medium">Produto Liberado!</p>
+                      <p className="text-base font-bold text-foreground mt-1">{activateProduct.emoji} {activateProduct.name}</p>
+                    </div>
+                    <a
+                      href={activateProduct.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full h-13 rounded-2xl bg-gradient-to-r from-kid-green to-kid-teal text-white font-bold text-sm shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-[0.98]"
+                    >
+                      <Download className="h-4 w-4" />
+                      Baixar Produto
+                    </a>
+                    <button
+                      onClick={closeActivate}
+                      className="text-xs text-foreground/40 hover:text-foreground/60 transition-colors"
+                    >
+                      Fechar
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={closeActivate}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              >
+                <X className="h-4 w-4 text-white" />
+              </button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
