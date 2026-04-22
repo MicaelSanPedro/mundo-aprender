@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, FileText, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,31 +9,30 @@ import { Button } from "@/components/ui/button";
 const STORAGE_KEY = "mundo-aprender-termos-aceitos";
 const ACCEPTANCE_VERSION = "2025-04-23";
 
-const HIDDEN_PATHS = ["/termos-de-uso", "/politica-de-privacidade", "/admin"];
+export function hasAcceptedTerms(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.version === ACCEPTANCE_VERSION && parsed.accepted === true;
+    }
+  } catch {}
+  return false;
+}
 
-export default function AcceptanceModal() {
-  const [isOpen, setIsOpen] = useState(false);
+interface AcceptanceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function AcceptanceModal({ isOpen, onClose }: AcceptanceModalProps) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
 
-  useEffect(() => {
-    if (HIDDEN_PATHS.some((p) => pathname?.startsWith(p))) return;
-    setMounted(true);
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.version === ACCEPTANCE_VERSION && parsed.accepted === true) {
-          return; // Already accepted current version
-        }
-      }
-      setIsOpen(true);
-    } catch {
-      setIsOpen(true);
-    }
-  }, []);
+  if (!isOpen) return null;
+
+  const canAccept = acceptedTerms && acceptedPrivacy;
 
   const handleAccept = () => {
     if (!acceptedTerms || !acceptedPrivacy) return;
@@ -47,15 +45,11 @@ export default function AcceptanceModal() {
           acceptedAt: new Date().toISOString(),
         })
       );
-    } catch {
-      // localStorage might be unavailable
-    }
-    setIsOpen(false);
+    } catch {}
+    setAcceptedTerms(false);
+    setAcceptedPrivacy(false);
+    onClose();
   };
-
-  if (!mounted || !isOpen) return null;
-
-  const canAccept = acceptedTerms && acceptedPrivacy;
 
   return (
     <AnimatePresence>
@@ -67,7 +61,7 @@ export default function AcceptanceModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={(e) => e.preventDefault()} // Prevent closing by clicking outside
+            onClick={(e) => e.preventDefault()}
           />
 
           {/* Modal */}
@@ -80,14 +74,12 @@ export default function AcceptanceModal() {
           >
             {/* Header gradient */}
             <div className="gradient-hero p-6 sm:p-8 rounded-t-2xl sm:rounded-t-3xl relative overflow-hidden">
-              {/* Decorative elements */}
               <div className="absolute top-2 right-4 text-4xl opacity-20 animate-float">
                 <Shield className="h-10 w-10 text-white" />
               </div>
               <div className="absolute bottom-3 left-6 text-3xl opacity-15 animate-float-delay-1">
                 <FileText className="h-8 w-8 text-white" />
               </div>
-
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm">
@@ -95,10 +87,10 @@ export default function AcceptanceModal() {
                   </div>
                   <div>
                     <h2 className="text-xl sm:text-2xl font-black text-white">
-                      Bem-vindo ao Mundo Aprender!
+                      Aceite os Termos
                     </h2>
                     <p className="text-white/80 text-xs sm:text-sm">
-                      Precisamos do seu aceite para continuar
+                      Necessario para continuar
                     </p>
                   </div>
                 </div>
@@ -108,10 +100,9 @@ export default function AcceptanceModal() {
             {/* Body */}
             <div className="p-6 sm:p-8 space-y-5">
               <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
-                Para utilizarmos nossos servicos, e necessario que voce leia e aceite nossos
-                Termos de Uso e Politica de Privacidade. Estes documentos descrevem como
-                tratamos seus dados e as regras de utilizacao da plataforma, em conformidade
-                com a LGPD (Lei 13.709/2018).
+                Para prosseguir com a compra ou ativacao de produto, e necessario que
+                voce leia e aceite nossos Termos de Uso e Politica de Privacidade,
+                em conformidade com a LGPD (Lei 13.709/2018).
               </p>
 
               {/* Terms checkbox */}
@@ -136,9 +127,7 @@ export default function AcceptanceModal() {
                         : "border-gray-300 peer-hover:border-kid-orange"
                     }`}
                   >
-                    {acceptedTerms && (
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    )}
+                    {acceptedTerms && <CheckCircle2 className="h-5 w-5 text-white" />}
                   </div>
                 </div>
                 <div className="flex-1">
@@ -183,9 +172,7 @@ export default function AcceptanceModal() {
                         : "border-gray-300 peer-hover:border-kid-blue"
                     }`}
                   >
-                    {acceptedPrivacy && (
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    )}
+                    {acceptedPrivacy && <CheckCircle2 className="h-5 w-5 text-white" />}
                   </div>
                 </div>
                 <div className="flex-1">
@@ -223,12 +210,6 @@ export default function AcceptanceModal() {
                   Aceitar e Continuar
                 </span>
               </Button>
-
-              <p className="text-center text-[11px] text-foreground/40 leading-relaxed">
-                Ao aceitar, voce concorda com a coleta e o tratamento dos seus dados conforme
-                descrito em nossos documentos. Voce pode revogar seu consentimento a qualquer
-                momento entrando em contato conosco.
-              </p>
             </div>
           </motion.div>
         </div>

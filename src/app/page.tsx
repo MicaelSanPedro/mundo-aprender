@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AcceptanceModal, { hasAcceptedTerms } from "@/components/acceptance-modal";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -802,6 +803,27 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
   const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
+  // Terms acceptance gate
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
+
+  const requireTermsAcceptance = useCallback((action: () => void) => {
+    if (hasAcceptedTerms()) {
+      action();
+    } else {
+      pendingActionRef.current = action;
+      setShowAcceptModal(true);
+    }
+  }, []);
+
+  const handleTermsAccepted = useCallback(() => {
+    setShowAcceptModal(false);
+    if (pendingActionRef.current) {
+      pendingActionRef.current();
+      pendingActionRef.current = null;
+    }
+  }, []);
+
   // Activation code state
   const [activateOpen, setActivateOpen] = useState(false);
   const [activateCode, setActivateCode] = useState("");
@@ -908,13 +930,15 @@ export default function Home() {
 
   // Open checkout from cart
   const openCheckout = () => {
-    setCheckoutStep(1);
-    setCustomer({ name: "", email: "", phone: "" });
-    setCompletedOrder(null);
-    setPaymentResult(null);
-    setPaymentResultOrder(null);
-    setCartOpen(false);
-    setTimeout(() => setCheckoutOpen(true), 200);
+    requireTermsAcceptance(() => {
+      setCheckoutStep(1);
+      setCustomer({ name: "", email: "", phone: "" });
+      setCompletedOrder(null);
+      setPaymentResult(null);
+      setPaymentResultOrder(null);
+      setCartOpen(false);
+      setTimeout(() => setCheckoutOpen(true), 200);
+    });
   };
 
   // Submit order — manual PIX payment
@@ -1000,15 +1024,17 @@ export default function Home() {
 
   // When opening the modal, show activated products if any
   const openActivate = () => {
-    setActivateOpen(true);
-    if (activatedProducts.length > 0) {
-      setActivateStep("activated");
-      setActivateProduct(activatedProducts[0]);
-    } else {
-      setActivateStep("input");
-      setActivateCode("");
-      setActivateError("");
-    }
+    requireTermsAcceptance(() => {
+      setActivateOpen(true);
+      if (activatedProducts.length > 0) {
+        setActivateStep("activated");
+        setActivateProduct(activatedProducts[0]);
+      } else {
+        setActivateStep("input");
+        setActivateCode("");
+        setActivateError("");
+      }
+    });
   };
 
   const sendConfirmationEmailJS = useCallback(async (order: Order) => {
@@ -3281,6 +3307,9 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Terms Acceptance Modal */}
+      <AcceptanceModal isOpen={showAcceptModal} onClose={handleTermsAccepted} />
     </div>
   );
 }

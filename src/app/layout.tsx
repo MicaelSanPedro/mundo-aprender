@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AcceptanceModal from "@/components/acceptance-modal";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -43,7 +42,6 @@ export default function RootLayout({
       <body className={`${nunito.variable} antialiased font-[family-name:var(--font-nunito)]`}>
         {children}
         <Toaster />
-        <AcceptanceModal />
       </body>
     </html>
   );
