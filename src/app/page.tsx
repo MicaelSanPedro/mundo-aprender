@@ -2926,20 +2926,18 @@ export default function Home() {
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))" }}
-            className="fixed bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto sm:max-w-sm z-50 flex items-center gap-2.5 bg-white border-2 border-kid-green/30 rounded-2xl shadow-lg shadow-kid-green/10 px-3 py-2.5 sm:px-5 sm:py-3.5"
+            className="fixed bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto sm:max-w-xs z-50 flex items-center gap-2 bg-white border-2 border-kid-green/30 rounded-2xl shadow-lg shadow-kid-green/10 px-3 py-2.5 sm:px-4 sm:py-3"
           >
-            <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-kid-green/15 text-base sm:text-xl shrink-0">
-              {cartToast.emoji}
+            <span className="text-xl sm:text-2xl shrink-0 leading-none">{cartToast.emoji}</span>
+            <span className="text-xs sm:text-sm font-bold text-foreground truncate flex-1 min-w-0">{cartToast.name}</span>
+            <span className="text-kid-green shrink-0">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={3} />
             </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm font-bold text-foreground leading-tight truncate">{cartToast.name}</p>
-              <p className="text-[10px] sm:text-xs text-foreground/50 font-medium">Adicionado ao carrinho!</p>
-            </div>
             <button
               onClick={() => { setCartToast(null); setCartOpen(true); }}
-              className="shrink-0 flex items-center gap-1 text-xs sm:text-sm font-bold text-kid-blue bg-kid-blue/10 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 active:scale-95 transition-transform"
+              className="shrink-0 flex items-center gap-1 text-[11px] sm:text-xs font-bold text-white bg-kid-blue rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 active:scale-95 transition-transform"
             >
-              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+              <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               Ver
             </button>
           </motion.div>
