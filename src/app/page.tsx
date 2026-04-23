@@ -391,7 +391,7 @@ function PageFace({ page, side }: { page: PageContent; side: "left" | "right" })
       <div className="relative h-full p-4 sm:p-5 md:p-6 flex flex-col z-[1]">
         <span className="text-2xl sm:text-3xl md:text-4xl mb-2 drop-shadow-sm">{page.emoji}</span>
         <h4 className="text-[#4A3728] font-bold text-[11px] sm:text-sm md:text-base mb-2 leading-snug">{page.title}</h4>
-        <div className="text-[#5C4A3A] text-[9px] sm:text-[11px] md:text-xs leading-[1.7] whitespace-pre-line flex-1">{page.content}</div>
+        <div className="text-[#5C4A3A] text-[9px] sm:text-[11px] md:text-xs leading-[1.7] flex-1">{page.content.split('\n').map((line, i) => line ? <span key={i}>{line}<br /></span> : <br key={i} />)}</div>
         <div className="border-t border-[#D8CCBA] pt-1.5 mt-2">
           <p className="text-[#A89878] text-[7px] sm:text-[9px] italic">{page.footer}</p>
         </div>
@@ -1775,7 +1775,8 @@ export default function Home() {
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
                     : `bg-white ${cat.hoverBorder} hover:shadow-md hover:-translate-y-1`
                 }`}
-              >\n                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
+              >
+                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
                   {cat.emoji}
                 </span>
                 <span className="font-bold text-sm sm:text-lg md:text-xl text-center leading-tight">{cat.name}</span>
