@@ -2115,9 +2115,9 @@ export default function Home() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
                   { icon: Download, color: "kid-blue", title: "Download Imediato", desc: "Receba seus PDFs no instante" },
-                  { icon: Shield, color: "kid-green", title: "Acesso por 24h", desc: "Link de download com validade" },
+                  { icon: Shield, color: "kid-green", title: "Acesso Vitalício", desc: "Download ilimitado para sempre" },
                   { icon: Heart, color: "kid-pink", title: "Feito com Carinho", desc: "Aprovado por educadores" },
-                  { icon: Award, color: "kid-purple", title: "3 Downloads", desc: "Baixe até 3 vezes cada PDF" },
+                  { icon: Award, color: "kid-purple", title: "Acesso Ilimitado", desc: "Baixe quantas vezes quiser" },
                 ].map((feat, fi) => (
                   <motion.div
                     key={feat.title}
