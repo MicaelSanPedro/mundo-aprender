@@ -2779,7 +2779,7 @@ export default function Home() {
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      💳 Pagar com PIX
+                      Finalizar Compra 🎉
                     </span>
                   )}
                 </Button>
