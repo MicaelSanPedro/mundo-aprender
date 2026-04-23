@@ -671,10 +671,9 @@ const ProductCard = memo(function ProductCard({
 }: ProductCardProps) {
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className={`card-hover group relative bg-white rounded-2xl sm:rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
     >
       {product.tag && (
@@ -698,7 +697,7 @@ const ProductCard = memo(function ProductCard({
         className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${isFavorite ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "bg-white/80 hover:bg-kid-pink/20"}`}
         onClick={(e) => { e.stopPropagation(); onToggleFavorite(product.id); }}
       >
-        <motion.div animate={isJustFavorited ? { scale: [1, 1.4, 1] } : {}} transition={{ duration: 0.3 }}>
+        <motion.div animate={isJustFavorited ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.25, ease: "easeOut" }}>
           <Heart className={`h-4 w-4 transition-colors ${isFavorite ? "text-kid-pink" : "text-foreground/30 hover:text-kid-pink"}`} fill={isFavorite ? "currentColor" : "none"} />
         </motion.div>
       </Button>
@@ -751,7 +750,7 @@ const ProductCard = memo(function ProductCard({
             )}
           </div>
         </div>
-        <motion.div whileTap={{ scale: 0.95 }} className="mt-2 sm:mt-3">
+        <div className="mt-2 sm:mt-3">
           <Button
             className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${isJustAdded ? "bg-kid-green text-white" : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"}`}
             onClick={() => onAddToCart(product)}
@@ -762,7 +761,7 @@ const ProductCard = memo(function ProductCard({
               <span className="flex items-center justify-center gap-1"><ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Adicionar</span>
             )}
           </Button>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
@@ -1316,10 +1315,9 @@ export default function Home() {
                         {cartItems.map((item) => (
                           <motion.div
                             key={item.id}
-                            layout
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
                             className="flex items-center gap-3 bg-kid-yellow/5 rounded-2xl p-3 border border-kid-yellow/20"
                           >
                             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
@@ -1721,27 +1719,18 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.4 }}
-                whileHover={{ scale: 1.05, y: -4 }}
-                whileTap={{ scale: 0.95 }}
+                transition={{ delay: i * 0.1, duration: 0.3 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   setActiveCategory(activeCategory === cat.id ? null : cat.id);
                   setActiveSubcategory(null);
                 }}
-                className={`relative group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
+                className={`relative group flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 transition-all duration-200 ${
                   activeCategory === cat.id
                     ? `${cat.color} border-transparent shadow-lg ${cat.shadow} ring-2 ring-white ring-offset-2`
-                    : `bg-white ${cat.hoverBorder} hover:shadow-lg`
+                    : `bg-white ${cat.hoverBorder} hover:shadow-md hover:-translate-y-1`
                 }`}
-              >
-                {activeCategory === cat.id && (
-                  <motion.div
-                    layoutId="category-glow"
-                    className={`absolute inset-0 rounded-2xl sm:rounded-3xl ${cat.shadow} opacity-50 blur-md`}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
+              >\n                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
                   {cat.emoji}
                 </span>
                 <span className="font-bold text-sm sm:text-lg md:text-xl text-center leading-tight">{cat.name}</span>
@@ -1782,11 +1771,10 @@ export default function Home() {
                     ?.subcategories.map((sub, i) => (
                     <motion.button
                       key={sub.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.08, duration: 0.25 }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      transition={{ delay: i * 0.05, duration: 0.2 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => setActiveSubcategory(activeSubcategory === sub.id ? null : sub.id)}
                       className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border-2 text-xs sm:text-sm font-semibold transition-all duration-200 ${
                         activeSubcategory === sub.id
@@ -1892,8 +1880,7 @@ export default function Home() {
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-            <AnimatePresence mode="popLayout">
-              {filteredProducts.map((product) => (
+            {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -1908,7 +1895,6 @@ export default function Home() {
                   onShareProduct={shareProduct}
                 />
               ))}
-            </AnimatePresence>
           </div>
 
           {filteredProducts.length === 0 && (
@@ -2007,9 +1993,8 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.4 }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`relative text-center ${item.bgColor} border-2 ${item.borderColor} rounded-3xl p-6 md:p-8`}
+                transition={{ delay: i * 0.1, duration: 0.3 }}
+                className={`relative text-center ${item.bgColor} border-2 ${item.borderColor} rounded-3xl p-6 md:p-8 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg`}
               >
                 <div className={`inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${item.color} text-white text-3xl md:text-4xl shadow-lg mb-4`}>
                   {item.emoji}
@@ -2543,10 +2528,9 @@ export default function Home() {
                     return (
                       <motion.div
                         key={product.id}
-                        layout
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
                         className="flex items-center gap-3 bg-kid-pink/5 rounded-2xl p-3 border border-kid-pink/20"
                       >
                         <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
@@ -2679,6 +2663,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="space-y-4"
               >
                 <div className="text-center mb-6">
@@ -2777,6 +2762,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="space-y-4"
               >
                 <div className="text-center mb-4">
@@ -2862,6 +2848,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="text-center py-4"
               >
                 <img src="https://devtools.com.br/img/pix/logo-pix-png-icone-520x520.png" alt="Pix" className="h-14 w-auto mx-auto mb-3 object-contain" />
