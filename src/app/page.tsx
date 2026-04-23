@@ -48,6 +48,9 @@ import {
   Copy,
   Check,
   KeyRound,
+  Moon,
+  Sun,
+  Share2,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -662,11 +665,12 @@ interface ProductCardProps {
   onAddToCart: (product: (typeof products)[0]) => void;
   onToggleDesc: (id: number) => void;
   onPreviewImage: (src: string, name: string) => void;
+  onShareProduct: (product: (typeof products)[0]) => void;
 }
 
 const ProductCard = memo(function ProductCard({
   product, isFavorite, isJustFavorited, isJustAdded, isDescExpanded,
-  onToggleFavorite, onAddToCart, onToggleDesc, onPreviewImage,
+  onToggleFavorite, onAddToCart, onToggleDesc, onPreviewImage, onShareProduct,
 }: ProductCardProps) {
   return (
     <motion.div
@@ -686,7 +690,15 @@ const ProductCard = memo(function ProductCard({
       <Button
         variant="ghost"
         size="icon"
-        className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${isFavorite ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "bg-white/80 hover:bg-kid-pink/20"}`}
+        className="absolute top-3 right-12 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all bg-white/80 dark:bg-[#1a1a2e]/80 hover:bg-kid-green/20"
+        onClick={(e) => { e.stopPropagation(); onShareProduct(product); }}
+      >
+        <Share2 className="h-4 w-4 text-foreground/30 hover:text-kid-green transition-colors" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-xl backdrop-blur-sm hover:scale-110 transition-all ${isFavorite ? "bg-kid-pink/15 hover:bg-kid-pink/25" : "bg-white/80 dark:bg-[#1a1a2e]/80 hover:bg-kid-pink/20"}`}
         onClick={(e) => { e.stopPropagation(); onToggleFavorite(product.id); }}
       >
         <motion.div animate={isJustFavorited ? { scale: [1, 1.4, 1] } : {}} transition={{ duration: 0.3 }}>
@@ -825,6 +837,9 @@ export default function Home() {
     } catch { return []; }
   });
 
+  // Dark mode theme
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
   // Persist activated products to localStorage
   useEffect(() => {
     if (activatedProducts.length > 0) {
@@ -838,6 +853,45 @@ export default function Home() {
       localStorage.setItem("mundo-carrinho", JSON.stringify(cartItems));
     } catch {}
   }, [cartItems]);
+
+  // Initialize theme from localStorage / system preference
+  useEffect(() => {
+    const saved = localStorage.getItem("mundo-theme");
+    if (saved === "dark") {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
+    } else if (saved === "light") {
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === "light" ? "dark" : "light";
+      if (next === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      try { localStorage.setItem("mundo-theme", next); } catch {}
+      return next;
+    });
+  }, []);
+
+  const shareProduct = useCallback((product: (typeof products)[0]) => {
+    const url = window.location.href;
+    const text = `Confira esse material incrivel: ${product.name} - R$ ${product.price.toFixed(2)} 🔥`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({ title: product.name, text, url }).catch(() => {});
+    } else {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(text + "\n" + url)}`;
+      window.open(waUrl, "_blank");
+    }
+  }, []);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -1251,6 +1305,20 @@ export default function Home() {
 
             {/* Actions */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {/* Theme toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden sm:inline-flex rounded-2xl hover:bg-kid-purple/20 h-9 w-9 sm:h-10 sm:w-10"
+                onClick={toggleTheme}
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+                ) : (
+                  <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+                )}
+              </Button>
+
               {/* Search toggle - desktop only (mobile: inside ☰ menu) */}
               <Button
                 variant="ghost"
@@ -1475,7 +1543,7 @@ export default function Home() {
                   {/* Quick actions - Favorites, Cart, Orders */}
                   <div className="px-4 pt-3 pb-1 shrink-0">
                     <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-wider px-4 mb-2">Ações rápidas</p>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       <button
                         onClick={() => {
                           setMobileMenuOpen(false);
@@ -1521,6 +1589,20 @@ export default function Home() {
                       >
                         <KeyRound className="h-5 w-5 text-foreground/40" />
                         <span className="text-[11px] font-semibold text-foreground/60">Ativar</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          toggleTheme();
+                        }}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl bg-kid-yellow/5 hover:bg-kid-yellow/10 border border-kid-yellow/10 transition-all"
+                      >
+                        {theme === "dark" ? (
+                          <Sun className="h-5 w-5 text-foreground/40" />
+                        ) : (
+                          <Moon className="h-5 w-5 text-foreground/40" />
+                        )}
+                        <span className="text-[11px] font-semibold text-foreground/60">{theme === "dark" ? "Claro" : "Escuro"}</span>
                       </button>
                     </div>
                   </div>
@@ -1920,6 +2002,7 @@ export default function Home() {
                   onAddToCart={addToCart}
                   onToggleDesc={(id) => setExpandedDescId(expandedDescId === id ? null : id)}
                   onPreviewImage={(src, name) => setPreviewImage({ src, name })}
+                  onShareProduct={shareProduct}
                 />
               ))}
             </AnimatePresence>
