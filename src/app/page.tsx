@@ -2811,7 +2811,7 @@ export default function Home() {
                 {/* Payment method tabs */}
                 <div className="mt-5 grid grid-cols-2 gap-2">
                   <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-kid-green/10 border-2 border-kid-green/40 shadow-sm">
-                    <span className="text-xl">💳</span>
+                    <img src="https://devtools.com.br/img/pix/logo-pix-png-icone-520x520.png" alt="Pix" className="h-8 w-auto object-contain" />
                     <span className="text-xs font-bold text-foreground">Pix</span>
                     <span className="text-[10px] text-kid-green font-semibold">Disponível</span>
                   </div>
