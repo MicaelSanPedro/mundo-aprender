@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, memo } from "react";
-import emailjs from "@emailjs/browser";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -1088,40 +1087,6 @@ export default function Home() {
     }
   };
 
-  const sendConfirmationEmailJS = useCallback(async (order: Order) => {
-    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
-    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-
-    if (!publicKey || !serviceId || !templateId) {
-      console.log("[EMAILJS] Credenciais não configuradas. Pulando envio.");
-      return;
-    }
-
-    emailjs.init(publicKey);
-
-    const firstItem = order.items[0];
-    const prod = products.find((p) => p.id === firstItem.id);
-    const link = prod?.link || "";
-
-    try {
-      await emailjs.send(serviceId, templateId, {
-        to_email: order.customer.email,
-        to_name: order.customer.name.split(" ")[0],
-        order_number: order.orderNumber,
-        product_name: firstItem.name,
-        product_emoji: firstItem.emoji,
-        product_link: link,
-        total: `R$ ${Number(order.total).toFixed(2)}`,
-        items_list: order.items
-          .map((item) => `${item.emoji} ${item.name} - ${products.find((pr) => pr.id === item.id)?.link || "#"}`)
-          .join(" | "),
-      });
-      console.log("[EMAILJS] Email enviado com sucesso para:", order.customer.email);
-    } catch (error) {
-      console.error("[EMAILJS] Erro ao enviar email:", error);
-    }
-  }, []);
 
   // Handle payment callback from Mercado Pago redirect
   useEffect(() => {
@@ -1157,8 +1122,7 @@ export default function Home() {
             setCompletedOrder(orderData);
             if (paymentStatus === "approved") {
               setCartItems([]);
-              sendConfirmationEmailJS(orderData);
-            }
+                        }
           }
         } catch (error) {
           console.error("Erro ao buscar pedido:", error);
@@ -2652,7 +2616,7 @@ export default function Home() {
                 <div className="text-center mb-6">
                   <span className="text-4xl">📄</span>
                   <h3 className="text-lg font-bold mt-2">Dados para Recebimento</h3>
-                  <p className="text-sm text-foreground/50">Os PDFs serão enviados para seu e-mail</p>
+                  <p className="text-sm text-foreground/50">Dados para receber seu material</p>
                 </div>
 
                 <div className="bg-kid-blue/10 rounded-2xl p-4 border border-kid-blue/20 flex items-center gap-3">
@@ -2717,7 +2681,7 @@ export default function Home() {
                       value={customer.email}
                       onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                     />
-                    <p className="text-xs text-foreground/40 mt-1">O link de download será enviado para este e-mail</p>
+                    <p className="text-xs text-foreground/40 mt-1">Seu contato para caso precisemos</p>
                   </div>
                   <div>
                     <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
