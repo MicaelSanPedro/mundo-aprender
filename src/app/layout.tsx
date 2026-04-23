@@ -38,19 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-        try {
-          var t = localStorage.getItem('mundo-theme');
-          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-          }
-        } catch(e) {}
-      `,
-        }}
-      />
+    <html lang="pt-BR">
       <body className={`${nunito.variable} antialiased font-[family-name:var(--font-nunito)]`}>
         {children}
         <Toaster />

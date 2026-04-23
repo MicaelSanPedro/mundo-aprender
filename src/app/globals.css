@@ -88,40 +88,6 @@
   --sidebar-ring: #FF922B;
 }
 
-.dark {
-  --background: #0f0f1a;
-  --foreground: #e8e8f0;
-  --card: #1a1a2e;
-  --card-foreground: #e8e8f0;
-  --popover: #1a1a2e;
-  --popover-foreground: #e8e8f0;
-  --primary: #FF922B;
-  --primary-foreground: #FFFFFF;
-  --secondary: #2a2a3e;
-  --secondary-foreground: #e8e8f0;
-  --muted: #1e1e32;
-  --muted-foreground: #a0a0b8;
-  --accent: #FFD43B;
-  --accent-foreground: #0f0f1a;
-  --destructive: #FF6B6B;
-  --border: #2a2a3e;
-  --input: #2a2a3e;
-  --ring: #FF922B;
-  --chart-1: #4DABF7;
-  --chart-2: #69DB7C;
-  --chart-3: #F783AC;
-  --chart-4: #FFD43B;
-  --chart-5: #B197FC;
-  --sidebar: #0f0f1a;
-  --sidebar-foreground: #e8e8f0;
-  --sidebar-primary: #FF922B;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1a1a2e;
-  --sidebar-accent-foreground: #e8e8f0;
-  --sidebar-border: #2a2a3e;
-  --sidebar-ring: #FF922B;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -132,55 +98,6 @@
   html {
     scroll-behavior: smooth;
   }
-}
-
-/* Dark mode overrides for common patterns */
-.dark .card-hover {
-  background-color: #1a1a2e;
-  border-color: rgba(255,255,255,0.05);
-}
-
-.dark .card-hover:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-}
-
-.dark .gradient-hero {
-  filter: brightness(0.5) saturate(1.3);
-}
-
-.dark .gradient-promo {
-  filter: brightness(0.7);
-}
-
-.dark .gradient-newsletter {
-  filter: brightness(0.6) saturate(1.2);
-}
-
-.dark [data-slot="sheet-content"] {
-  background-color: #1a1a2e;
-}
-
-.dark .paper-texture {
-  background-color: #2a2a3e;
-}
-
-.dark .pattern-dots {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
-}
-
-.dark .glass {
-  background: rgba(15, 15, 26, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.dark .shimmer-bg {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
-  background-size: 200% 100%;
-}
-
-/* Dark mode scrollbar */
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #4DABF7, #FF922B);
 }
 
 /* Floating animation for hero decorations */
