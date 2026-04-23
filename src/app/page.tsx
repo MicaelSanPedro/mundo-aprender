@@ -2816,7 +2816,7 @@ export default function Home() {
                     <span className="text-[10px] text-kid-green font-semibold">Disponível</span>
                   </div>
                   <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-foreground/5 border-2 border-foreground/10 cursor-not-allowed">
-                    <span className="text-xl opacity-40">💳</span>
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTIMaJ2EZbryt3Hur2j_qYUZwmYEOYM2uQ3aE-aEtJIkeBE4i6Cm0A_pZb&s=10" alt="Cartão de Crédito" className="h-8 w-auto object-contain opacity-40" />
                     <span className="text-xs font-bold text-foreground/40">Cartão de Crédito</span>
                     <span className="text-[10px] text-foreground/30 font-semibold">Em breve</span>
                   </div>
