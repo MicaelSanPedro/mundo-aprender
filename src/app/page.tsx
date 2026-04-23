@@ -1165,14 +1165,6 @@ export default function Home() {
     }
   };
 
-  // Open order history sheet
-  const openOrders = async () => {
-    setOrdersOpen(true);
-    setExpandedOrderId(null);
-    setCancelConfirmId(null);
-    await fetchOrders();
-  };
-
   // Cancel order
   const cancelOrder = async (orderId: string) => {
     try {
@@ -1421,7 +1413,10 @@ export default function Home() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[85vw] sm:max-w-sm bg-white p-0 flex flex-col">
+                <SheetContent
+                className="w-[85vw] sm:max-w-sm bg-white p-0 flex flex-col"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
                   <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                   <div className="bg-gradient-to-r from-kid-blue to-kid-purple p-5 sm:p-6 text-white">
                     <span className="text-3xl sm:text-4xl">🎒</span>
@@ -2586,21 +2581,23 @@ export default function Home() {
           <SheetTitle className="sr-only">Finalizar Compra</SheetTitle>
           {/* Checkout Header */}
           <div className="bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple p-6 text-white sticky top-0 z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="h-6 w-6" />
-                <h2 className="text-xl font-bold">Finalizar Compra</h2>
-              </div>
-              {checkoutStep > 1 && checkoutStep < 3 && (
+            <div className="flex items-center">
+              {checkoutStep > 1 && checkoutStep < 3 ? (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-xl text-white/80 hover:text-white hover:bg-white/20"
+                  className="rounded-xl text-white hover:text-white hover:bg-white/20 mr-3 shrink-0 font-bold text-base"
                   onClick={() => setCheckoutStep(checkoutStep === 2 ? 1 : 2)}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                  <ChevronLeft className="h-5 w-5 mr-1" /> Voltar
                 </Button>
+              ) : (
+                <div className="w-[90px] shrink-0" />
               )}
+              <div className="flex items-center gap-3 min-w-0">
+                <ShoppingCart className="h-6 w-6 shrink-0" />
+                <h2 className="text-xl font-bold truncate">Finalizar Compra</h2>
+              </div>
             </div>
             {/* Steps indicator */}
             <div className="flex items-center gap-2 mt-4">
