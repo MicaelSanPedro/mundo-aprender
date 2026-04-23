@@ -2895,7 +2895,11 @@ export default function Home() {
                 {/* Nubank payment option */}
                 <div className="mt-4 bg-[#820AD1]/10 rounded-2xl p-4 border-2 border-[#820AD1]/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">💜</span>
+                    <img
+                      src="https://imgs.search.brave.com/UNJ3X6hCb_iyuWCqrEk9BVIexCkriJr3oHBZQFqmmtk/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9sb2dv/ZG93bmxvYWQub3Jn/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDE5/LzA4L251YmFuay1s/b2dvLTIucG5n"
+                      alt="Nubank"
+                      className="h-6 w-auto object-contain"
+                    />
                     <p className="text-sm font-bold text-foreground">Prefere pagar pelo Nubank?</p>
                   </div>
                   <p className="text-xs text-foreground/60 mb-3">
