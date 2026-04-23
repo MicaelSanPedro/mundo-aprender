@@ -277,13 +277,21 @@ const bookPages = [
     left: {
       emoji: "🎒",
       title: "Mundo Aprender",
-      content: "Seja bem-vindo ao mundo da aprendizagem divertida!\n\nAqui, cada página é uma nova aventura cheia de descobertas. Vamos aprender brincando!",
+      content: `Seja bem-vindo ao mundo da aprendizagem divertida!
+
+Aqui, cada página é uma nova aventura cheia de descobertas. Vamos aprender brincando!`,
       footer: "Passe as páginas para explorar! ➡️",
     },
     right: {
       emoji: "🔢",
       title: "Matemática",
-      content: "Descubra os números e suas mágicas!\n\n2 + 3 = 5\n4 × 3 = 12\n15 ÷ 5 = 3\n\nOs números estão em tudo: nas flores, nas estrelas, na música!",
+      content: `Descubra os números e suas mágicas!
+
+2 + 3 = 5
+4 × 3 = 12
+15 ÷ 5 = 3
+
+Os números estão em tudo: nas flores, nas estrelas, na música!`,
       footer: "A Matemática é a linguagem do universo!",
     },
   },
@@ -291,13 +299,23 @@ const bookPages = [
     left: {
       emoji: "✏️",
       title: "Atividades",
-      content: "Complete a sequência:\n\n2, 4, 6, ___ , ___\n5, 10, 15, ___ , ___\n1, 3, 5, ___ , ___\n\nQue padrões você descobriu?",
+      content: `Complete a sequência:
+
+2, 4, 6, ___ , ___
+5, 10, 15, ___ , ___
+1, 3, 5, ___ , ___
+
+Que padrões você descobriu?`,
       footer: "Respostas: 8, 10  |  20, 25  |  7, 9",
     },
     right: {
       emoji: "📝",
       title: "Português",
-      content: "As vogais são:\n\nA  •  E  •  I  •  O  •  U\n\nSem elas não dá pra falar nem uma única palavra! Experimente falar \"O L\" sem as vogais...",
+      content: `As vogais são:
+
+A  •  E  •  I  •  O  •  U
+
+Sem elas não dá pra falar nem uma única palavra! Experimente falar "O L" sem as vogais...`,
       footer: "As vogais são a alma das palavras!",
     },
   },
@@ -305,13 +323,26 @@ const bookPages = [
     left: {
       emoji: "📚",
       title: "Histórias Educativas",
-      content: "Era uma vez um Zero que se achava sozinho...\n\n\"Ninguém me nota!\" — suspirava o Zero.\n\nMas quando o 1 chegou, juntos formaram o 10 — o maior número que o Zero já tinha visto!\n\nMoral: Juntos somos mais fortes.",
+      content: `Era uma vez um Zero que se achava sozinho...
+
+"Ninguém me nota!" — suspirava o Zero.
+
+Mas quando o 1 chegou, juntos formaram o 10 — o maior número que o Zero já tinha visto!
+
+Moral: Juntos somos mais fortes.`,
       footer: "Cada um importa!",
     },
     right: {
       emoji: "🎲",
       title: "Jogos Matemáticos",
-      content: "Jogo dos Dobros:\n\nSe 2 é o dobro de 1\nE 4 é o dobro de 2\n\nQual é o dobro de 3? → 6\nQual é o dobro de 5? → 10\nQual é o dobro de 7? → 14",
+      content: `Jogo dos Dobros:
+
+Se 2 é o dobro de 1
+E 4 é o dobro de 2
+
+Qual é o dobro de 3? → 6
+Qual é o dobro de 5? → 10
+Qual é o dobro de 7? → 14`,
       footer: "Continua assim, pequeno gênio!",
     },
   },
@@ -319,13 +350,27 @@ const bookPages = [
     left: {
       emoji: "📖",
       title: "Sílabas Mágicas",
-      content: "Vamos separar as sílabas:\n\nCA-CHOR-ro  (3 sílabas)\nBO-NI-TO  (3 sílabas)\nLA-PIZ  (2 sílabas)\nES-TRE-LA  (3 sílabas)\nA-LE-GRI-A  (4 sílabas)",
+      content: `Vamos separar as sílabas:
+
+CA-CHOR-ro  (3 sílabas)
+BO-NI-TO  (3 sílabas)
+LA-PIZ  (2 sílabas)
+ES-TRE-LA  (3 sílabas)
+A-LE-GRI-A  (4 sílabas)`,
       footer: "Sílabas são os tijolinhos das palavras!",
     },
     right: {
       emoji: "✍️",
       title: "Letramento",
-      content: "Complete as palavras:\n\nG___TO  → gato\nC___XA  → caixa\nB___LA  → bola\nS___L   → sol\nP___O   → pão\n\nE agora invente uma frase usando uma dessas palavras!",
+      content: `Complete as palavras:
+
+G___TO  → gato
+C___XA  → caixa
+B___LA  → bola
+S___L   → sol
+P___O   → pão
+
+E agora invente uma frase usando uma dessas palavras!`,
       footer: "Quanto mais se lê, mais se aprende!",
     },
   },
