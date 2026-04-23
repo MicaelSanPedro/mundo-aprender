@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, me
 import emailjs from "@emailjs/browser";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +50,22 @@ import {
   Check,
   KeyRound,
   Share2,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+  HeartIcon,
+  ShoppingBag,
 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /* ─── Data ─────────────────────────────────────────────── */
 
@@ -772,6 +788,18 @@ const ProductCard = memo(function ProductCard({
 /* ─── Component ─────────────────────────────────────────── */
 
 export default function Home() {
+  // Firebase Auth
+  const { user, profile, loading: authLoading, firebaseReady, loginWithGoogle, logout, saveFavorites, loadFavorites, savePurchase, loadPurchases, saveCustomerData, loadCustomerData } = useAuth();
+
+  // Welcome toast when user logs in
+  const prevUserRef = useRef<User | null>(null);
+  useEffect(() => {
+    if (user && !prevUserRef.current && !authLoading) {
+      // User just logged in
+    }
+    prevUserRef.current = user;
+  }, [user, authLoading]);
+
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -920,6 +948,40 @@ export default function Home() {
     setTimeout(() => setJustFavorited(null), 1200);
   }, []);
 
+  // ─── Sync favorites with Firestore when user logs in ─────
+  useEffect(() => {
+    if (user && firebaseReady && !authLoading) {
+      // Load favorites from Firestore
+      loadFavorites().then((saved) => {
+        if (saved.length > 0) {
+          setFavorites(new Set(saved));
+        }
+      });
+    }
+  }, [user, firebaseReady, authLoading, loadFavorites]);
+
+  // Save favorites to Firestore whenever they change (debounced)
+  const favTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!user || !firebaseReady) return;
+    if (favTimeoutRef.current) clearTimeout(favTimeoutRef.current);
+    favTimeoutRef.current = setTimeout(() => {
+      saveFavorites(Array.from(favorites));
+    }, 1000);
+    return () => { if (favTimeoutRef.current) clearTimeout(favTimeoutRef.current); };
+  }, [favorites, user, firebaseReady, saveFavorites]);
+
+  // ─── Auto-fill customer data from Firebase profile ───────
+  useEffect(() => {
+    if (user && profile && !checkoutOpen) {
+      setCustomer(prev => ({
+        name: prev.name || profile.name || "",
+        email: prev.email || profile.email || "",
+        phone: prev.phone || profile.phone || "",
+      }));
+    }
+  }, [user, profile, checkoutOpen]);
+
   const handleSubscribe = () => {
     if (email.includes("@")) {
       setSubscribed(true);
@@ -990,6 +1052,10 @@ export default function Home() {
     try {
       localStorage.setItem("mundo-ultimo-checkout", JSON.stringify(customer));
     } catch {}
+    // Save to Firestore if logged in
+    if (user && firebaseReady) {
+      saveCustomerData(customer);
+    }
     setCheckoutStep(2);
   };
 
@@ -1308,6 +1374,80 @@ export default function Home() {
                 <KeyRound className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
               </Button>
 
+              {/* Google Login / User Avatar - desktop */}
+              {firebaseReady ? (
+                user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="hidden sm:inline-flex rounded-full h-9 w-9 sm:h-10 sm:w-10 p-0 hover:bg-kid-green/10 ring-2 ring-kid-green/30 hover:ring-kid-green/50 transition-all">
+                        <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+                          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
+                          <AvatarFallback className="bg-gradient-to-br from-kid-orange to-kid-pink text-white font-bold text-xs sm:text-sm">
+                            {(user.displayName || "U").charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 rounded-2xl border-2 border-kid-green/20 bg-white shadow-lg">
+                      <DropdownMenuLabel className="font-semibold text-sm">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-foreground font-bold">{user.displayName || "Usuário"}</span>
+                          <span className="text-foreground/50 text-xs font-normal">{user.email}</span>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-kid-green/10" />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          className="rounded-xl cursor-pointer hover:bg-kid-green/10 focus:bg-kid-green/10 py-2.5"
+                          onClick={() => { setMobileMenuOpen(false); setFavoritesOpen(true); }}
+                        >
+                          <Heart className="h-4 w-4 text-kid-pink mr-2" />
+                          <span className="text-sm">Meus Favoritos</span>
+                          {favorites.size > 0 && (
+                            <span className="ml-auto bg-kid-pink/10 text-kid-pink text-xs font-bold rounded-full px-2 py-0.5">{favorites.size}</span>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="rounded-xl cursor-pointer hover:bg-kid-orange/10 focus:bg-kid-orange/10 py-2.5"
+                          onClick={() => { setMobileMenuOpen(false); setCartOpen(true); }}
+                        >
+                          <ShoppingCart className="h-4 w-4 text-kid-orange mr-2" />
+                          <span className="text-sm">Meu Carrinho</span>
+                          {totalItems > 0 && (
+                            <span className="ml-auto bg-kid-orange/10 text-kid-orange text-xs font-bold rounded-full px-2 py-0.5">{totalItems}</span>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="rounded-xl cursor-pointer hover:bg-kid-purple/10 focus:bg-kid-purple/10 py-2.5"
+                          onClick={() => openActivate()}
+                        >
+                          <KeyRound className="h-4 w-4 text-kid-purple mr-2" />
+                          <span className="text-sm">Ativar Código</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator className="bg-kid-green/10" />
+                      <DropdownMenuItem
+                        className="rounded-xl cursor-pointer hover:bg-kid-red/10 focus:bg-kid-red/10 text-kid-red py-2.5"
+                        onClick={logout}
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Sair da conta</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden sm:inline-flex rounded-2xl hover:bg-kid-green/10 h-9 w-9 sm:h-10 sm:w-10"
+                    onClick={loginWithGoogle}
+                    title="Entrar com Google"
+                  >
+                    <LogIn className="h-4 w-4 sm:h-5 sm:w-5 text-foreground/60" />
+                  </Button>
+                )
+              ) : null}
+
               {/* Cart - desktop only (mobile: inside ☰ menu) */}
               <Sheet open={cartOpen} onOpenChange={setCartOpen}>
                 <SheetTrigger asChild>
@@ -1444,6 +1584,50 @@ export default function Home() {
                     <h2 className="text-lg sm:text-xl font-bold mt-2">Mundo Aprender</h2>
                     <p className="text-white/70 text-xs sm:text-sm">Brincar &bull; Criar &bull; Aprender ✨</p>
                   </div>
+
+                  {/* Mobile user profile / login */}
+                  {firebaseReady && (
+                    <div className="px-4 pt-3 shrink-0">
+                      {user ? (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-kid-green/5 border border-kid-green/15">
+                          <Avatar className="h-10 w-10 shrink-0">
+                            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ""} />
+                            <AvatarFallback className="bg-gradient-to-br from-kid-orange to-kid-pink text-white font-bold text-sm">
+                              {(user.displayName || "U").charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-foreground truncate">{user.displayName || "Usuário"}</p>
+                            <p className="text-[11px] text-foreground/50 truncate">{user.email}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-xl hover:bg-kid-red/10 shrink-0"
+                            onClick={logout}
+                          >
+                            <LogOut className="h-4 w-4 text-foreground/40" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            loginWithGoogle();
+                          }}
+                          className="w-full flex items-center gap-3 p-3 rounded-2xl bg-kid-green/5 hover:bg-kid-green/10 border border-kid-green/15 hover:border-kid-green/30 transition-all"
+                        >
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-kid-green to-kid-teal flex items-center justify-center shrink-0">
+                            <LogIn className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1 text-left">
+                            <p className="text-sm font-bold text-foreground">Entrar com Google</p>
+                            <p className="text-[11px] text-foreground/50">Salve favoritos e dados na nuvem</p>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {/* Mobile search */}
                   <div className="px-4 pt-4 shrink-0">
