@@ -2892,6 +2892,27 @@ export default function Home() {
                   <p className="text-[10px] text-foreground/40 mt-2">(66) 98122-0410</p>
                 </div>
 
+                {/* Nubank payment option */}
+                <div className="mt-4 bg-[#820AD1]/10 rounded-2xl p-4 border-2 border-[#820AD1]/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">💜</span>
+                    <p className="text-sm font-bold text-foreground">Prefere pagar pelo Nubank?</p>
+                  </div>
+                  <p className="text-xs text-foreground/60 mb-3">
+                    Clique abaixo e pague direto pelo seu Nubank, sem precisar copiar código PIX:
+                  </p>
+                  <a
+                    href="https://nubank.com.br/cobrar/fymy8c/69e98c4e-f0bc-4bae-9737-4639732bbe06"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full p-3 bg-[#820AD1] hover:bg-[#6B08A8] text-white rounded-xl font-bold transition-colors text-sm shadow-md"
+                  >
+                    <span className="text-lg">🟣</span>
+                    Pagar com Nubank
+                  </a>
+                  <p className="text-[10px] text-foreground/40 mt-2">Abre direto no app do Nubank</p>
+                </div>
+
                 {/* Items reminder */}
                 <div className="mt-4 text-left bg-kid-blue/5 rounded-2xl p-4 border border-kid-blue/10">
                   <p className="text-xs font-semibold text-foreground/50 mb-2">Itens do pedido:</p>
