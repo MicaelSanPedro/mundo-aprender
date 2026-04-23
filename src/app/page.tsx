@@ -2046,7 +2046,7 @@ export default function Home() {
             {[
               {
                 q: "Como recebo o PDF após a compra?",
-                a: "Após a confirmação do pagamento, o download é liberado automaticamente. Você recebe o link por e-mail e também pode acessar pela área 'Meus Pedidos'. O link é válido por 24 horas.",
+                a: "Após a confirmação do pagamento pelo WhatsApp, o material é liberado automaticamente. Você recebe o link de download e pode acessar quantas vezes quiser!",
                 emoji: "📥",
               },
               {
@@ -2056,17 +2056,17 @@ export default function Home() {
               },
               {
                 q: "Os materiais são para qual faixa etária?",
-                a: "Nossos materiais cobrem do 1º ao 9º ano do Ensino Fundamental. Cada produto tem a indicação de série/ano na descrição, facilitando a escolha do material adequado.",
+                a: "Nossos materiais cobrem do 1º ao 6º ano do Ensino Fundamental. Cada produto tem a indicação de série/ano na descrição, facilitando a escolha do material adequado.",
                 emoji: "👨‍🎓",
               },
               {
                 q: "Qual a forma de pagamento?",
-                a: "Aceitamos Pix (aprovação instantânea), cartão de crédito (em até 12x), e boleto bancário. Para Pix e cartão, o download é liberado em minutos!",
+                a: "Aceitamos Pix e Nubank. Após o pagamento, envie o comprovante pelo WhatsApp e o material é liberado na mesma hora!",
                 emoji: "💳",
               },
               {
                 q: "Posso solicitar reembolso?",
-                a: "Sim! Oferecemos garantia de 7 dias. Se o material não atender suas expectativas, entre em contato pelo e-mail contato@mundoaprender.com.br e devolvemos 100% do valor.",
+                a: "Sim! Oferecemos garantia de 7 dias. Se o material não atender suas expectativas, entre em contato pelo WhatsApp ou e-mail damatorres50@hotmail.com e devolvemos 100% do valor.",
                 emoji: "🛡️",
               },
             ].map((faq, i) => (
@@ -2378,11 +2378,11 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-kid-green shrink-0" />
-                  <span className="text-sm text-white/50">(11) 98765-4321</span>
+                  <span className="text-sm text-white/50">(66) 98444-7849</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-kid-blue shrink-0" />
-                  <span className="text-sm text-white/50">contato@mundoaprender.com.br</span>
+                  <span className="text-sm text-white/50">damatorres50@hotmail.com</span>
                 </li>
               </ul>
 
@@ -2843,7 +2843,7 @@ export default function Home() {
                     Após pagar, envie o comprovante pelo WhatsApp para liberar seu material:
                   </p>
                   <a
-                    href="https://wa.me/5566981220410?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"
+                    href="https://wa.me/5566984447849?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full p-3 bg-[#25D366] hover:bg-[#1da851] text-white rounded-xl font-bold transition-colors text-sm shadow-md"
@@ -2853,7 +2853,7 @@ export default function Home() {
                     </svg>
                     Enviar Comprovante
                   </a>
-                  <p className="text-[10px] text-foreground/40 mt-2">(66) 98122-0410</p>
+                  <p className="text-[10px] text-foreground/40 mt-2">(66) 98444-7849</p>
                 </div>
 
                 {/* Nubank payment option */}
