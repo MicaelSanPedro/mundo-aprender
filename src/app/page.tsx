@@ -2911,7 +2911,6 @@ export default function Home() {
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full p-3 bg-[#820AD1] hover:bg-[#6B08A8] text-white rounded-xl font-bold transition-colors text-sm shadow-md"
                   >
-                    <span className="text-lg">🟣</span>
                     Pagar com Nubank
                   </a>
                   <p className="text-[10px] text-foreground/40 mt-2">Abre direto no app do Nubank</p>
