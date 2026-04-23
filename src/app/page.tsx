@@ -2061,7 +2061,7 @@ export default function Home() {
               },
               {
                 q: "Qual a forma de pagamento?",
-                a: "Aceitamos Pix e Nubank. Após o pagamento, envie o comprovante pelo WhatsApp e o material é liberado na mesma hora!",
+                a: "Por enquanto aceitamos apenas Pix. Após o pagamento, envie o comprovante pelo WhatsApp e o material é liberado na mesma hora! Cartão de crédito em breve!",
                 emoji: "💳",
               },
               {
@@ -2806,6 +2806,20 @@ export default function Home() {
                 <div className="mt-4 bg-gradient-to-r from-kid-orange to-kid-pink rounded-2xl p-4 text-white">
                   <p className="text-xs text-white/70">Valor a pagar</p>
                   <p className="text-3xl font-black">R$ {totalPrice.toFixed(2)}</p>
+                </div>
+
+                {/* Payment method tabs */}
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                  <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-kid-green/10 border-2 border-kid-green/40 shadow-sm">
+                    <span className="text-xl">💳</span>
+                    <span className="text-xs font-bold text-foreground">Pix</span>
+                    <span className="text-[10px] text-kid-green font-semibold">Disponível</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-foreground/5 border-2 border-foreground/10 cursor-not-allowed">
+                    <span className="text-xl opacity-40">💳</span>
+                    <span className="text-xs font-bold text-foreground/40">Cartão de Crédito</span>
+                    <span className="text-[10px] text-foreground/30 font-semibold">Em breve</span>
+                  </div>
                 </div>
 
                 {/* Copy PIX code */}
