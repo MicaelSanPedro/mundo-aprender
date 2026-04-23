@@ -2796,7 +2796,7 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-center py-4"
               >
-                <span className="text-6xl block mb-3">💳</span>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTghf8C70fSYn4SONBq6Np1FKdTw95JGrec6dmtn4tVcT0faGk0ddwijkrU&s=10" alt="Pagamento" className="h-14 w-auto mx-auto mb-3 object-contain" />
                 <h3 className="text-xl font-black text-foreground">Pagamento via PIX</h3>
                 <p className="text-foreground/60 mt-1 text-sm">
                   Efetue o pagamento e envie o comprovante
