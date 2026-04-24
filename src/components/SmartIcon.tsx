@@ -40,6 +40,8 @@ const emojiIconMap: Record<string, IconName> = {
   "⏰": "clock",
   "🛍️": "store",
   "➡️": "arrow-right",
+  "⚙️": "settings",
+  "🛠️": "settings",
 };
 
 const emojiColorMap: Record<string, string> = {
@@ -53,6 +55,7 @@ const emojiColorMap: Record<string, string> = {
   "⭐": "#eab308",
   "🛡️": "#6366f1",
   "📥": "#22c55e",
+  "⚙️": "#6B7280",
 };
 
 interface SmartIconProps {

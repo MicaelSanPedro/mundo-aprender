@@ -34,7 +34,8 @@ type IconName =
   | "share"
   | "trash"
   | "package"
-  | "truck";
+  | "truck"
+  | "settings";
 
 interface AnimatedIconProps {
   name: IconName;
@@ -45,7 +46,9 @@ interface AnimatedIconProps {
   onClick?: () => void;
 }
 
-const iconPaths: Record<IconName, string> = {
+type IconPath = string | string[];
+
+const iconPaths: Record<IconName, IconPath> = {
   book:
     "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H20V17H6.5A2.5 2.5 0 0 0 4 19.5Z",
   notebook:
@@ -108,6 +111,10 @@ const iconPaths: Record<IconName, string> = {
     "M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16ZM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12",
   truck:
     "M1 3h15v13H1zM16 8h4l3 3v5h-7V8zM5.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM18.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z",
+  settings: [
+    "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z",
+    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  ],
 };
 
 export default function AnimatedIcon({
@@ -159,11 +166,10 @@ export default function AnimatedIcon({
     };
   }, []);
 
-  // Viewbox based on icon
-  const viewBox =
-    name === "star" || name === "sparkle" || name === "check" || name === "arrow-right"
-      ? "0 0 24 24"
-      : "0 0 24 24";
+  const viewBox = "0 0 24 24";
+
+  // Settings gets a continuous rotation+scale animation (from Lottie keyframes)
+  const isSettings = name === "settings";
 
   return (
     <svg
@@ -176,7 +182,7 @@ export default function AnimatedIcon({
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`animated-icon ${animated ? "icon-animate" : ""} ${className}`}
+      className={`animated-icon ${animated && !isSettings ? "icon-animate" : ""} ${animated && isSettings ? "icon-settings" : ""} ${className}`}
       style={{
         color: color || "inherit",
         width: size,
@@ -186,9 +192,11 @@ export default function AnimatedIcon({
         ...(onClick ? { cursor: "pointer" } : {}),
       }}
       onClick={onClick}
-      onMouseEnter={animated ? triggerAnimation : undefined}
+      onMouseEnter={animated && !isSettings ? triggerAnimation : undefined}
     >
-      <path d={iconPaths[name]} />
+      {Array.isArray(iconPaths[name])
+        ? iconPaths[name].map((p, i) => <path key={i} d={p} />)
+        : <path d={iconPaths[name] as string} />}
     </svg>
   );
 }
