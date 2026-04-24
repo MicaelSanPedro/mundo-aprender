@@ -1430,11 +1430,11 @@ export default function Home() {
                         Finalizar Compra 🎉
                       </Button>
                       <Button
-                        className="w-full mt-3 rounded-2xl bg-gradient-to-r from-kid-blue/10 to-kid-purple/10 text-kid-blue font-bold border-2 border-kid-blue/20 hover:border-kid-blue/40 hover:from-kid-blue/15 hover:to-kid-purple/15 hover:text-kid-blue py-3 transition-all duration-300"
+                        className="w-full mt-3 rounded-2xl bg-white text-[#1a1a2e] font-bold text-lg py-6 shadow-[0_4px_15px_rgba(0,0,0,0.12)] border border-[#e5e5e5] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] hover:bg-gray-50 transition-all duration-300"
                         onClick={() => setCartOpen(false)}
                       >
                         <span className="flex items-center justify-center gap-2">
-                          <ShoppingBag className="h-4 w-4" />
+                          <ShoppingBag className="h-5 w-5" />
                           Continuar Comprando
                         </span>
                       </Button>
