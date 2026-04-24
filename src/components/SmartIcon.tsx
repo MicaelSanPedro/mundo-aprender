@@ -26,7 +26,7 @@ const emojiIconMap: Record<string, IconName> = {
   "📋": "document",
   "❓": "question",
   "🔑": "key",
-  "✅": "check",
+  "✅": "check-circle",
   "🎉": "sparkle",
   "🛒": "cart",
   "🚀": "sparkle",
