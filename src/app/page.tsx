@@ -2854,24 +2854,28 @@ export default function Home() {
                   <p className="text-white/70 text-xs mt-1">Key de ativação enviada após pagamento 🗝️</p>
                 </div>
 
-                <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={checkoutTermsAccepted}
-                    onChange={(e) => setCheckoutTermsAccepted(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-kid-green focus:ring-kid-green accent-[#69DB7C]"
-                  />
-                  <span className="text-xs text-foreground/60 leading-relaxed">
+                <div
+                  onClick={() => setCheckoutTermsAccepted(!checkoutTermsAccepted)}
+                  className={`flex items-start gap-3 cursor-pointer select-none rounded-2xl p-3.5 border-2 transition-all duration-300 ${checkoutTermsAccepted ? 'bg-kid-orange/5 border-kid-orange/30 shadow-md shadow-kid-orange/10' : 'bg-white border-gray-200 hover:border-kid-orange/20 hover:bg-kid-orange/[0.02]'}`}
+                >
+                  <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${checkoutTermsAccepted ? 'bg-kid-orange border-kid-orange shadow-sm shadow-kid-orange/30' : 'bg-white border-gray-300'}`}>
+                    {checkoutTermsAccepted && (
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-sm text-foreground/70 leading-relaxed">
                     Li e concordo com os{" "}
-                    <Link href="/termos-de-uso" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                    <Link href="/termos-de-uso" target="_blank" className="text-kid-orange font-semibold underline hover:text-kid-orange/70">
                       Termos de Uso
                     </Link>{" "}
                     e a{" "}
-                    <Link href="/politica-de-privacidade" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                    <Link href="/politica-de-privacidade" target="_blank" className="text-kid-orange font-semibold underline hover:text-kid-orange/70">
                       Politica de Privacidade
                     </Link>
                   </span>
-                </label>
+                </div>
 
                 <Button
                   className="w-full rounded-2xl bg-gradient-to-r from-kid-green to-[#2f9e5a] hover:from-[#2f9e5a] hover:to-[#228b4d] text-white font-bold text-lg py-6 shadow-kid-green/30"
@@ -3134,24 +3138,28 @@ export default function Home() {
                       </motion.p>
                     )}
 
-                    <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={activateTermsAccepted}
-                        onChange={(e) => setActivateTermsAccepted(e.target.checked)}
-                        className="mt-0.5 w-4 h-4 rounded border-gray-300 text-kid-green focus:ring-kid-green accent-[#69DB7C]"
-                      />
-                      <span className="text-xs text-foreground/60 leading-relaxed">
+                    <div
+                      onClick={() => setActivateTermsAccepted(!activateTermsAccepted)}
+                      className={`flex items-start gap-3 cursor-pointer select-none rounded-2xl p-3.5 border-2 transition-all duration-300 ${activateTermsAccepted ? 'bg-kid-orange/5 border-kid-orange/30 shadow-md shadow-kid-orange/10' : 'bg-white border-gray-200 hover:border-kid-orange/20 hover:bg-kid-orange/[0.02]'}`}
+                    >
+                      <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${activateTermsAccepted ? 'bg-kid-orange border-kid-orange shadow-sm shadow-kid-orange/30' : 'bg-white border-gray-300'}`}>
+                        {activateTermsAccepted && (
+                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm text-foreground/70 leading-relaxed">
                         Li e concordo com os{" "}
-                        <Link href="/termos-de-uso" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                        <Link href="/termos-de-uso" target="_blank" className="text-kid-orange font-semibold underline hover:text-kid-orange/70">
                           Termos de Uso
                         </Link>{" "}
                         e a{" "}
-                        <Link href="/politica-de-privacidade" target="_blank" className="text-kid-blue underline hover:text-kid-blue/70">
+                        <Link href="/politica-de-privacidade" target="_blank" className="text-kid-orange font-semibold underline hover:text-kid-orange/70">
                           Politica de Privacidade
                         </Link>
                       </span>
-                    </label>
+                    </div>
 
                     <Button
                       onClick={handleActivateCode}
