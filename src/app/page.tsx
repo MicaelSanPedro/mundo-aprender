@@ -1258,9 +1258,9 @@ export default function Home() {
   /* ─── Render ──────────────────────────────────────────── */
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-hidden pt-14 sm:pt-16 md:pt-20">
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-2 border-kid-yellow/30 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-kid-yellow/30 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
