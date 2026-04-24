@@ -71,7 +71,7 @@ const categories = [
   },
 ];
 
-const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; subcategory: string; tag: string | null; tagColor: string; ageRange: string; image?: string; link?: string }[] = [
+const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; subcategory: string; tag: string | null; tagColor: string; ageRange: string; schoolYear: string; image?: string; link?: string }[] = [
   {
     id: 1,
     name: "O Código Secreto do Mundo",
@@ -88,6 +88,7 @@ const products: { id: number; name: string; description: string; price: number; 
     tag: "Novo!",
     tagColor: "bg-kid-green/90 text-white",
     ageRange: "6 a 8 anos",
+    schoolYear: "1º ao 3º ano",
     image: "/product-2.png",
     link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
   },
@@ -782,6 +783,9 @@ const ProductCard = memo(function ProductCard({
         })()}
         <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-kid-purple/70 bg-kid-purple/8 border border-kid-purple/15 rounded-lg px-2 py-0.5 font-medium mb-1.5">
           👶 {product.ageRange}
+        </span>
+        <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-kid-orange/70 bg-kid-orange/8 border border-kid-orange/15 rounded-lg px-2 py-0.5 font-medium mb-1.5">
+          📚 {product.schoolYear}
         </span>
         <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">{product.name}</h3>
         <p className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${isDescExpanded ? "" : "line-clamp-2"}`}>
