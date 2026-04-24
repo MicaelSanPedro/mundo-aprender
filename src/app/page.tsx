@@ -2467,14 +2467,6 @@ export default function Home() {
                 Contato
               </h4>
               <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-kid-orange mt-0.5 shrink-0" />
-                  <span className="text-sm text-white/50">
-                    Rua da Aprendizagem, 123
-                    <br />
-                    São Paulo - SP, 01234-567
-                  </span>
-                </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-kid-green shrink-0" />
                   <span className="text-sm text-white/50">(66) 98444-7849</span>
