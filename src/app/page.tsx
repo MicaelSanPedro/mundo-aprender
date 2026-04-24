@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SmartIcon from "@/components/SmartIcon";
+import AnimatedIcon from "@/components/AnimatedIcon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
