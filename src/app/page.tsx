@@ -1001,24 +1001,17 @@ export default function Home() {
     }
   };
 
-  // Phone mask helper
+  // Phone mask helper (only number part, DDD is handled by DDDSelector)
   const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    const digits = value.replace(/\D/g, "").slice(0, 9);
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 8) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    return `${digits.slice(0, 5)}-${digits.slice(5, 9)}`;
   };
 
-  // Handle DDD auto-fill using functional state update to avoid stale closure
+  // Handle DDD select — just store the DDD, don't touch the phone input
   const handleDDDChange = useCallback((ddd: string) => {
     setSelectedDDD(ddd);
-    if (ddd) {
-      setCustomer((prev) => {
-        const digits = prev.phone.replace(/\D/g, "");
-        const numberPart = digits.length > 2 ? digits.slice(2) : "";
-        return { ...prev, phone: formatPhone(ddd + numberPart) };
-      });
-    }
   }, []);
 
   // Zip code mask helper
@@ -1071,9 +1064,12 @@ export default function Home() {
   };
 
   const saveCustomerAndAdvance = () => {
-    // Save current data to localStorage
+    // Save current data to localStorage — combine DDD with phone number
     try {
-      localStorage.setItem("mundo-ultimo-checkout", JSON.stringify(customer));
+      const fullPhone = selectedDDD && customer.phone
+        ? `(${selectedDDD}) ${customer.phone}`
+        : customer.phone;
+      localStorage.setItem("mundo-ultimo-checkout", JSON.stringify({ ...customer, phone: fullPhone }));
     } catch {}
     setCheckoutStep(2);
   };
@@ -2837,10 +2833,6 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                  <StateSelector
-                    value={customer.state}
-                    onChange={(state) => setCustomer({ ...customer, state })}
-                  />
                 </div>
 
                 <Button
@@ -2871,7 +2863,7 @@ export default function Home() {
                   <p className="text-xs font-semibold text-foreground/50 mb-1">Dados do comprador:</p>
                   <p className="text-sm font-semibold">{customer.name}</p>
                   <p className="text-xs text-foreground/60">{customer.email}</p>
-                  {customer.phone && <p className="text-xs text-foreground/60">{customer.phone}</p>}
+                  {customer.phone && <p className="text-xs text-foreground/60">{selectedDDD ? `(${selectedDDD}) ` : ""}{customer.phone}</p>}
                   {customer.state && (
                     <p className="text-xs text-foreground/60">
                       {BRAZILIAN_STATES.find(s => s.abbreviation === customer.state)?.name} ({customer.state})

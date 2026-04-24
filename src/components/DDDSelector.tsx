@@ -127,7 +127,7 @@ export default function DDDSelector({
             setShowDDDPicker(false);
           }
         }}
-        className={`h-full min-h-[44px] flex items-center gap-0.5 px-1.5 rounded-l-2xl border-2 border-r-0 text-xs font-bold transition-all duration-200 cursor-pointer ${
+        className={`h-10 flex items-center gap-0.5 px-1.5 rounded-l-2xl border-2 border-r-0 text-xs font-bold transition-all duration-200 cursor-pointer ${
           selectedDDD
             ? "border-kid-orange/40 bg-kid-orange/5 text-kid-orange"
             : "border-kid-orange/20 bg-foreground/[0.02] text-foreground/40 hover:border-kid-orange/30"
