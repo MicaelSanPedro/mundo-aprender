@@ -765,6 +765,14 @@ const ProductCard = memo(function ProductCard({
             </div>
           </div>
         )}
+        <div className="absolute bottom-2 left-2 flex items-center gap-1 z-10">
+          <span className="text-[9px] sm:text-[10px] font-bold text-white bg-black/50 backdrop-blur-sm rounded-lg px-1.5 py-0.5">
+            👶 {product.ageRange}
+          </span>
+          <span className="text-[9px] sm:text-[10px] font-bold text-white bg-black/50 backdrop-blur-sm rounded-lg px-1.5 py-0.5">
+            📚 {product.schoolYear}
+          </span>
+        </div>
       </button>
       <div className="p-2.5 sm:p-4 md:p-5">
         <div className="flex items-center gap-1 mb-2">
@@ -781,12 +789,6 @@ const ProductCard = memo(function ProductCard({
             </span>
           ) : null;
         })()}
-        <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-kid-purple/70 bg-kid-purple/8 border border-kid-purple/15 rounded-lg px-2 py-0.5 font-medium mb-1.5">
-          👶 {product.ageRange}
-        </span>
-        <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs text-kid-orange/70 bg-kid-orange/8 border border-kid-orange/15 rounded-lg px-2 py-0.5 font-medium mb-1.5">
-          📚 {product.schoolYear}
-        </span>
         <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">{product.name}</h3>
         <p className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${isDescExpanded ? "" : "line-clamp-2"}`}>
           {product.description}
