@@ -220,14 +220,13 @@ export default function DDDSelector({
                     : "hover:bg-foreground/[0.03]"
                 }`}
               >
-                <span className={`text-xs font-bold w-7 text-center rounded-md py-0.5 ${
+                <span className={`text-xs font-bold text-center rounded-md py-0.5 px-2 ${
                   selectedDDD === ddd
                     ? "bg-kid-green text-white"
                     : "bg-foreground/5 text-foreground/50"
                 }`}>
                   {ddd}
                 </span>
-                <span className="text-xs text-foreground/60">{ddd}</span>
                 {selectedDDD === ddd && (
                   <svg className="w-3 h-3 text-kid-green ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
