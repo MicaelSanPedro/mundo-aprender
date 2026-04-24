@@ -1,0 +1,89 @@
+/* AnimatedIcon Styles */
+/* Import this in globals.css or layout */
+
+/* Main icon animation - subtle bounce + glow */
+@keyframes iconPop {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.15) rotate(-3deg); }
+  30% { transform: scale(1.05) rotate(2deg); }
+  45% { transform: scale(1.12) rotate(-1deg); }
+  60% { transform: scale(1.02) rotate(0deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Path draw animation */
+@keyframes drawPath {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0.3;
+  }
+  40% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Shimmer effect on hover */
+@keyframes iconShimmer {
+  0% { filter: drop-shadow(0 0 0px currentColor); }
+  50% { filter: drop-shadow(0 0 6px currentColor); }
+  100% { filter: drop-shadow(0 0 0px currentColor); }
+}
+
+/* Subtle float animation for static icons */
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animated-icon {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: filter 0.3s ease, color 0.3s ease;
+}
+
+.animated-icon.icon-animate {
+  animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             iconShimmer 1.2s ease 0.3s forwards;
+}
+
+.animated-icon.icon-draw,
+.animated-icon path.icon-draw,
+.animated-icon polyline.icon-draw,
+.animated-icon line.icon-draw,
+.animated-icon circle.icon-draw,
+.animated-icon rect.icon-draw {
+  animation: drawPath 0.8s ease-out forwards;
+}
+
+.animated-icon path.icon-draw {
+  stroke-dasharray: 100;
+  animation: drawPath 0.8s ease-out forwards;
+}
+
+/* After animation completes, keep visible */
+.animated-icon:not(.icon-animate) {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+/* Disable float on static */
+.animated-icon:not(.icon-animate)[data-static="true"] {
+  animation: none;
+}
+
+/* Responsive */
+@media (prefers-reduced-motion: reduce) {
+  .animated-icon,
+  .animated-icon.icon-animate,
+  .animated-icon.icon-draw {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+}

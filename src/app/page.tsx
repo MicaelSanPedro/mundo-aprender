@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import SmartIcon from "@/components/SmartIcon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -243,7 +244,7 @@ function FAQItem({ question, answer, emoji, index }: { question: string; answer:
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left"
       >
-        <span className="text-xl sm:text-2xl shrink-0">{emoji}</span>
+        <span className="shrink-0"><SmartIcon emoji={emoji} size={26} /></span>
         <span className="flex-1 font-semibold text-sm sm:text-base text-foreground">{question}</span>
         <motion.div
           animate={{ rotate: open ? 180 : 0 }}
@@ -392,7 +393,7 @@ function PageFace({ page, side }: { page: PageContent; side: "left" | "right" })
       }`} />
       {/* Content */}
       <div className="relative h-full p-4 sm:p-5 md:p-6 flex flex-col z-[1]">
-        <span className="text-2xl sm:text-3xl md:text-4xl mb-2 drop-shadow-sm">{page.emoji}</span>
+        <span className="mb-2 drop-shadow-sm"><SmartIcon emoji={page.emoji} size={32} animated={false} /></span>
         <h4 className="text-[#4A3728] font-bold text-[11px] sm:text-sm md:text-base mb-2 leading-snug">{page.title}</h4>
         <div className="text-[#5C4A3A] text-[9px] sm:text-[11px] md:text-xs leading-[1.7] flex-1">{page.content.split('\n').map((line, i) => line ? <span key={i}>{line}<br /></span> : <br key={i} />)}</div>
         <div className="border-t border-[#D8CCBA] pt-1.5 mt-2">
@@ -1800,8 +1801,8 @@ export default function Home() {
                     : `bg-white ${cat.hoverBorder} hover:shadow-md hover:-translate-y-1`
                 }`}
               >
-                <span className="text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-300">
-                  {cat.emoji}
+                <span className="flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <SmartIcon emoji={cat.emoji} size={56} animated={activeCategory === cat.id} />
                 </span>
                 <span className="font-bold text-sm sm:text-lg md:text-xl text-center leading-tight">{cat.name}</span>
                 <span className="text-[10px] sm:text-xs text-foreground/40 font-medium">{products.filter(p => p.category === cat.id).length} itens</span>
@@ -1852,7 +1853,7 @@ export default function Home() {
                           : "bg-white text-foreground/70 border-foreground/10 hover:border-kid-orange/40 hover:text-kid-orange"
                       }`}
                     >
-                      <span className="text-base sm:text-lg">{sub.emoji}</span>
+                      <span className="flex items-center"><SmartIcon emoji={sub.emoji} size={20} animated={activeSubcategory === sub.id} /></span>
                       <span>{sub.name}</span>
                       {activeSubcategory === sub.id && (
                         <X className="h-3 w-3 ml-0.5" />
@@ -2225,7 +2226,7 @@ export default function Home() {
                   whileHover={{ scale: 1.05, y: -4 }}
                   className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center`}
                 >
-                  <span className="text-3xl md:text-4xl block mb-2">{stat.emoji}</span>
+                  <span className="block mb-2"><SmartIcon emoji={stat.emoji} size={36} /></span>
                   <p className="text-2xl md:text-3xl font-black text-foreground">
                     <AnimatedCounter target={stat.target} suffix={stat.suffix} decimals={"decimals" in stat ? stat.decimals : 0} />
                   </p>
@@ -2462,7 +2463,7 @@ export default function Home() {
                       }}
                       className="text-sm text-white/50 hover:text-kid-yellow transition-colors flex items-center gap-1.5 font-semibold"
                     >
-                      <span>{cat.emoji}</span> {cat.name}
+                      <span className="flex items-center"><SmartIcon emoji={cat.emoji} size={18} animated={false} /></span> {cat.name}
                     </button>
                     <ul className="ml-6 mt-1 space-y-1">
                       {cat.subcategories.map((sub) => (
@@ -2475,7 +2476,7 @@ export default function Home() {
                             }}
                             className="text-xs text-white/35 hover:text-kid-yellow/80 transition-colors flex items-center gap-1"
                           >
-                            <span>{sub.emoji}</span> {sub.name}
+                            <span className="flex items-center"><SmartIcon emoji={sub.emoji} size={16} animated={false} /></span> {sub.name}
                           </button>
                         </li>
                       ))}
