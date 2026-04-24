@@ -127,20 +127,20 @@ export default function DDDSelector({
             setShowDDDPicker(false);
           }
         }}
-        className={`h-full min-h-[44px] flex items-center gap-1 px-2.5 rounded-l-2xl border-2 border-r-0 text-xs font-bold transition-all duration-200 cursor-pointer ${
+        className={`h-full min-h-[44px] flex items-center gap-0.5 px-1.5 rounded-l-2xl border-2 border-r-0 text-xs font-bold transition-all duration-200 cursor-pointer ${
           selectedDDD
             ? "border-kid-orange/40 bg-kid-orange/5 text-kid-orange"
             : "border-kid-orange/20 bg-foreground/[0.02] text-foreground/40 hover:border-kid-orange/30"
         }`}
         title={stateObj ? `${stateObj.name} (${stateObj.abbreviation})` : "Selecione o estado"}
       >
-        <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
         {selectedDDD ? (
           <span>{selectedDDD}</span>
         ) : (
-          <span>UF</span>
+          <span>DDD</span>
         )}
       </button>
 
