@@ -72,7 +72,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close data-slot="sheet-close" className="absolute top-4 right-4 rounded-full bg-white border-2 border-kid-orange/40 shadow-xl p-1.5 text-kid-orange hover:text-kid-orange hover:scale-110 hover:border-kid-orange hover:bg-white transition-all duration-200 focus:outline-none disabled:pointer-events-none z-50">
+        <SheetPrimitive.Close data-slot="sheet-close" className="fixed top-4 right-4 rounded-full bg-white border-2 border-kid-orange/40 shadow-xl p-1.5 text-kid-orange hover:text-kid-orange hover:scale-110 hover:border-kid-orange hover:bg-white transition-all duration-200 focus:outline-none disabled:pointer-events-none z-[60]">
           <XIcon className="size-6" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
