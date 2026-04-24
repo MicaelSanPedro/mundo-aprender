@@ -36,7 +36,8 @@ type IconName =
   | "package"
   | "truck"
   | "settings"
-  | "check-circle";
+  | "check-circle"
+  | "alert-circle";
 
 interface AnimatedIconProps {
   name: IconName;
@@ -120,12 +121,18 @@ const iconPaths: Record<IconName, IconPath> = {
     "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
     "M7 12.5l3 3.5 7-7",
   ],
+  "alert-circle": [
+    "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
+    "M12 8v4",
+    "M12 16h.01",
+  ],
 };
 
 // Icons with special/custom animations
 const customAnimatedIcons: Record<string, string> = {
   settings: "icon-settings",
   "check-circle": "icon-check-circle",
+  "alert-circle": "icon-alert-circle",
 };
 
 export default function AnimatedIcon({

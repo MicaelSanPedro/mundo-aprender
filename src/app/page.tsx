@@ -2904,7 +2904,10 @@ export default function Home() {
                   )}
                 </Button>
                 {!checkoutTermsAccepted && (
-                  <p className="text-center text-[10px] text-kid-orange">Aceite os termos acima para continuar</p>
+                  <p className="text-center text-[10px] text-kid-orange flex items-center justify-center gap-1.5">
+                    <AnimatedIcon name="alert-circle" size={14} color="#FF922B" animated={true} />
+                    Aceite os termos acima para continuar
+                  </p>
                 )}
               </motion.div>
             )}
