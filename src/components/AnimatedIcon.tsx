@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback } from "react";
+import "./AnimatedIcon.css";
 
 type IconName =
   | "book"
