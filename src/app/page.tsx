@@ -1584,8 +1584,8 @@ export default function Home() {
                   {/* Mobile menu footer */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-kid-yellow/10 border-t border-kid-yellow/20">
                     <div className="flex items-center gap-2 text-xs text-foreground/40">
-                      <Download className="h-3.5 w-3.5" />
-                      <span>Downloads imediatos em PDF</span>
+                      <KeyRound className="h-3.5 w-3.5" />
+                      <span>Entrega por key de ativação</span>
                     </div>
                   </div>
                 </SheetContent>
@@ -1693,7 +1693,7 @@ export default function Home() {
               </h1>
               <p className="mt-3 sm:mt-4 md:mt-6 text-base sm:text-lg md:text-xl text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 Atividades, jogos e cadernos em PDF para imprimir! Material didático digital para
-                crianças do 1º ao 9º ano. Download imediato! 📥
+                crianças do 1º ao 9º ano. Receba sua key e acesse! 🗝️
               </p>
               <div className="mt-5 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <a href="#produtos">
@@ -1713,7 +1713,7 @@ export default function Home() {
               {/* Trust badges */}
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
                 <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
-                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Download Imediato
+                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Entrega por Key
                 </div>
                 <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
                   <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Compra Segura
@@ -2037,8 +2037,8 @@ export default function Home() {
               {
                 step: "03",
                 emoji: "📥",
-                title: "Receba e Imprima",
-                description: "O download do PDF é liberado na hora! Imprima quantas vezes quiser e comece a usar.",
+                title: "Ative sua Key",
+                description: "Após o pagamento, você recebe uma key de ativação pelo WhatsApp. Digite a key no site e acesse seu material!",
                 color: "from-kid-purple to-kid-pink",
                 bgColor: "bg-kid-purple/5",
                 borderColor: "border-kid-purple/20",
@@ -2086,8 +2086,8 @@ export default function Home() {
           <div className="space-y-3">
             {[
               {
-                q: "Como recebo o PDF após a compra?",
-                a: "Após a confirmação do pagamento pelo WhatsApp, o material é liberado automaticamente. Você recebe o link de download e pode acessar quantas vezes quiser!",
+                q: "Como recebo o material após a compra?",
+                a: "Após a confirmação do pagamento, você recebe uma key de ativação pelo WhatsApp. Basta digitar a key no site para acessar seu material! O acesso é vitalício e ilimitado.",
                 emoji: "📥",
               },
               {
@@ -2102,7 +2102,7 @@ export default function Home() {
               },
               {
                 q: "Qual a forma de pagamento?",
-                a: "Por enquanto aceitamos apenas Pix. Após o pagamento, envie o comprovante pelo WhatsApp e o material é liberado na mesma hora! Cartão de crédito em breve!",
+                a: "Por enquanto aceitamos apenas Pix. Após o pagamento, envie o comprovante pelo WhatsApp e receba sua key de ativação na mesma hora! Cartão de crédito em breve!",
                 emoji: "💳",
               },
               {
@@ -2155,7 +2155,7 @@ export default function Home() {
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
-                  { icon: Download, color: "kid-blue", title: "Download Imediato", desc: "Receba seus PDFs no instante" },
+                  { icon: Download, color: "kid-blue", title: "Entrega por Key", desc: "Receba sua key e ative no site" },
                   { icon: Shield, color: "kid-green", title: "Acesso Vitalício", desc: "Download ilimitado para sempre" },
                   { icon: Heart, color: "kid-pink", title: "Feito com Carinho", desc: "Aprovado por educadores" },
                   { icon: Award, color: "kid-purple", title: "Acesso Ilimitado", desc: "Baixe quantas vezes quiser" },
@@ -2717,12 +2717,12 @@ export default function Home() {
                 <div className="text-center mb-6">
                   <span className="text-4xl">📄</span>
                   <h3 className="text-lg font-bold mt-2">Dados para Recebimento</h3>
-                  <p className="text-sm text-foreground/50">Dados para receber seu material</p>
+                  <p className="text-sm text-foreground/50">Dados para receber sua key de ativação</p>
                 </div>
 
                 <div className="bg-kid-blue/10 rounded-2xl p-4 border border-kid-blue/20 flex items-center gap-3">
                   <FileText className="h-5 w-5 text-kid-blue shrink-0" />
-                  <p className="text-sm text-foreground/70">Produto digital em PDF — download imediato após a confirmação do pagamento!</p>
+                  <p className="text-sm text-foreground/70">Produto digital em PDF — após o pagamento, você recebe uma key de ativação pelo WhatsApp!</p>
                 </div>
 
                 <div className="space-y-3">
@@ -2847,7 +2847,7 @@ export default function Home() {
                     <span className="font-semibold">Total do Pedido:</span>
                     <span className="text-2xl font-black">R$ {totalPrice.toFixed(2)}</span>
                   </div>
-                  <p className="text-white/70 text-xs mt-1">Download imediato após pagamento 📥</p>
+                  <p className="text-white/70 text-xs mt-1">Key de ativação enviada após pagamento 🗝️</p>
                 </div>
 
                 <label className="flex items-start gap-2.5 cursor-pointer select-none">
@@ -2957,7 +2957,7 @@ export default function Home() {
                     <p className="text-sm font-bold text-foreground">Envie o comprovante</p>
                   </div>
                   <p className="text-xs text-foreground/60 mb-3">
-                    Após pagar, envie o comprovante pelo WhatsApp para liberar seu material:
+                    Após pagar, envie o comprovante pelo WhatsApp para receber sua key de ativação:
                   </p>
                   <a
                     href="https://wa.me/5566984447849?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"
