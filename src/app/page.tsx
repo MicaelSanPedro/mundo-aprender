@@ -2904,8 +2904,8 @@ export default function Home() {
                   )}
                 </Button>
                 {!checkoutTermsAccepted && (
-                  <p className="text-center text-[10px] text-kid-orange flex items-center justify-center gap-1.5">
-                    <AnimatedIcon name="alert-circle" size={14} color="#FF922B" animated={true} />
+                  <p className="text-center text-sm text-kid-orange flex items-center justify-center gap-2 font-medium">
+                    <AnimatedIcon name="alert-circle" size={20} color="#FF922B" animated={true} />
                     Aceite os termos acima para continuar
                   </p>
                 )}
@@ -3184,6 +3184,13 @@ export default function Home() {
                     >
                       Ativar
                     </Button>
+
+                    {!activateTermsAccepted && (
+                      <p className="text-center text-sm text-kid-blue flex items-center justify-center gap-2 font-medium">
+                        <AnimatedIcon name="alert-circle" size={20} color="#4DABF7" animated={true} />
+                        Aceite os termos acima para continuar
+                      </p>
+                    )}
 
                     <p className="text-[10px] text-foreground/30 text-center">
                       Recebeu o código no WhatsApp após enviar o comprovante PIX
