@@ -48,6 +48,7 @@ import {
   Check,
   KeyRound,
   Share2,
+  ShoppingBag,
 } from "lucide-react";
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -1429,10 +1430,13 @@ export default function Home() {
                         Finalizar Compra 🎉
                       </Button>
                       <Button
-                        className="w-full mt-2 rounded-2xl bg-transparent text-[#1a1a2e]/50 hover:text-[#1a1a2e] hover:bg-[#FFD43B]/10"
+                        className="w-full mt-3 rounded-2xl bg-gradient-to-r from-kid-blue/10 to-kid-purple/10 text-kid-blue font-bold border-2 border-kid-blue/20 hover:border-kid-blue/40 hover:from-kid-blue/15 hover:to-kid-purple/15 hover:text-kid-blue py-3 transition-all duration-300"
                         onClick={() => setCartOpen(false)}
                       >
-                        Continuar Comprando
+                        <span className="flex items-center justify-center gap-2">
+                          <ShoppingBag className="h-4 w-4" />
+                          Continuar Comprando
+                        </span>
                       </Button>
                     </div>
                   )}
