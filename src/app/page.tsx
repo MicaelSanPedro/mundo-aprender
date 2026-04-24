@@ -791,9 +791,19 @@ const ProductCard = memo(function ProductCard({
           ) : null;
         })()}
         <h3 className="font-bold text-xs sm:text-sm md:text-base text-foreground leading-snug line-clamp-2 mb-1">{product.name}</h3>
-        <p className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 transition-all duration-200 ${isDescExpanded ? "" : "line-clamp-2"}`}>
-          {product.description}
-        </p>
+        <AnimatePresence initial={false}>
+          <motion.p
+            key={isDescExpanded ? "expanded" : "collapsed"}
+            initial={{ height: 0, opacity: 0.7 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0.7 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className={`text-[10px] sm:text-xs text-foreground/50 mb-2 sm:mb-3 overflow-hidden ${isDescExpanded ? "" : "line-clamp-2"}`}
+            style={!isDescExpanded ? { height: "auto", opacity: 1 } : undefined}
+          >
+            {product.description}
+          </motion.p>
+        </AnimatePresence>
         <button type="button" onClick={(e) => { e.stopPropagation(); onToggleDesc(product.id); }}
           className="text-[10px] sm:text-xs text-kid-blue font-semibold hover:text-kid-blue/70 hover:underline -mt-1.5 mb-1.5 block transition-colors">
           {isDescExpanded ? "Ver menos ▲" : "Ver mais ▼"}
