@@ -3027,14 +3027,19 @@ export default function Home() {
                     ← Voltar ao Resumo
                   </Button>
                   <Button
-                    className="w-full rounded-2xl bg-kid-green hover:bg-kid-green/90 text-white font-bold py-5"
+                    className="w-full rounded-2xl bg-gradient-to-r from-kid-green to-[#2f9e5a] hover:from-[#2f9e5a] hover:to-[#228b4d] text-white font-bold text-lg py-6 shadow-lg shadow-kid-green/25 hover:shadow-xl hover:shadow-kid-green/30 transition-all duration-300 active:scale-[0.98]"
                     onClick={() => {
                       setCheckoutOpen(false);
                       setCheckoutStep(1);
                       setCartItems([]);
                     }}
                   >
-                    ✅ Já paguei, finalizei
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Pagamento Confirmado
+                    </span>
                   </Button>
                 </div>
               </motion.div>
