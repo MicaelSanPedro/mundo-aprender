@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SmartIcon from "@/components/SmartIcon";
 import AnimatedIcon from "@/components/AnimatedIcon";
 import StateSelector from "@/components/StateSelector";
+import DDDSelector from "@/components/DDDSelector";
 import { BRAZILIAN_STATES } from "@/components/StateSelector";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -2819,35 +2820,27 @@ export default function Home() {
                     />
                     <p className="text-xs text-foreground/40 mt-1">Seu contato para caso precisemos</p>
                   </div>
-                  {/* Telefone + Estado/DDD */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold text-foreground/70 block">Telefone</Label>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="flex-1">
-                        <Input
-                          placeholder="(11) 99999-9999"
-                          className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
-                          value={customer.phone}
-                          onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
-                        />
-                        {selectedDDD && !customer.phone.includes(selectedDDD) && (
-                          <p className="text-xs text-kid-green mt-1.5 font-medium">
-                            DDD {selectedDDD} selecionado automaticamente
-                          </p>
-                        )}
-                      </div>
-                      <div className="sm:w-[200px]">
-                        <StateSelector
-                          value={customer.state}
-                          onChange={(state) => setCustomer({ ...customer, state })}
-                          onDDDChange={handleDDDChange}
-                          selectedDDD={selectedDDD}
-                          onDDDSelect={(ddd) => setSelectedDDD(ddd)}
-                          hideLabel
-                        />
-                      </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
+                    <div className="flex">
+                      <DDDSelector
+                        selectedDDD={selectedDDD}
+                        selectedState={customer.state}
+                        onStateChange={(uf) => setCustomer({ ...customer, state: uf })}
+                        onDDDChange={handleDDDChange}
+                      />
+                      <Input
+                        placeholder="99999-9999"
+                        className="rounded-l-none rounded-r-2xl border-2 border-l-0 border-kid-orange/20 focus:border-kid-orange"
+                        value={customer.phone}
+                        onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
+                      />
                     </div>
                   </div>
+                  <StateSelector
+                    value={customer.state}
+                    onChange={(state) => setCustomer({ ...customer, state })}
+                  />
                 </div>
 
                 <Button
