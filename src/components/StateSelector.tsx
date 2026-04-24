@@ -41,11 +41,24 @@ const BRAZILIAN_STATES: BrazilianState[] = [
 interface StateSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  onDDDChange?: (ddd: string) => void;
+  selectedDDD?: string;
+  onDDDSelect?: (ddd: string) => void;
+  /** Hide the label (used when embedded in phone section) */
+  hideLabel?: boolean;
 }
 
-export default function StateSelector({ value, onChange }: StateSelectorProps) {
+export default function StateSelector({
+  value,
+  onChange,
+  onDDDChange,
+  selectedDDD,
+  onDDDSelect,
+  hideLabel = false,
+}: StateSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [dddPickerOpen, setDddPickerOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -62,10 +75,12 @@ export default function StateSelector({ value, onChange }: StateSelectorProps) {
 
   const selectedState = BRAZILIAN_STATES.find((s) => s.abbreviation === value);
 
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+        setDddPickerOpen(false);
         setSearch("");
       }
     }
@@ -73,39 +88,78 @@ export default function StateSelector({ value, onChange }: StateSelectorProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Auto-focus search input when dropdown opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isOpen]);
 
+  const handleStateSelect = (state: BrazilianState) => {
+    onChange(state.abbreviation);
+
+    if (state.ddd.length === 1) {
+      // Single DDD — auto-fill
+      onDDDChange?.(state.ddd[0]);
+      onDDDSelect?.(state.ddd[0]);
+      setDddPickerOpen(false);
+      setIsOpen(false);
+      setSearch("");
+    } else {
+      // Multiple DDDs — open DDD picker
+      setDddPickerOpen(true);
+      onDDDChange?.(""); // clear DDD until user picks one
+      onDDDSelect?.("");
+    }
+  };
+
+  const handleDDDSelect = (ddd: string) => {
+    onDDDChange?.(ddd);
+    onDDDSelect?.(ddd);
+    setDddPickerOpen(false);
+    setIsOpen(false);
+    setSearch("");
+  };
+
   return (
     <div ref={containerRef} className="relative">
-      <label className="text-sm font-semibold text-foreground/70 mb-1 block">
-        Estado *
-      </label>
+      {!hideLabel && (
+        <label className="text-sm font-semibold text-foreground/70 mb-1 block">
+          Estado *
+        </label>
+      )}
 
       {/* Trigger button */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (dddPickerOpen) {
+            setDddPickerOpen(false);
+          } else {
+            setIsOpen(!isOpen);
+          }
+        }}
         className={`w-full flex items-center justify-between gap-2 rounded-2xl border-2 px-4 py-3 text-sm transition-all duration-200 ${
           selectedState
             ? "border-kid-orange/40 bg-white"
             : "border-kid-orange/20 bg-white hover:border-kid-orange/30"
-        } ${isOpen ? "ring-2 ring-kid-orange/20 border-kid-orange" : ""}`}
+        } ${isOpen || dddPickerOpen ? "ring-2 ring-kid-orange/20 border-kid-orange" : ""}`}
       >
         {selectedState ? (
           <span className="flex items-center gap-2">
             <span className="font-bold text-kid-orange text-base">{selectedState.abbreviation}</span>
             <span className="text-foreground/70">{selectedState.name}</span>
-            <span className="text-foreground/30 text-xs">DDD: {selectedState.ddd.join(", ")}</span>
+            {selectedDDD && (
+              <span className="text-xs font-semibold text-kid-green bg-kid-green/10 rounded-lg px-2 py-0.5">
+                DDD {selectedDDD}
+              </span>
+            )}
           </span>
         ) : (
           <span className="text-foreground/30">Selecione seu estado</span>
         )}
         <svg
-          className={`w-4 h-4 text-foreground/30 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-foreground/30 shrink-0 transition-transform duration-200 ${isOpen || dddPickerOpen ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -115,8 +169,8 @@ export default function StateSelector({ value, onChange }: StateSelectorProps) {
         </svg>
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
+      {/* Main dropdown (states + search) */}
+      {isOpen && !dddPickerOpen && (
         <div className="absolute z-50 mt-1 w-full bg-white rounded-2xl border-2 border-kid-orange/20 shadow-xl shadow-black/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Search input */}
           <div className="p-2 border-b border-foreground/5">
@@ -152,11 +206,7 @@ export default function StateSelector({ value, onChange }: StateSelectorProps) {
                 <button
                   key={state.abbreviation}
                   type="button"
-                  onClick={() => {
-                    onChange(state.abbreviation);
-                    setIsOpen(false);
-                    setSearch("");
-                  }}
+                  onClick={() => handleStateSelect(state)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-150 ${
                     value === state.abbreviation
                       ? "bg-kid-orange/10 text-kid-orange"
@@ -179,6 +229,60 @@ export default function StateSelector({ value, onChange }: StateSelectorProps) {
                 </button>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* DDD Picker (when state has multiple DDDs) */}
+      {dddPickerOpen && selectedState && selectedState.ddd.length > 1 && (
+        <div className="absolute z-50 mt-1 w-full bg-white rounded-2xl border-2 border-kid-orange/20 shadow-xl shadow-black/5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-3 border-b border-foreground/5">
+            <p className="text-xs font-semibold text-foreground/50">
+              Selecione o DDD de{" "}
+              <span className="text-kid-orange">{selectedState.name}</span>
+            </p>
+          </div>
+          <div className="p-1">
+            {selectedState.ddd.map((ddd) => (
+              <button
+                key={ddd}
+                type="button"
+                onClick={() => handleDDDSelect(ddd)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-150 ${
+                  selectedDDD === ddd
+                    ? "bg-kid-green/10 text-kid-green"
+                    : "hover:bg-foreground/[0.03]"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className={`text-sm font-bold w-10 text-center rounded-lg py-1 ${
+                    selectedDDD === ddd
+                      ? "bg-kid-green text-white"
+                      : "bg-foreground/5 text-foreground/50"
+                  }`}>
+                    {ddd}
+                  </span>
+                  <span className="text-sm text-foreground/70">DDD {ddd}</span>
+                </div>
+                {selectedDDD === ddd && (
+                  <svg className="w-4 h-4 text-kid-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="p-2 border-t border-foreground/5">
+            <button
+              type="button"
+              onClick={() => {
+                setDddPickerOpen(false);
+                setIsOpen(true);
+              }}
+              className="w-full text-center text-xs text-foreground/40 hover:text-foreground/60 py-1.5 transition-colors"
+            >
+              Voltar para estados
+            </button>
           </div>
         </div>
       )}

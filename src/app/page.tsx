@@ -886,6 +886,9 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
   const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
+  // Selected DDD from state selector
+  const [selectedDDD, setSelectedDDD] = useState<string>("");
+
   // Terms checkbox for checkout
   const [checkoutTermsAccepted, setCheckoutTermsAccepted] = useState(false);
   const [activateTermsAccepted, setActivateTermsAccepted] = useState(false);
@@ -1004,6 +1007,18 @@ export default function Home() {
     if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
   };
+
+  // Handle DDD auto-fill using functional state update to avoid stale closure
+  const handleDDDChange = useCallback((ddd: string) => {
+    setSelectedDDD(ddd);
+    if (ddd) {
+      setCustomer((prev) => {
+        const digits = prev.phone.replace(/\D/g, "");
+        const numberPart = digits.length > 2 ? digits.slice(2) : "";
+        return { ...prev, phone: formatPhone(ddd + numberPart) };
+      });
+    }
+  }, []);
 
   // Zip code mask helper
   const formatZipCode = (value: string) => {
@@ -2804,19 +2819,35 @@ export default function Home() {
                     />
                     <p className="text-xs text-foreground/40 mt-1">Seu contato para caso precisemos</p>
                   </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
-                    <Input
-                      placeholder="(11) 99999-9999"
-                      className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
-                      value={customer.phone}
-                      onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
-                    />
+                  {/* Telefone + Estado/DDD */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-foreground/70 block">Telefone</Label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1">
+                        <Input
+                          placeholder="(11) 99999-9999"
+                          className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
+                          value={customer.phone}
+                          onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
+                        />
+                        {selectedDDD && !customer.phone.includes(selectedDDD) && (
+                          <p className="text-xs text-kid-green mt-1.5 font-medium">
+                            DDD {selectedDDD} selecionado automaticamente
+                          </p>
+                        )}
+                      </div>
+                      <div className="sm:w-[200px]">
+                        <StateSelector
+                          value={customer.state}
+                          onChange={(state) => setCustomer({ ...customer, state })}
+                          onDDDChange={handleDDDChange}
+                          selectedDDD={selectedDDD}
+                          onDDDSelect={(ddd) => setSelectedDDD(ddd)}
+                          hideLabel
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <StateSelector
-                    value={customer.state}
-                    onChange={(state) => setCustomer({ ...customer, state })}
-                  />
                 </div>
 
                 <Button
