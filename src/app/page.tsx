@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue, me
 import { motion, AnimatePresence } from "framer-motion";
 import SmartIcon from "@/components/SmartIcon";
 import AnimatedIcon from "@/components/AnimatedIcon";
+import StateSelector from "@/components/StateSelector";
+import { BRAZILIAN_STATES } from "@/components/StateSelector";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,6 +136,7 @@ interface Customer {
   name: string;
   email: string;
   phone: string;
+  state: string;
 }
 
 interface Order {
@@ -865,7 +868,7 @@ export default function Home() {
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
-    name: "", email: "", phone: "",
+    name: "", email: "", phone: "", state: "",
   });
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
@@ -1027,7 +1030,7 @@ export default function Home() {
         const parsed = JSON.parse(saved) as Customer;
         if (parsed.name || parsed.email) {
           setSavedCustomer(parsed);
-          setCustomer({ name: "", email: "", phone: "" });
+          setCustomer({ name: "", email: "", phone: "", state: "" });
           setShowSavedPrompt(true);
           setTimeout(() => setCheckoutOpen(true), 200);
           return;
@@ -2758,6 +2761,7 @@ export default function Home() {
                           <p className="text-xs text-foreground/50 mt-1 mb-3">
                             {savedCustomer.name} — {savedCustomer.email}
                             {savedCustomer.phone ? ` — ${savedCustomer.phone}` : ""}
+                            {savedCustomer.state ? ` — ${savedCustomer.state}` : ""}
                           </p>
                           <div className="flex gap-2">
                             <button
@@ -2809,6 +2813,10 @@ export default function Home() {
                       onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
                     />
                   </div>
+                  <StateSelector
+                    value={customer.state}
+                    onChange={(state) => setCustomer({ ...customer, state })}
+                  />
                 </div>
 
                 <Button
@@ -2840,6 +2848,11 @@ export default function Home() {
                   <p className="text-sm font-semibold">{customer.name}</p>
                   <p className="text-xs text-foreground/60">{customer.email}</p>
                   {customer.phone && <p className="text-xs text-foreground/60">{customer.phone}</p>}
+                  {customer.state && (
+                    <p className="text-xs text-foreground/60">
+                      {BRAZILIAN_STATES.find(s => s.abbreviation === customer.state)?.name} ({customer.state})
+                    </p>
+                  )}
                 </div>
 
                 {/* Items */}
