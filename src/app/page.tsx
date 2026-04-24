@@ -2667,7 +2667,7 @@ export default function Home() {
       <Sheet open={checkoutOpen} onOpenChange={(open) => {
         if (!open) setCheckoutOpen(false);
       }}>
-        <SheetContent className="w-full sm:max-w-lg bg-white p-0 flex flex-col overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-lg bg-white p-0 flex flex-col overflow-y-auto [&>button.absolute]:top-3 [&>button.absolute]:right-3 [&>button.absolute]:opacity-100 [&>button.absolute]:rounded-xl [&>button.absolute]:bg-white/20 [&>button.absolute]:hover:bg-white/40 [&>button.absolute]:shadow-lg [&>button.absolute]:transition-all [&>button.absolute>svg]:size-6 [&>button.absolute]:text-white [&>button.absolute]:hover:text-white">
           <SheetTitle className="sr-only">Finalizar Compra</SheetTitle>
           {/* Checkout Header */}
           <div className="bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple p-6 text-white sticky top-0 z-10">
