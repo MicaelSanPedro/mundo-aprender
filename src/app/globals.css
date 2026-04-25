@@ -425,7 +425,7 @@
     opacity: 0.8;
   }
   100% {
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(2);
     opacity: 0;
   }
 }
@@ -456,30 +456,30 @@
 
 .click-particle {
   position: fixed;
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  animation: click-particle 0.5s ease-out forwards;
+  animation: click-particle 0.6s ease-out forwards;
   mix-blend-mode: screen;
 }
 
 .click-ring {
   position: fixed;
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 3px solid;
   pointer-events: none;
   z-index: 9998;
-  animation: click-ring 0.6s ease-out forwards;
+  animation: click-ring 0.7s ease-out forwards;
 }
 
 .click-spark {
   position: fixed;
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;

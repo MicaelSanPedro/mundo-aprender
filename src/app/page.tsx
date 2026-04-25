@@ -1042,28 +1042,9 @@ export default function Home() {
     } catch {}
   }, [cartItems]);
 
-  // Global click effect (particles + ring + sparks) and click sound
+  // Global click effect (particles + ring + sparks)
   useEffect(() => {
     const clickColors = ["#FF922B", "#FFD43B", "#4DABF7", "#69DB7C", "#F783AC", "#B197FC", "#38D9A9"];
-    let audioCtx: AudioContext | null = null;
-
-    const playClick = () => {
-      try {
-        if (!audioCtx) audioCtx = new AudioContext();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
-        osc.type = "sine";
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.15);
-      } catch {}
-    };
 
     const handleClick = (e: MouseEvent) => {
       // Don't trigger on sheets/overlays
@@ -1081,7 +1062,7 @@ export default function Home() {
       particle.style.top = `${y}px`;
       particle.style.background = `radial-gradient(circle, ${color}cc, ${color}44)`;
       document.body.appendChild(particle);
-      setTimeout(() => particle.remove(), 500);
+      setTimeout(() => particle.remove(), 600);
 
       // Ring
       const ring = document.createElement("div");
@@ -1090,14 +1071,14 @@ export default function Home() {
       ring.style.top = `${y}px`;
       ring.style.borderColor = color;
       document.body.appendChild(ring);
-      setTimeout(() => ring.remove(), 600);
+      setTimeout(() => ring.remove(), 700);
 
       // Mini sparks
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         const spark = document.createElement("div");
         spark.className = "click-spark";
-        const angle = (Math.PI * 2 / 5) * i + Math.random() * 0.5;
-        const dist = 15 + Math.random() * 20;
+        const angle = (Math.PI * 2 / 6) * i + Math.random() * 0.5;
+        const dist = 25 + Math.random() * 30;
         spark.style.left = `${x}px`;
         spark.style.top = `${y}px`;
         spark.style.background = clickColors[(Math.floor(Math.random() * clickColors.length))];
@@ -1105,19 +1086,15 @@ export default function Home() {
         spark.style.setProperty("--ty", `${Math.sin(angle) * dist}px`);
         spark.style.animation = "none";
         spark.offsetHeight; // reflow
-        spark.style.animation = `click-spark 0.35s ease-out forwards`;
-        spark.style.transform = `translate(calc(-50% + var(--tx)), calc(-50% + var(--ty)))`;
+        spark.style.animation = `click-spark 0.4s ease-out forwards`;
         document.body.appendChild(spark);
-        setTimeout(() => spark.remove(), 400);
+        setTimeout(() => spark.remove(), 450);
       }
-
-      playClick();
     };
 
     window.addEventListener("click", handleClick);
     return () => {
       window.removeEventListener("click", handleClick);
-      if (audioCtx) audioCtx.close();
     };
   }, []);
 
