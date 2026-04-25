@@ -77,7 +77,9 @@ const categories = [
   },
 ];
 
-const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; subcategory: string; tag: string | null; tagColor: string; ageRange: string; schoolYear: string; image?: string; link?: string }[] = [
+type ProductVariant = { label: string; qty: number; price: number; originalPrice: number | null };
+
+const products: { id: number; name: string; description: string; price: number; originalPrice: number | null; rating: number; reviews: number; emoji: string; bgColor: string; borderHover: string; category: string; subcategory: string; tag: string | null; tagColor: string; ageRange: string; schoolYear: string; image?: string; link?: string; variants?: ProductVariant[] }[] = [
   {
     id: 1,
     name: "O Código Secreto do Mundo",
@@ -97,6 +99,29 @@ const products: { id: number; name: string; description: string; price: number; 
     schoolYear: "1º ao 3º ano",
     image: "/product-2.png",
     link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
+  },
+  {
+    id: 2,
+    name: "Pack de Atividades - 3º Ano",
+    description: "Atividades selecionadas especialmente para o 3º ano! Matemática, Português, Ciências e muito mais. Escolha a quantidade ideal para o seu pequeno aprendiz.",
+    price: 9.90,
+    originalPrice: null,
+    rating: 5,
+    reviews: 8,
+    emoji: "📚",
+    bgColor: "bg-gradient-to-br from-kid-green/10 to-kid-teal/10",
+    borderHover: "hover:border-kid-green/40",
+    category: "matematica",
+    subcategory: "mat-atividades",
+    tag: "Popular!",
+    tagColor: "bg-kid-orange/90 text-white",
+    ageRange: "8 a 9 anos",
+    schoolYear: "3º ano",
+    variants: [
+      { label: "10 atividades", qty: 10, price: 9.90, originalPrice: null },
+      { label: "20 atividades", qty: 20, price: 14.90, originalPrice: 19.80 },
+      { label: "30 atividades", qty: 30, price: 19.90, originalPrice: 29.70 },
+    ],
   },
 ];
 
@@ -723,6 +748,17 @@ const ProductCard = memo(function ProductCard({
   product, isFavorite, isJustFavorited, isJustAdded, isDescExpanded,
   onToggleFavorite, onAddToCart, onToggleDesc, onPreviewImage, onShareProduct,
 }: ProductCardProps) {
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const activeVariant = product.variants?.[selectedVariantIdx];
+
+  const handleAdd = () => {
+    if (activeVariant) {
+      onAddToCart({ ...product, price: activeVariant.price, originalPrice: activeVariant.originalPrice });
+    } else {
+      onAddToCart(product);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -814,18 +850,49 @@ const ProductCard = memo(function ProductCard({
           className="text-[10px] sm:text-xs text-kid-blue font-semibold hover:text-kid-blue/70 hover:underline -mt-1.5 mb-1.5 block transition-colors">
           {isDescExpanded ? "Ver menos ▲" : "Ver mais ▼"}
         </button>
+
+        {/* Variant selector */}
+        {product.variants && product.variants.length > 0 && (
+          <div className="flex gap-1.5 mb-2">
+            {product.variants.map((v, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSelectedVariantIdx(i)}
+                className={`flex-1 rounded-lg border-2 text-center px-1 py-1.5 text-[10px] sm:text-xs font-bold transition-all duration-200 ${
+                  selectedVariantIdx === i
+                    ? "border-kid-green bg-kid-green/10 text-kid-green"
+                    : "border-transparent bg-foreground/5 text-foreground/50 hover:bg-foreground/10 hover:text-foreground/70"
+                }`}
+              >
+                {v.qty}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-base sm:text-xl font-black text-kid-orange">R$ {product.price.toFixed(2)}</span>
-            {product.originalPrice && (
-              <span className="text-[10px] sm:text-xs text-foreground/30 line-through">R$ {product.originalPrice.toFixed(2)}</span>
+            <motion.span
+              key={activeVariant ? `p-${activeVariant.price}` : "p-default"}
+              initial={{ opacity: 0.5, y: -2 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-base sm:text-xl font-black text-kid-orange"
+            >
+              R$ {(activeVariant?.price ?? product.price).toFixed(2)}
+            </motion.span>
+            {(activeVariant?.originalPrice ?? product.originalPrice) && (
+              <span className="text-[10px] sm:text-xs text-foreground/30 line-through">
+                R$ {(activeVariant?.originalPrice ?? product.originalPrice)!.toFixed(2)}
+              </span>
             )}
           </div>
         </div>
         <div className="mt-2 sm:mt-3">
           <Button
             className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${isJustAdded ? "bg-kid-green text-white" : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"}`}
-            onClick={() => onAddToCart(product)}
+            onClick={handleAdd}
           >
             {isJustAdded ? (
               <span className="flex items-center justify-center gap-1">Adicionado! ✅</span>
