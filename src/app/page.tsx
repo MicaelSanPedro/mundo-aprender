@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import SmartIcon from "@/components/SmartIcon";
 import AnimatedIcon from "@/components/AnimatedIcon";
 import StateSelector from "@/components/StateSelector";
-import DDDSelector from "@/components/DDDSelector";
 import { BRAZILIAN_STATES } from "@/components/StateSelector";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -1007,8 +1006,6 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<{ src: string; name: string } | null>(null);
   const [cartToast, setCartToast] = useState<{ name: string; emoji: string } | null>(null);
 
-  // Selected DDD from state selector
-  const [selectedDDD, setSelectedDDD] = useState<string>("");
 
   // Terms checkbox for checkout
   const [checkoutTermsAccepted, setCheckoutTermsAccepted] = useState(false);
@@ -1279,22 +1276,13 @@ export default function Home() {
     }
   };
 
-  // Phone mask helper (only number part, DDD is handled by DDDSelector)
+  // Phone mask helper (full phone with DDD)
   const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 9);
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 8) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-    return `${digits.slice(0, 5)}-${digits.slice(5, 9)}`;
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
   };
-
-  // Handle DDD select — just store the DDD, don't touch the phone input
-  const phoneInputRef = useRef<HTMLInputElement>(null);
-
-  const handleDDDChange = useCallback((ddd: string) => {
-    setSelectedDDD(ddd);
-    // Focus phone number input after DDD selection
-    setTimeout(() => phoneInputRef.current?.focus(), 50);
-  }, []);
 
   // Zip code mask helper
   const formatZipCode = (value: string) => {
@@ -1346,12 +1334,9 @@ export default function Home() {
   };
 
   const saveCustomerAndAdvance = () => {
-    // Save current data to localStorage — combine DDD with phone number
+    // Save current data to localStorage
     try {
-      const fullPhone = selectedDDD && customer.phone
-        ? `(${selectedDDD}) ${customer.phone}`
-        : customer.phone;
-      localStorage.setItem("mundo-ultimo-checkout", JSON.stringify({ ...customer, phone: fullPhone }));
+      localStorage.setItem("mundo-ultimo-checkout", JSON.stringify(customer));
     } catch {}
     setCheckoutStep(2);
   };
@@ -3100,21 +3085,12 @@ export default function Home() {
                   </div>
                   <div>
                     <Label className="text-sm font-semibold text-foreground/70 mb-1 block">Telefone</Label>
-                    <div className="flex">
-                      <DDDSelector
-                        selectedDDD={selectedDDD}
-                        selectedState={customer.state}
-                        onStateChange={(uf) => setCustomer({ ...customer, state: uf })}
-                        onDDDChange={handleDDDChange}
-                      />
-                      <Input
-                        ref={phoneInputRef}
-                        placeholder="99999-9999"
-                        className="rounded-l-none rounded-r-2xl border-2 border-l-0 border-kid-orange/20 focus:border-kid-orange"
+                    <Input
+                        placeholder="(00) 00000-0000"
+                        className="rounded-2xl border-2 border-kid-orange/20 focus:border-kid-orange"
                         value={customer.phone}
                         onChange={(e) => setCustomer({ ...customer, phone: formatPhone(e.target.value) })}
                       />
-                    </div>
                   </div>
                 </div>
 
@@ -3146,7 +3122,7 @@ export default function Home() {
                   <p className="text-xs font-semibold text-foreground/50 mb-1">Dados do comprador:</p>
                   <p className="text-sm font-semibold">{customer.name}</p>
                   <p className="text-xs text-foreground/60">{customer.email}</p>
-                  {customer.phone && <p className="text-xs text-foreground/60">{selectedDDD ? `(${selectedDDD}) ` : ""}{customer.phone}</p>}
+                  {customer.phone && <p className="text-xs text-foreground/60">{customer.phone}</p>}
                   {customer.state && (
                     <p className="text-xs text-foreground/60">
                       {BRAZILIAN_STATES.find(s => s.abbreviation === customer.state)?.name} ({customer.state})
