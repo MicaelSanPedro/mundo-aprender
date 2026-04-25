@@ -1093,6 +1093,57 @@ export default function Home() {
     };
   }, []);
 
+  // Keyboard typing sound
+  useEffect(() => {
+    let audioCtx: AudioContext | null = null;
+
+    const playKeySound = () => {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        // Noise-based click
+        const bufferSize = audioCtx.sampleRate * 0.03;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        // High-pass filter for "clicky" feel
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.value = 2000 + Math.random() * 1500;
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + 0.03);
+      } catch {}
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      // Only trigger on actual character/space/backspace/delete keys, not modifiers
+      if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter" || e.key === "Tab") {
+        playKeySound();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      if (audioCtx) audioCtx.close();
+    };
+  }, []);
+
   // Global click effect (particles + ring + sparks)
   useEffect(() => {
     const clickColors = ["#FF922B", "#FFD43B", "#4DABF7", "#69DB7C", "#F783AC", "#B197FC", "#38D9A9"];
