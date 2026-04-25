@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
+const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const PRODUCTS: Record<number, { name: string; emoji: string; link: string; price: number }> = {
   1: {
@@ -18,6 +19,20 @@ const PRODUCTS: Record<number, { name: string; emoji: string; link: string; pric
   },
 };
 
+function computeSignature(payload: string, productId: number): string {
+  const hmac = crypto
+    .createHmac("sha256", SECRET)
+    .update(`${payload}:${productId}`)
+    .digest("hex")
+    .toUpperCase();
+  let sig = "";
+  sig += ALPHABET[parseInt(hmac.slice(0, 2), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(2, 4), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(4, 6), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(6, 8), 16) % 36];
+  return sig;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
@@ -26,40 +41,27 @@ export async function POST(
     const { code } = await params;
     const clean = decodeURIComponent(code).replace(/-/g, "").toUpperCase();
 
-    if (clean.length !== 16) {
+    if (clean.length !== 16 || !/^[0-9A-Z]{16}$/.test(clean)) {
       return NextResponse.json({ success: false, error: "Formato inválido" });
     }
 
-    const prod = clean.slice(0, 2);
-    const nonce = clean.slice(2, 8);
-    const providedSig = clean.slice(8, 16);
+    const payload = clean.slice(0, 12);
+    const providedSig = clean.slice(12, 16);
 
-    const expectedSig = crypto
-      .createHmac("sha256", SECRET)
-      .update(`${prod}${nonce}`)
-      .digest("hex")
-      .toUpperCase()
-      .slice(0, 8);
-
-    if (providedSig !== expectedSig) {
-      return NextResponse.json({ success: false, error: "Código inválido" });
+    for (const [id, product] of Object.entries(PRODUCTS)) {
+      const expectedSig = computeSignature(payload, parseInt(id));
+      if (providedSig === expectedSig) {
+        return NextResponse.json({
+          success: true,
+          productName: product.name,
+          productEmoji: product.emoji,
+          productPrice: product.price,
+          productLink: product.link,
+        });
+      }
     }
 
-    const productId = parseInt(prod, 36);
-    const product = PRODUCTS[productId];
-
-    if (!product) {
-      return NextResponse.json({ success: false, error: "Produto não encontrado" });
-    }
-
-    // Return product info — code is cryptographically signed so it can't be guessed
-    return NextResponse.json({
-      success: true,
-      productName: product.name,
-      productEmoji: product.emoji,
-      productPrice: product.price,
-      productLink: product.link,
-    });
+    return NextResponse.json({ success: false, error: "Código inválido" });
   } catch {
     return NextResponse.json({ success: false, error: "Erro ao ativar código" });
   }

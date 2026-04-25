@@ -3,6 +3,8 @@ import crypto from "crypto";
 
 const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
 
+const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 // Products catalog — mirrors page.tsx
 const PRODUCTS: Record<number, { name: string; emoji: string; link: string; price: number }> = {
   1: {
@@ -20,29 +22,43 @@ const PRODUCTS: Record<number, { name: string; emoji: string; link: string; pric
 };
 
 /**
- * Code format: XXXX-XXXX-XXXX-XXXX (16 chars)
- *   2 chars = product ID (base-36)
- *   6 chars = random nonce (hex)
- *   8 chars = HMAC-SHA256 signature (hex)
+ * Code format: XXXX-XXXX-XXXX-XXXX (16 alphanumeric chars)
+ *   12 chars = fully random payload (no product ID visible!)
+ *    4 chars = HMAC signature (product ID is used in HMAC computation)
  *
- * Verification only needs the secret + code — no database required!
+ * Product ID is NOT visible in the code — it's only used in the HMAC.
+ * Verification tries all known products to find which one matches.
+ * Codes look completely random: e.g. K7XW-3M9P-F2HJ-8QTL
  */
+function randomChars(n: number): string {
+  let s = "";
+  for (let i = 0; i < n; i++) {
+    s += ALPHABET[Math.floor(Math.random() * 36)];
+  }
+  return s;
+}
+
+function computeSignature(payload: string, productId: number): string {
+  const hmac = crypto
+    .createHmac("sha256", SECRET)
+    .update(`${payload}:${productId}`)
+    .digest("hex")
+    .toUpperCase();
+  // Convert 8 hex chars to 4 alphanumeric chars for compact display
+  let sig = "";
+  sig += ALPHABET[parseInt(hmac.slice(0, 2), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(2, 4), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(4, 6), 16) % 36];
+  sig += ALPHABET[parseInt(hmac.slice(6, 8), 16) % 36];
+  return sig;
+}
+
 function generateSignedCode(productId: number): string {
   if (!PRODUCTS[productId]) throw new Error("Produto não encontrado");
-
-  const nonce = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 hex chars
-  const prod = productId.toString(36).toUpperCase().padStart(2, "0"); // 2 chars
-
-  const payload = `${prod}${nonce}`;
-  const signature = crypto
-    .createHmac("sha256", SECRET)
-    .update(payload)
-    .digest("hex")
-    .toUpperCase()
-    .slice(0, 8); // 8 hex chars
-
-  const code = `${prod}${nonce}${signature}`; // 16 chars
-  return code.match(/.{1,4}/g).join("-");
+  const payload = randomChars(12);
+  const sig = computeSignature(payload, productId);
+  const code = (payload + sig).match(/.{1,4}/g).join("-");
+  return code;
 }
 
 function verifySignedCode(
@@ -56,41 +72,32 @@ function verifySignedCode(
     return { valid: false, error: "Formato inválido" };
   }
 
-  const prod = clean.slice(0, 2);
-  const nonce = clean.slice(2, 8);
-  const providedSig = clean.slice(8, 16);
-
-  const expectedSig = crypto
-    .createHmac("sha256", SECRET)
-    .update(`${prod}${nonce}`)
-    .digest("hex")
-    .toUpperCase()
-    .slice(0, 8);
-
-  if (providedSig !== expectedSig) {
-    return { valid: false, error: "Código inválido" };
+  if (!/^[0-9A-Z]{16}$/.test(clean)) {
+    return { valid: false, error: "Formato inválido" };
   }
 
-  const productId = parseInt(prod, 36);
-  const product = PRODUCTS[productId];
+  const payload = clean.slice(0, 12);
+  const providedSig = clean.slice(12, 16);
 
-  if (!product) {
-    return { valid: false, error: "Produto não encontrado" };
+  // Try all known products — the correct one will match the signature
+  for (const [id, product] of Object.entries(PRODUCTS)) {
+    const expectedSig = computeSignature(payload, parseInt(id));
+    if (providedSig === expectedSig) {
+      return { valid: true, productId: parseInt(id), product };
+    }
   }
 
-  return { valid: true, productId, product };
+  return { valid: false, error: "Código inválido" };
 }
 
 // GET — verify a code (public, no auth needed)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
-  // If ?password= is present, this is an admin listing request
   const password = searchParams.get("password");
   const codeParam = searchParams.get("code");
 
   if (password) {
-    // Admin auth check
     if (password !== SECRET) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
     }
