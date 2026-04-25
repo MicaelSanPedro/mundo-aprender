@@ -751,12 +751,40 @@ const ProductCard = memo(function ProductCard({
 }: ProductCardProps) {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
   const activeVariant = product.variants?.[selectedVariantIdx];
+  const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+  const lastTapRef = useRef(0);
 
   const handleAdd = () => {
     if (activeVariant) {
       onAddToCart({ ...product, price: activeVariant.price, originalPrice: activeVariant.originalPrice });
     } else {
       onAddToCart(product);
+    }
+  };
+
+  const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    setRipples((prev) => [...prev, { x, y, id }]);
+    setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 600);
+    handleAdd();
+  };
+
+  const handleImageClick = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 350) {
+      handleAdd();
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+      setTimeout(() => {
+        if (lastTapRef.current !== 0 && Date.now() - lastTapRef.current >= 350) {
+          product.image && onPreviewImage(product.image, product.name);
+          lastTapRef.current = 0;
+        }
+      }, 400);
     }
   };
 
@@ -794,7 +822,7 @@ const ProductCard = memo(function ProductCard({
       </Button>
       <button
         type="button"
-        onClick={() => product.image && onPreviewImage(product.image, product.name)}
+        onClick={handleImageClick}
         className={`relative ${product.bgColor} p-3 sm:p-6 md:p-8 flex items-center justify-center aspect-square overflow-hidden w-full cursor-pointer group/img`}
       >
         {product.image ? (
@@ -890,10 +918,24 @@ const ProductCard = memo(function ProductCard({
             )}
           </div>
         </div>
-        <div className="mt-2 sm:mt-3">
+        <div className="mt-2 sm:mt-3 relative overflow-hidden">
+          {ripples.map((r) => (
+            <span
+              key={r.id}
+              className="absolute rounded-full bg-white/40 animate-ripple pointer-events-none"
+              style={{
+                left: r.x,
+                top: r.y,
+                width: 10,
+                height: 10,
+                marginLeft: -5,
+                marginTop: -5,
+              }}
+            />
+          ))}
           <Button
             className={`w-full rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-sm py-3 sm:py-5 transition-all duration-300 ${isJustAdded ? "bg-kid-green text-white" : "bg-kid-orange hover:bg-kid-orange/90 text-white shadow-kid-orange hover:shadow-lg"}`}
-            onClick={handleAdd}
+            onClick={handleAddClick}
           >
             {isJustAdded ? (
               <span className="flex items-center justify-center gap-1">Adicionado! ✅</span>
