@@ -104,38 +104,41 @@
 /* Custom cursor */
 .custom-cursor-dot {
   position: fixed;
-  width: 8px;
-  height: 8px;
-  background: #FF922B;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
   z-index: 99999;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, background 0.2s;
+  transform: translate(-2px, -2px);
+  transition: transform 0.1s ease;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.custom-cursor-dot svg {
+  width: 100%;
+  height: 100%;
 }
 
 .custom-cursor-dot.hovering {
-  width: 14px;
-  height: 14px;
-  background: #F783AC;
+  transform: translate(-2px, -2px) scale(1.15);
 }
 
 .custom-cursor-ring {
   position: fixed;
-  width: 36px;
-  height: 36px;
-  border: 2px solid rgba(255, 146, 43, 0.5);
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 146, 43, 0.4);
   border-radius: 50%;
   pointer-events: none;
   z-index: 99998;
   transform: translate(-50%, -50%);
-  transition: width 0.3s ease-out, height 0.3s ease-out, border-color 0.3s;
+  transition: width 0.3s ease-out, height 0.3s ease-out, background 0.3s;
 }
 
 .custom-cursor-ring.hovering {
-  width: 50px;
-  height: 50px;
-  border-color: rgba(247, 131, 172, 0.5);
+  width: 36px;
+  height: 36px;
+  background: rgba(247, 131, 172, 0.15);
+  border: 2px solid rgba(247, 131, 172, 0.4);
 }
 
 @media (pointer: coarse) {

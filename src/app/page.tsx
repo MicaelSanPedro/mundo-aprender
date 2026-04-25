@@ -1046,6 +1046,9 @@ export default function Home() {
   useEffect(() => {
     const dot = document.createElement("div");
     dot.className = "custom-cursor-dot";
+    dot.innerHTML = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1L1 14L5.5 9.5L9 15L11.5 13.5L8 8L14 7.5L1 1Z" fill="white" stroke="#FF922B" stroke-width="1.2" stroke-linejoin="round"/>
+    </svg>`;
     const ring = document.createElement("div");
     ring.className = "custom-cursor-ring";
     document.body.appendChild(dot);
