@@ -1288,8 +1288,12 @@ export default function Home() {
   };
 
   // Handle DDD select — just store the DDD, don't touch the phone input
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+
   const handleDDDChange = useCallback((ddd: string) => {
     setSelectedDDD(ddd);
+    // Focus phone number input after DDD selection
+    setTimeout(() => phoneInputRef.current?.focus(), 50);
   }, []);
 
   // Zip code mask helper
@@ -3104,6 +3108,7 @@ export default function Home() {
                         onDDDChange={handleDDDChange}
                       />
                       <Input
+                        ref={phoneInputRef}
                         placeholder="99999-9999"
                         className="rounded-l-none rounded-r-2xl border-2 border-l-0 border-kid-orange/20 focus:border-kid-orange"
                         value={customer.phone}
