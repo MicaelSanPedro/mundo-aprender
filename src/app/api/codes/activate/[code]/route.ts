@@ -10,6 +10,12 @@ const PRODUCTS: Record<number, { name: string; emoji: string; link: string; pric
     price: 4.99,
     link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
   },
+  2: {
+    name: "Pack de Atividades - 3º Ano (10 atividades)",
+    emoji: "📚",
+    price: 4.95,
+    link: "https://www.mediafire.com/folder/x8dcszq4f7egl/MUNDO-APRENDER-10",
+  },
 };
 
 export async function POST(
