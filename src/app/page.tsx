@@ -857,7 +857,17 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [justAdded, setJustAdded] = useState<number | null>(null);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<number>>(() => {
+    if (typeof window === "undefined") return new Set<number>();
+    try {
+      const saved = localStorage.getItem("ma-favorites");
+      if (saved) {
+        const ids = JSON.parse(saved) as number[];
+        return new Set(ids);
+      }
+    } catch {}
+    return new Set<number>();
+  });
   const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [justFavorited, setJustFavorited] = useState<number | null>(null);
   const [email, setEmail] = useState("");
@@ -987,6 +997,7 @@ export default function Home() {
       } else {
         next.add(id);
       }
+      localStorage.setItem("ma-favorites", JSON.stringify([...next]));
       return next;
     });
     setJustFavorited(id);
