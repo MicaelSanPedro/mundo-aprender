@@ -243,7 +243,7 @@ function FAQItem({ question, answer, emoji, index }: { question: string; answer:
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.08, duration: 0.3 }}
-      className="liquid-glass-light rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200"
+      className="bg-white rounded-2xl border-2 border-kid-blue/10 overflow-hidden shadow-sm hover:shadow-md hover:border-kid-blue/20 transition-all duration-200"
     >
       <button
         onClick={() => setOpen(!open)}
@@ -728,7 +728,7 @@ const ProductCard = memo(function ProductCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`card-hover group relative liquid-glass-light liquid-shine liquid-refraction rounded-2xl sm:rounded-3xl ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
+      className={`card-hover group relative bg-white rounded-2xl sm:rounded-3xl border-2 border-transparent ${product.borderHover} overflow-hidden shadow-md hover:shadow-xl`}
     >
       {product.tag && (
         <div className="absolute top-3 left-3 z-10">
@@ -1285,9 +1285,9 @@ export default function Home() {
   /* ─── Render ──────────────────────────────────────────── */
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden pt-14 sm:pt-16 md:pt-20 liquid-bg">
+    <div className="min-h-screen flex flex-col overflow-x-hidden pt-14 sm:pt-16 md:pt-20">
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="fixed top-0 left-0 right-0 z-50 liquid-glass-nav">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-kid-yellow/30 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
@@ -1370,7 +1370,7 @@ export default function Home() {
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-md liquid-sheet p-0 flex flex-col">
+                <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
                   <SheetTitle className="sr-only">Carrinho de Compras</SheetTitle>
                   <div className="bg-gradient-to-r from-kid-pink to-kid-orange p-6 text-white">
                     <div className="flex items-center gap-3">
@@ -1483,7 +1483,7 @@ export default function Home() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent
-                className="w-[85vw] sm:max-w-sm liquid-sheet p-0 flex flex-col"
+                className="w-[85vw] sm:max-w-sm bg-white p-0 flex flex-col"
                 onOpenAutoFocus={(e) => e.preventDefault()}
               >
                   <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
@@ -1685,16 +1685,24 @@ export default function Home() {
       </header>
 
       {/* ═══════════════ HERO SECTION ═══════════════ */}
-      <section id="inicio" className="relative gradient-hero overflow-hidden liquid-bg-hero">
+      <section id="inicio" className="relative gradient-hero overflow-hidden">
         {/* Decorative floating elements */}
-        {/* Liquid glass floating blobs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="liquid-blob liquid-blob-1 -top-10 -left-20" />
-          <div className="liquid-blob liquid-blob-2 top-20 -right-10" />
-          <div className="liquid-blob liquid-blob-3 bottom-0 left-1/3" />
-          <div className="liquid-blob liquid-blob-4 top-1/2 right-1/4" />
-          <div className="liquid-blob liquid-blob-5 bottom-1/4 left-1/4" />
+          <span className="absolute top-10 left-[5%] text-5xl md:text-7xl animate-float opacity-30">⭐</span>
+          <span className="absolute top-20 right-[10%] text-4xl md:text-6xl animate-float-delay-1 opacity-30">✏️</span>
+          <span className="absolute bottom-20 left-[15%] text-4xl md:text-5xl animate-float-delay-2 opacity-25">📖</span>
+          <span className="absolute bottom-32 right-[20%] text-5xl md:text-7xl animate-float-slow opacity-30">🎨</span>
+          <span className="absolute top-1/2 left-[3%] text-3xl md:text-4xl animate-float-delay-3 opacity-20">📐</span>
+          <span className="absolute top-1/3 right-[5%] text-3xl md:text-4xl animate-float opacity-20">🔬</span>
+          <span className="absolute bottom-10 left-[40%] text-4xl md:text-5xl animate-float-delay-1 opacity-25">🌈</span>
+          <span className="absolute top-5 left-[50%] text-3xl animate-float-delay-2 opacity-20">🎈</span>
         </div>
+
+        {/* Decorative blob shapes */}
+        <div className="absolute top-10 right-10 w-28 h-28 md:w-44 md:h-44 bg-white/15 blob-1 blur-xl" />
+        <div className="absolute bottom-10 left-10 w-32 h-32 md:w-52 md:h-52 bg-white/10 blob-2 blur-xl" />
+        <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-white/10 blob-1 blur-md opacity-60" />
+        <div className="absolute bottom-1/3 right-1/4 w-12 h-12 bg-white/10 blob-2 blur-md opacity-50" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -1770,7 +1778,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ CATEGORIES SECTION ═══════════════ */}
-      <section id="categorias" className="py-16 md:py-24 pattern-dots">
+      <section id="categorias" className="py-16 md:py-24 bg-background pattern-dots">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1901,7 +1909,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ PRODUCTS SECTION ═══════════════ */}
-      <section id="produtos" ref={productsRef} className="py-16 md:py-24">
+      <section id="produtos" ref={productsRef} className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {searchQuery.trim() !== "" ? (
             <motion.div
@@ -2015,7 +2023,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ HOW IT WORKS ═══════════════ */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -2090,7 +2098,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ FAQ ═══════════════ */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -2141,7 +2149,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ ABOUT / STATS ═══════════════ */}
-      <section id="sobre" className="py-16 md:py-24">
+      <section id="sobre" className="py-16 md:py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -2190,7 +2198,7 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ delay: fi * 0.1 }}
                     whileHover={{ scale: 1.03, y: -2 }}
-                    className="relative flex items-start gap-3 liquid-glass-light rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden"
+                    className="relative flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm border-2 border-transparent hover:border-kid-orange/20 transition-all duration-300 group overflow-hidden"
                   >
                     {/* Gradient border glow on hover */}
                     <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-kid-yellow/5 via-transparent to-kid-pink/5 pointer-events-none" />
@@ -2232,7 +2240,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.12, duration: 0.4 }}
                   whileHover={{ scale: 1.05, y: -4 }}
-                  className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center liquid-shine`}
+                  className={`${stat.color} border-2 ${stat.border} rounded-3xl p-5 md:p-6 text-center`}
                 >
                   <span className="block mb-2"><SmartIcon emoji={stat.emoji} size={36} /></span>
                   <p className="text-2xl md:text-3xl font-black text-foreground">
@@ -2389,7 +2397,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ FOOTER ═══════════════ */}
-      <footer id="contato" className="relative bg-foreground text-white/80 liquid-bg-footer">
+      <footer id="contato" className="relative bg-foreground text-white/80">
         {/* Gradient overlay at top */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
 
@@ -2563,7 +2571,7 @@ export default function Home() {
 
       {/* ═══════════════ FAVORITES SHEET ═══════════════ */}
       <Sheet open={favoritesOpen} onOpenChange={setFavoritesOpen}>
-        <SheetContent className="w-full sm:max-w-md liquid-sheet p-0 flex flex-col">
+        <SheetContent className="w-full sm:max-w-md bg-white p-0 flex flex-col">
           <SheetTitle className="sr-only">Meus Favoritos</SheetTitle>
           <div className="bg-gradient-to-r from-kid-pink to-kid-purple p-6 text-white">
             <div className="flex items-center gap-3">
@@ -2686,7 +2694,7 @@ export default function Home() {
       <Sheet open={checkoutOpen} onOpenChange={(open) => {
         if (!open) setCheckoutOpen(false);
       }}>
-        <SheetContent className="w-full sm:max-w-lg liquid-sheet p-0 flex flex-col overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-lg bg-white p-0 flex flex-col overflow-y-auto">
           <SheetTitle className="sr-only">Finalizar Compra</SheetTitle>
           {/* Checkout Header */}
           <div className="bg-gradient-to-r from-kid-orange via-kid-pink to-kid-purple p-6 text-white sticky top-0 z-10">
