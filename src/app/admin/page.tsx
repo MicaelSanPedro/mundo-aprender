@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import CustomCursor from "@/components/CustomCursor";
 import {
   KeyRound,
   Plus,
@@ -15,6 +16,7 @@ import {
 
 const productOptions = [
   { id: 1, name: "O Código Secreto do Mundo", emoji: "🔢", price: 4.99 },
+  { id: 2, name: "Pack de Atividades - 3º Ano (10 atividades)", emoji: "📚", price: 4.95 },
 ];
 
 export default function AdminPage() {
@@ -92,6 +94,7 @@ export default function AdminPage() {
   if (!authenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-kid-purple/5 to-kid-blue/5 flex items-center justify-center p-4">
+      <CustomCursor />
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -136,6 +139,7 @@ export default function AdminPage() {
   // ─── Admin Dashboard ────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
+      <CustomCursor />
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
