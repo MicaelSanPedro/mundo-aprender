@@ -104,41 +104,42 @@
    LIQUID GLASS — Core System
    ═══════════════════════════════════════════ */
 
-/* Liquid glass base — the foundation for all glass effects */
+/* Liquid glass base — DRAMATIC glass effect */
 .liquid-glass {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.35) 50%,
-    rgba(255, 255, 255, 0.45) 100%
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.3) 100%
   );
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(24px) saturate(1.8) brightness(1.05);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8) brightness(1.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
-  contain: layout style paint;
+    0 8px 40px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 30px rgba(255, 255, 255, 0.08);
 }
 
-/* Lighter variant — for cards and panels */
+/* Cards and panels — STRONG glass refraction */
 .liquid-glass-light {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    rgba(255, 255, 255, 0.4) 100%
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.35) 100%
   );
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.06),
-    0 1px 4px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
-  contain: layout style paint;
+    0 12px 48px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.03),
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 40px rgba(255, 255, 255, 0.06);
 }
 
 /* Dark glass variant — for contrast on bright gradients */
@@ -158,23 +159,23 @@
   contain: layout style paint;
 }
 
-/* Navbar glass — thin, subtle, always-on-top feel */
+/* Navbar — crystal clear glass with strong edge light */
 .liquid-glass-nav {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.5) 100%
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.35) 100%
   );
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.05);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 1px 12px rgba(0, 0, 0, 0.04),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
-  contain: layout style paint;
+    0 4px 30px rgba(0, 0, 0, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.03) inset;
 }
 
-/* Specular highlight overlay — shine effect on glass surfaces */
+/* Specular highlight — DRAMATIC light sweep */
 .liquid-shine {
   position: relative;
   overflow: hidden;
@@ -184,25 +185,40 @@
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 60%;
+  left: -120%;
+  width: 80%;
   height: 100%;
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.5) 45%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0.5) 55%,
+    transparent 80%
   );
-  transition: left 0.6s ease;
+  transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
   z-index: 1;
 }
 
 .liquid-shine:hover::before {
-  left: 120%;
+  left: 140%;
 }
 
-/* Refraction border — simulates light bending through glass edges */
+/* Top specular edge — always visible */
+.liquid-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), rgba(255,255,255,0.4), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Refraction border — PRISMATIC rainbow edge refraction */
 .liquid-refraction {
   position: relative;
   border: none !important;
@@ -213,14 +229,16 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1.5px;
+  padding: 2px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 200, 100, 0.3) 25%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(77, 171, 247, 0.3) 75%,
-    rgba(255, 255, 255, 0.6) 100%
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 200, 100, 0.6) 15%,
+    rgba(247, 131, 172, 0.5) 30%,
+    rgba(177, 151, 252, 0.5) 50%,
+    rgba(77, 171, 247, 0.6) 70%,
+    rgba(105, 219, 124, 0.5) 85%,
+    rgba(255, 255, 255, 0.9) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -383,50 +401,49 @@
     linear-gradient(180deg, transparent 0%, rgba(26, 26, 46, 0.03) 100%);
 }
 
-/* ═══ Liquid Blob Decorations ═══ */
+/* ═══ Liquid Blob Decorations — BIG & VIBRANT ═══ */
 
 .liquid-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.5;
+  filter: blur(80px);
+  opacity: 0.7;
   pointer-events: none;
-  contain: layout style;
 }
 
 .liquid-blob-1 {
-  background: radial-gradient(circle, rgba(255, 146, 43, 0.35), transparent 70%);
-  width: 300px;
-  height: 300px;
+  background: radial-gradient(circle, rgba(255, 146, 43, 0.5), rgba(255, 212, 59, 0.2) 50%, transparent 70%);
+  width: 400px;
+  height: 400px;
   animation: liquid-drift 15s ease-in-out infinite;
 }
 
 .liquid-blob-2 {
-  background: radial-gradient(circle, rgba(77, 171, 247, 0.3), transparent 70%);
-  width: 250px;
-  height: 250px;
+  background: radial-gradient(circle, rgba(77, 171, 247, 0.45), rgba(77, 171, 247, 0.15) 50%, transparent 70%);
+  width: 350px;
+  height: 350px;
   animation: liquid-drift-slow 20s ease-in-out infinite;
 }
 
 .liquid-blob-3 {
-  background: radial-gradient(circle, rgba(247, 131, 172, 0.3), transparent 70%);
-  width: 280px;
-  height: 280px;
+  background: radial-gradient(circle, rgba(247, 131, 172, 0.5), rgba(247, 131, 172, 0.15) 50%, transparent 70%);
+  width: 380px;
+  height: 380px;
   animation: liquid-drift-reverse 18s ease-in-out infinite;
 }
 
 .liquid-blob-4 {
-  background: radial-gradient(circle, rgba(177, 151, 252, 0.25), transparent 70%);
-  width: 220px;
-  height: 220px;
+  background: radial-gradient(circle, rgba(177, 151, 252, 0.45), rgba(177, 151, 252, 0.15) 50%, transparent 70%);
+  width: 320px;
+  height: 320px;
   animation: liquid-drift 22s ease-in-out infinite;
   animation-delay: -5s;
 }
 
 .liquid-blob-5 {
-  background: radial-gradient(circle, rgba(105, 219, 124, 0.25), transparent 70%);
-  width: 200px;
-  height: 200px;
+  background: radial-gradient(circle, rgba(105, 219, 124, 0.4), rgba(105, 219, 124, 0.12) 50%, transparent 70%);
+  width: 280px;
+  height: 280px;
   animation: liquid-drift-slow 18s ease-in-out infinite;
   animation-delay: -8s;
 }
@@ -669,14 +686,13 @@
   animation: gradient-shift 10s ease infinite;
 }
 
-/* Playful card hover — liquid version */
+/* Playful card hover — liquid version with dramatic lift */
 .card-hover {
-  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  will-change: transform;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card-hover:hover {
-  transform: translateY(-6px) scale(1.01);
+  transform: translateY(-10px) scale(1.02);
 }
 
 /* Shimmer effect for empty state */
@@ -765,20 +781,22 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* ═══ Liquid Glass: Sheet/Modal ═══ */
+/* ═══ Liquid Glass: Sheet/Modal — HEAVY glass ═══ */
 
 .liquid-sheet {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.6) 100%
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.65) 100%
   );
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(40px) saturate(2) brightness(1.08);
+  -webkit-backdrop-filter: blur(40px) saturate(2) brightness(1.08);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    -4px 0 30px rgba(0, 0, 0, 0.06),
-    inset 1px 0 0 rgba(255, 255, 255, 0.5);
+    -8px 0 50px rgba(0, 0, 0, 0.08),
+    inset 2px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 60px rgba(255, 255, 255, 0.05);
 }
 
 /* ═══ Performance: Contain utility ═══ */
