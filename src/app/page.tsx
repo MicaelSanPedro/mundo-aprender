@@ -104,7 +104,7 @@ const products: { id: number; name: string; description: string; price: number; 
     id: 2,
     name: "Pack de Atividades - 3º Ano",
     description: "Atividades selecionadas especialmente para o 3º ano! Matemática, Português, Ciências e muito mais. Escolha a quantidade ideal para o seu pequeno aprendiz.",
-    price: 9.90,
+    price: 4.95,
     originalPrice: null,
     rating: 5,
     reviews: 8,
@@ -119,9 +119,9 @@ const products: { id: number; name: string; description: string; price: number; 
     schoolYear: "3º ano",
     image: "/product-pack-atividades.png",
     variants: [
-      { label: "10 atividades", qty: 10, price: 9.90, originalPrice: null },
-      { label: "20 atividades", qty: 20, price: 14.90, originalPrice: 19.80 },
-      { label: "30 atividades", qty: 30, price: 19.90, originalPrice: 29.70 },
+      { label: "10 atividades", qty: 10, price: 4.95, originalPrice: null },
+      { label: "20 atividades", qty: 20, price: 7.45, originalPrice: 9.90 },
+      { label: "30 atividades", qty: 30, price: 9.95, originalPrice: 14.85 },
     ],
   },
 ];
