@@ -1119,8 +1119,8 @@ export default function Home() {
         filter.frequency.value = 2000 + Math.random() * 1500;
 
         const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.06, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
         noise.connect(filter);
         filter.connect(gain);
