@@ -1042,6 +1042,57 @@ export default function Home() {
     } catch {}
   }, [cartItems]);
 
+  // Custom cursor
+  useEffect(() => {
+    const dot = document.createElement("div");
+    dot.className = "custom-cursor-dot";
+    const ring = document.createElement("div");
+    ring.className = "custom-cursor-ring";
+    document.body.appendChild(dot);
+    document.body.appendChild(ring);
+
+    let mouseX = 0, mouseY = 0;
+    let ringX = 0, ringY = 0;
+
+    const moveCursor = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.left = `${mouseX}px`;
+      dot.style.top = `${mouseY}px`;
+    };
+
+    const animateRing = () => {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      ring.style.left = `${ringX}px`;
+      ring.style.top = `${ringY}px`;
+      requestAnimationFrame(animateRing);
+    };
+
+    const handleOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("button, a, [role='button'], input, select, textarea, label")) {
+        dot.classList.add("hovering");
+        ring.classList.add("hovering");
+      } else {
+        dot.classList.remove("hovering");
+        ring.classList.remove("hovering");
+      }
+    };
+
+    window.addEventListener("mousemove", moveCursor);
+    window.addEventListener("mouseover", handleOver);
+    const rafId = requestAnimationFrame(animateRing);
+
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseover", handleOver);
+      cancelAnimationFrame(rafId);
+      dot.remove();
+      ring.remove();
+    };
+  }, []);
+
   // Global click effect (particles + ring + sparks)
   useEffect(() => {
     const clickColors = ["#FF922B", "#FFD43B", "#4DABF7", "#69DB7C", "#F783AC", "#B197FC", "#38D9A9"];
