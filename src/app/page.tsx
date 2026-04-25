@@ -3543,9 +3543,9 @@ export default function Home() {
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-kid-purple to-kid-blue p-6 text-white text-center">
-                <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 0.5, delay: 0.2 }}>
-                  <KeyRound className="h-8 w-8 mx-auto mb-2" />
-                </motion.div>
+                <div className="mb-2">
+                  <AnimatedIcon name="key" size={48} color="#FFFFFF" animated={true} />
+                </div>
                 <h3 className="text-lg font-bold">Ativar Produto</h3>
                 <p className="text-white/80 text-xs mt-1">Digite o código que recebeu para liberar seu produto</p>
               </div>
@@ -3589,8 +3589,10 @@ export default function Home() {
                       className={`flex items-start gap-3 cursor-pointer select-none rounded-2xl p-3.5 border-2 transition-all duration-300 ${activateTermsAccepted ? 'bg-kid-orange/5 border-kid-orange/30 shadow-md shadow-kid-orange/10' : 'bg-white border-gray-200 hover:border-kid-orange/20 hover:bg-kid-orange/[0.02]'}`}
                     >
                       <div className={`shrink-0 w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 overflow-hidden ${activateTermsAccepted ? 'bg-kid-orange border-kid-orange shadow-sm shadow-kid-orange/30' : 'bg-white border-gray-300'}`}>
-                        {activateTermsAccepted && (
-                          <AnimatedIcon name="check-circle" size={24} color="#FFFFFF" animated={true} />
+                        {activateTermsAccepted ? (
+                          <AnimatedIcon name="check" size={20} color="#FFFFFF" animated={true} />
+                        ) : (
+                          <AnimatedIcon name="shield" size={16} color="#D1D5DB" animated={false} />
                         )}
                       </div>
                       <span className="text-sm text-foreground/70 leading-relaxed">
@@ -3628,7 +3630,10 @@ export default function Home() {
 
                 {activateStep === "loading" && (
                   <div className="flex flex-col items-center justify-center py-8">
-                    <Loader2 className="h-8 w-8 text-kid-purple animate-spin" />
+                    <div className="relative">
+                      <div className="absolute inset-0 animate-ping bg-kid-purple/20 rounded-full" />
+                      <AnimatedIcon name="search" size={48} color="#B197FC" animated={true} />
+                    </div>
                     <p className="text-sm font-semibold text-foreground/60 mt-3">Verificando código...</p>
                   </div>
                 )}
@@ -3639,8 +3644,8 @@ export default function Home() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center space-y-4"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-kid-green/10 flex items-center justify-center mx-auto">
-                      <CheckCircle2 className="h-8 w-8 text-kid-green" />
+                    <div className="w-20 h-20 rounded-3xl bg-kid-green/10 flex items-center justify-center mx-auto shadow-inner">
+                      <AnimatedIcon name="check-circle" size={56} color="#69DB7C" animated={true} />
                     </div>
                     <div>
                       <p className="text-xs text-foreground/50 font-medium">Seus Produtos Liberados</p>
