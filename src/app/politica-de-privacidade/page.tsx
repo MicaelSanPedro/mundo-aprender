@@ -1,6 +1,7 @@
 import { Shield, ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade - Mundo Aprender",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function PoliticaDePrivacidade() {
   return (
     <div className="min-h-screen bg-background">
+      <CustomCursor />
       {/* Header */}
       <div className="gradient-hero py-12 px-4">
         <div className="max-w-3xl mx-auto text-center">

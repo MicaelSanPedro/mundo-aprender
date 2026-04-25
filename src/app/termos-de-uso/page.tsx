@@ -1,6 +1,7 @@
 import { FileText, ArrowLeft, Shield } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: "Termos de Uso - Mundo Aprender",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function TermosDeUso() {
   return (
     <div className="min-h-screen bg-background">
+      <CustomCursor />
       {/* Header */}
       <div className="gradient-hero py-12 px-4">
         <div className="max-w-3xl mx-auto text-center">
@@ -82,7 +84,8 @@ export default function TermosDeUso() {
                 <span>
                   <strong>Produto:</strong> Qualquer material didático digital ou físico oferecido
                   para venda na plataforma, incluindo cadernos educativos, jogos, livros e
-                  atividades pedagógicas.
+                  atividades pedagógicas. Os produtos digitais são fornecidos em formato ZIP
+                  contendo arquivos PDF.
                 </span>
               </li>
               <li className="flex gap-2">
@@ -150,7 +153,9 @@ export default function TermosDeUso() {
             </p>
             <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
               Para produtos digitais, o acesso será liberado por meio de código de ativação único
-              que permite o download do material pela plataforma MediaFire.
+              que permite o download do material em formato ZIP (contendo arquivos PDF) pela
+              plataforma MediaFire. Para extrair o arquivo ZIP no Windows, o usuário deve clicar
+              com o botão direito sobre o arquivo e selecionar "Extrair tudo".
               Cada código é válido para um único uso e está vinculado ao produto adquirido. O prazo
               para ativação do código é de 90 (noventa) dias após a data de compra, findo o qual
               o código expirará sem direito a reembolso.

@@ -2205,7 +2205,7 @@ export default function Home() {
                   <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Compra Segura
                 </div>
                 <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
-                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Material Digital PDF
+                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Material Digital em ZIP/PDF
                 </div>
               </div>
             </motion.div>
@@ -2573,12 +2573,12 @@ export default function Home() {
             {[
               {
                 q: "Como recebo o material após a compra?",
-                a: "Após a confirmação do pagamento, você recebe uma key de ativação pelo WhatsApp. Basta digitar a key no site para baixar seu material pelo MediaFire! O acesso é vitalício e ilimitado.",
+                a: "Após a confirmação do pagamento, você recebe uma key de ativação pelo WhatsApp. Basta digitar a key no site para baixar o arquivo ZIP com seus PDFs pelo MediaFire! O acesso é vitalício e ilimitado. Para abrir o arquivo ZIP no Windows, clique com o botão direito nele e selecione \"Extrair tudo\".",
                 emoji: "📥",
               },
               {
                 q: "Posso imprimir quantas vezes quiser?",
-                a: "Sim! Após baixar pelo MediaFire, o PDF é seu. Você pode imprimir quantas cópias precisar para uso pessoal ou em sala de aula. Recomendamos impressão em papel sulfite 75g ou superior.",
+                a: "Sim! Após baixar o arquivo ZIP pelo MediaFire, basta extrair para acessar os PDFs. Você pode imprimir quantas cópias precisar para uso pessoal ou em sala de aula. Recomendamos impressão em papel sulfite 75g ou superior.",
                 emoji: "🖨️",
               },
               {
@@ -2595,6 +2595,11 @@ export default function Home() {
                 q: "Posso solicitar reembolso?",
                 a: "Sim! Oferecemos garantia de 7 dias. Se o material não atender suas expectativas, entre em contato pelo WhatsApp ou e-mail damatorres50@hotmail.com e devolvemos 100% do valor.",
                 emoji: "🛡️",
+              },
+              {
+                q: "Como abro o arquivo ZIP no Windows?",
+                a: "É muito simples! Após baixar o arquivo ZIP, localize-o na pasta \"Downloads\" do seu computador. Clique com o botão direito sobre o arquivo e selecione \"Extrair tudo...\". Escolha onde quer salvar os arquivos e clique em \"Extrair\". Pronto! Os PDFs estarão disponíveis na pasta escolhida. Se preferir, também é possível dar um duplo clique no ZIP para abrir e arrastar os arquivos para outra pasta.",
+                emoji: "📦",
               },
             ].map((faq, i) => (
               <FAQItem key={i} question={faq.q} answer={faq.a} emoji={faq.emoji} index={i} />
@@ -2641,7 +2646,7 @@ export default function Home() {
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
-                  { icon: Download, color: "kid-blue", title: "Download via MediaFire", desc: "Receba sua key e baixe pelo MediaFire" },
+                  { icon: Download, color: "kid-blue", title: "Download via MediaFire", desc: "Arquivo ZIP com PDFs — receba sua key e baixe" },
                   { icon: Shield, color: "kid-green", title: "Acesso Vitalício", desc: "Download ilimitado para sempre" },
                   { icon: Heart, color: "kid-pink", title: "Feito com Carinho", desc: "Aprovado por educadores" },
                   { icon: Award, color: "kid-purple", title: "Acesso Ilimitado", desc: "Baixe quantas vezes quiser" },
@@ -3208,7 +3213,7 @@ export default function Home() {
 
                 <div className="bg-kid-blue/10 rounded-2xl p-4 border border-kid-blue/20 flex items-center gap-3">
                   <FileText className="h-5 w-5 text-kid-blue shrink-0" />
-                  <p className="text-sm text-foreground/70">Produto digital em PDF — após o pagamento, você recebe uma key de ativação pelo WhatsApp! O download é feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>.</p>
+                  <p className="text-sm text-foreground/70">Produto digital em formato ZIP contendo PDFs — após o pagamento, você recebe uma key de ativação pelo WhatsApp! O download é feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>. Para abrir: clique com o botão direito no ZIP e selecione &quot;Extrair tudo&quot;.</p>
                 </div>
 
                 <div className="space-y-3">
@@ -3454,7 +3459,7 @@ export default function Home() {
                     <p className="text-sm font-bold text-foreground">Envie o comprovante</p>
                   </div>
                   <p className="text-xs text-foreground/60 mb-3">
-                    Após pagar, envie o comprovante pelo WhatsApp para receber sua key de ativação. O download do material é feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>:
+                    Após pagar, envie o comprovante pelo WhatsApp para receber sua key de ativação. O download é um arquivo ZIP (contendo PDFs) feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>:
                   </p>
                   <a
                     href="https://wa.me/5566984447849?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"
