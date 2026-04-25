@@ -1883,7 +1883,7 @@ export default function Home() {
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-kid-yellow/10 border-t border-kid-yellow/20">
                     <div className="flex items-center gap-2 text-xs text-foreground/40">
                       <KeyRound className="h-3.5 w-3.5" />
-                      <span>Entrega por key de ativação</span>
+                      <span>Download via <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a></span>
                     </div>
                   </div>
                 </SheetContent>
@@ -2011,7 +2011,7 @@ export default function Home() {
               {/* Trust badges */}
               <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
                 <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
-                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Entrega por Key
+                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Download via MediaFire
                 </div>
                 <div className="flex items-center gap-1 sm:gap-1.5 glass rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm">
                   <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Compra Segura
@@ -2385,12 +2385,12 @@ export default function Home() {
             {[
               {
                 q: "Como recebo o material após a compra?",
-                a: "Após a confirmação do pagamento, você recebe uma key de ativação pelo WhatsApp. Basta digitar a key no site para acessar seu material! O acesso é vitalício e ilimitado.",
+                a: "Após a confirmação do pagamento, você recebe uma key de ativação pelo WhatsApp. Basta digitar a key no site para baixar seu material pelo MediaFire! O acesso é vitalício e ilimitado.",
                 emoji: "📥",
               },
               {
                 q: "Posso imprimir quantas vezes quiser?",
-                a: "Sim! Após o download, o PDF é seu. Você pode imprimir quantas cópias precisar para uso pessoal ou em sala de aula. Recomendamos impressão em papel sulfite 75g ou superior.",
+                a: "Sim! Após baixar pelo MediaFire, o PDF é seu. Você pode imprimir quantas cópias precisar para uso pessoal ou em sala de aula. Recomendamos impressão em papel sulfite 75g ou superior.",
                 emoji: "🖨️",
               },
               {
@@ -2453,7 +2453,7 @@ export default function Home() {
               {/* Features */}
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
-                  { icon: Download, color: "kid-blue", title: "Entrega por Key", desc: "Receba sua key e ative no site" },
+                  { icon: Download, color: "kid-blue", title: "Download via MediaFire", desc: "Receba sua key e baixe pelo MediaFire" },
                   { icon: Shield, color: "kid-green", title: "Acesso Vitalício", desc: "Download ilimitado para sempre" },
                   { icon: Heart, color: "kid-pink", title: "Feito com Carinho", desc: "Aprovado por educadores" },
                   { icon: Award, color: "kid-purple", title: "Acesso Ilimitado", desc: "Baixe quantas vezes quiser" },
@@ -3020,7 +3020,7 @@ export default function Home() {
 
                 <div className="bg-kid-blue/10 rounded-2xl p-4 border border-kid-blue/20 flex items-center gap-3">
                   <FileText className="h-5 w-5 text-kid-blue shrink-0" />
-                  <p className="text-sm text-foreground/70">Produto digital em PDF — após o pagamento, você recebe uma key de ativação pelo WhatsApp!</p>
+                  <p className="text-sm text-foreground/70">Produto digital em PDF — após o pagamento, você recebe uma key de ativação pelo WhatsApp! O download é feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>.</p>
                 </div>
 
                 <div className="space-y-3">
@@ -3266,7 +3266,7 @@ export default function Home() {
                     <p className="text-sm font-bold text-foreground">Envie o comprovante</p>
                   </div>
                   <p className="text-xs text-foreground/60 mb-3">
-                    Após pagar, envie o comprovante pelo WhatsApp para receber sua key de ativação:
+                    Após pagar, envie o comprovante pelo WhatsApp para receber sua key de ativação. O download do material é feito pelo <a href="https://pt.wikipedia.org/wiki/MediaFire" target="_blank" rel="noopener noreferrer" className="text-kid-orange underline underline-offset-2 hover:text-kid-orange/80">MediaFire</a>:
                   </p>
                   <a
                     href="https://wa.me/5566984447849?text=Olá! Acabei de realizar o pagamento pelo Mundo Aprender. Segue o comprovante:"

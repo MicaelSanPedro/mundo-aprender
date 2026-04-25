@@ -149,7 +149,8 @@ export default function TermosDeUso() {
               iniciado após a confirmação do pagamento.
             </p>
             <p className="text-sm sm:text-base text-foreground/70 leading-relaxed">
-              Para produtos digitais, o acesso será liberado por meio de código de ativação único.
+              Para produtos digitais, o acesso será liberado por meio de código de ativação único
+              que permite o download do material pela plataforma MediaFire.
               Cada código é válido para um único uso e está vinculado ao produto adquirido. O prazo
               para ativação do código é de 90 (noventa) dias após a data de compra, findo o qual
               o código expirará sem direito a reembolso.
