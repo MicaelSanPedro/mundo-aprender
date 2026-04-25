@@ -3543,9 +3543,9 @@ export default function Home() {
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-kid-purple to-kid-blue p-6 text-white text-center">
-                <div className="mb-2">
-                  <AnimatedIcon name="key" size={48} color="#FFFFFF" animated={true} />
-                </div>
+                <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 0.5, delay: 0.2 }}>
+                  <KeyRound className="h-8 w-8 mx-auto mb-2" />
+                </motion.div>
                 <h3 className="text-lg font-bold">Ativar Produto</h3>
                 <p className="text-white/80 text-xs mt-1">Digite o código que recebeu para liberar seu produto</p>
               </div>
