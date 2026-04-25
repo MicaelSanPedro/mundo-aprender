@@ -1,11 +1,8 @@
-"use client";
-
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AcceptanceModal, { hasAcceptedTerms } from "@/components/acceptance-modal";
-import { useState, useEffect } from "react";
+import AppWrapper from "@/components/AppWrapper";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -41,19 +38,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    if (!hasAcceptedTerms()) {
-      setShowModal(true);
-    }
-  }, []);
-
   return (
     <html lang="pt-BR">
       <body className={`${nunito.variable} antialiased font-[family-name:var(--font-nunito)]`}>
-        {children}
-        <AcceptanceModal isOpen={showModal} onClose={() => setShowModal(false)} />
+        <AppWrapper>
+          {children}
+        </AppWrapper>
         <Toaster />
       </body>
     </html>
