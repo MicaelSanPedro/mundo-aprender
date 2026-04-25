@@ -1152,10 +1152,6 @@ export default function Home() {
     const clickColors = ["#FF922B", "#FFD43B", "#4DABF7", "#69DB7C", "#F783AC", "#B197FC", "#38D9A9"];
 
     const handleClick = (e: MouseEvent) => {
-      // Don't trigger on sheets/overlays
-      const target = e.target as HTMLElement;
-      if (target.closest("[data-radix-popper-content-wrapper]") || target.closest("[role='dialog']")) return;
-
       const x = e.clientX;
       const y = e.clientY;
       const color = clickColors[Math.floor(Math.random() * clickColors.length)];
