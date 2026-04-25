@@ -1,23 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { PRODUCTS } from "@/config/products";
 
 const SECRET = process.env.ADMIN_PASSWORD || "mundo2024";
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-const PRODUCTS: Record<number, { name: string; emoji: string; link: string; price: number }> = {
-  1: {
-    name: "O Código Secreto do Mundo",
-    emoji: "🔢",
-    price: 4.99,
-    link: "https://docs.google.com/document/d/1AW-YdqoprQcQzkLzMWE2G_PNwb5kEspQoQMAz4lXHe8/edit?usp=drivesdk",
-  },
-  2: {
-    name: "Pack de Atividades - 3º Ano (10 atividades)",
-    emoji: "📚",
-    price: 4.95,
-    link: "https://www.mediafire.com/folder/x8dcszq4f7egl/MUNDO-APRENDER-10",
-  },
-};
 
 function computeSignature(payload: string, productId: number): string {
   const hmac = crypto
