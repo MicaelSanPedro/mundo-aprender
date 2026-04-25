@@ -117,6 +117,7 @@ const products: { id: number; name: string; description: string; price: number; 
     tagColor: "bg-kid-orange/90 text-white",
     ageRange: "8 a 9 anos",
     schoolYear: "3º ano",
+    image: "/product-pack-atividades.png",
     variants: [
       { label: "10 atividades", qty: 10, price: 9.90, originalPrice: null },
       { label: "20 atividades", qty: 20, price: 14.90, originalPrice: 19.80 },
